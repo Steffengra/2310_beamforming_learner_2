@@ -37,7 +37,7 @@ def los_channel_error_model_multiplicative_on_cos(
     #     erroneous_channel_state_to_users[user.idx] = satellite.channel_state_to_users[user.idx] * steering_error
 
     steering_error = exp(
-        tile(steering_idx, (len(users), 1)) * (
+        steering_idx * (
                 1j * 2 * pi / satellite.wavelength
                 * satellite.antenna_distance
                 * satellite.rng.uniform(low=error_model_config.uniform_error_interval['low'],
