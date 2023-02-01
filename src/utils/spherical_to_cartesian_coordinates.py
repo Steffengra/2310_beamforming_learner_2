@@ -1,12 +1,15 @@
 
 from numpy import (
+    ndarray,
     zeros,
     sin,
     cos,
 )
 
 
-def spherical_to_cartesian_coordinates(spherical_coordinates):
+def spherical_to_cartesian_coordinates(
+        spherical_coordinates: ndarray,
+) -> ndarray:
     """
     This function transforms a spherical coordinate vector with (radius,
     inclination, azimuth) into a spherical coordinate vector (x,y,z)
@@ -14,6 +17,7 @@ def spherical_to_cartesian_coordinates(spherical_coordinates):
         y = radius * sin(inclination) * sin(azimuth)
         z = radius * cos(inclination)
     """
+
     cartesian_coordinates = zeros(3)
     cartesian_coordinates[0] = spherical_coordinates[0] * sin(spherical_coordinates[1]) * cos(spherical_coordinates[2])
     cartesian_coordinates[1] = spherical_coordinates[0] * sin(spherical_coordinates[1]) * sin(spherical_coordinates[2])

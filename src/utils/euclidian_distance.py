@@ -1,10 +1,14 @@
 
 from numpy import (
+    ndarray,
     sqrt,
 )
 
 
-def euclidian_distance(vec_1, vec_2):
+def euclidian_distance(
+        vec_1: ndarray,
+        vec_2: ndarray,
+) -> ndarray:
     """
     This function calculates the euclidean distance between two 3D vectors
     """
