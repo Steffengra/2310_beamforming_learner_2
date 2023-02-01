@@ -20,7 +20,6 @@ from src.data.user import (
 class Users:
     """
     Users holds all user objects
-    TODO: And helper functions?
     """
 
     def __init__(
