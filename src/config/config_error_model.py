@@ -13,8 +13,6 @@ class ConfigErrorModel:
             self,
     ) -> None:
 
-        self.iter_nr: int = 10_000  # Number of Monte Carlo iterations
-
         self.error_model = los_channel_error_model_multiplicative_on_cos
 
         # MULTIPLICATIVE ERROR MODEL
