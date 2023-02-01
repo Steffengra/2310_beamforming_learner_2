@@ -50,15 +50,26 @@ class Config:
         self.sat_center_aod_earth_deg: float = 90  # Average center of satellites
 
         self.sat_gain_linear: float = 10**(self.sat_gain_dBi / 10)  # Gain per satellite linear
-        self.sat_ant_nr: int = self.sat_tot_ant_nr / self.sat_nr  # Number of Tx antennas per satellite
+        self.sat_ant_nr: int = int(self.sat_tot_ant_nr / self.sat_nr)  # Number of Tx antennas per satellite
         self.sat_ant_gain_linear: float = self.sat_gain_linear / self.sat_tot_ant_nr  # Gain per satellite antenna
         self.sat_ant_dist: float = self.wavelength / 2  # Distance between antenna elements in m
+
+        self._post_init()
 
     def _pre_init(
             self,
     ) -> None:
         self.rng = default_rng()
         self.logger = logging.getLogger()
+
+    def _post_init(
+            self,
+    ) -> None:
+        self.satellite_args: dict = {
+            'antenna_nr': self.sat_ant_nr,
+            'antenna_distance': self.sat_ant_dist,
+            'wavelength': self.wavelength,
+        }
 
 
 if __name__ == '__main__':
