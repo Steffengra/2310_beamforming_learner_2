@@ -2,6 +2,7 @@
 from numpy import (
     ndarray,
     array,
+    reshape,
     arange,
     zeros,
     ones,
@@ -34,8 +35,9 @@ class Satellites:
         self.satellites: list[Satellite] = []
         self._initialize_satellites(config=config)
 
-        self.channel_state_information: ndarray = array([])  # ndarray[user_idx, ant_idx, satellite_idx]
-        self.erroneous_channel_state_information: ndarray = array([])  # ndarray[user_idx, ant_idx, satellite_idx]
+        self.channel_state_information: ndarray = array([])  # ndarray \in dim_user x (nr_antennas * nr_satellites)
+                                                             #  per user: sat 1 ant1, sat 1 ant 2, sat 1 ant 3, sat 1 ant 1, ...
+        self.erroneous_channel_state_information: ndarray = array([])  # ndarray \in dim_user x (nr_antennas * nr_satellites)
 
     def _initialize_satellites(
             self,
@@ -130,6 +132,7 @@ class Satellites:
         """
 
         # TODO: This will break when satellites dont have the same nr of antennas
+        # TODO: This will also produce weird results when users or sats are not numbered consecutively
 
         # update channel state per satellite
         for satellite in self.satellites:
@@ -140,13 +143,17 @@ class Satellites:
                                             dtype='complex')
         for satellite in self.satellites:
             channel_state_per_satellite[:, :, satellite.idx] = satellite.channel_state_to_users
-        self.channel_state_information = channel_state_per_satellite
+        self.channel_state_information = reshape(
+            channel_state_per_satellite, (len(users), self.satellites[0].antenna_nr * len(self.satellites)))
 
     def update_erroneous_channel_state_information(
             self,
             error_model_config,
             users: list,
     ) -> None:
+
+        # TODO: This will break when satellites dont have the same nr of antennas
+        # TODO: This will also produce weird results when users or sats are not numbered consecutively
 
         # apply error model per satellite
         for satellite in self.satellites:
@@ -159,4 +166,5 @@ class Satellites:
         )
         for satellite in self.satellites:
             erroneous_channel_state_per_satellite[:, :, satellite.idx] = satellite.erroneous_channel_state_to_users
-        self.erroneous_channel_state_information = erroneous_channel_state_per_satellite
+        self.erroneous_channel_state_information = reshape(
+            erroneous_channel_state_per_satellite, (len(users), self.satellites[0].antenna_nr * len(self.satellites)))
