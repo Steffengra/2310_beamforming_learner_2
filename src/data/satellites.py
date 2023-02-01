@@ -84,3 +84,23 @@ class Satellites:
 
         for satellite in self.satellites:
             satellite.calculate_distance_to_users(users=users)
+
+    def calculate_satellite_aods_to_users(
+            self,
+            users: list,
+    ) -> None:
+        """
+        This function calculates the AODs (angles of departure) from each satellite to
+        each user (Earth and satellite orbits are assumed to be circular)
+        """
+
+        for satellite in self.satellites:
+            satellite.calculate_aods_to_users(users=users)
+
+
+cfg = Config()
+sat = Satellites(cfg)
+usr = Users(cfg)
+
+sat.calculate_satellite_distances_to_users(usr.users)
+sat.calculate_satellite_aods_to_users(usr.users)
