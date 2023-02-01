@@ -1,5 +1,6 @@
 
 from numpy import (
+    array,
     arange,
     zeros,
     ones,
@@ -13,6 +14,9 @@ from src.config.config import (
 )
 from src.data.satellite import (
     Satellite,
+)
+from src.data.users import (
+    Users,
 )
 
 
@@ -58,15 +62,25 @@ class Satellites:
         sat_radii = config.radius_orbit * ones(config.sat_nr)
         sat_inclinations = pi / 2 * ones(config.sat_nr)
 
+        sat_spherical_coordinates = array([sat_radii, sat_inclinations, sat_aods_earth_rad])
+
         self.satellites = []
         for sat_idx in range(config.sat_nr):
             self.satellites.append(
                 Satellite(
                     idx=sat_idx,
-                    spherical_coordinates=(sat_radii[sat_idx],
-                                           sat_inclinations[sat_idx],
-                                           sat_aods_earth_rad[sat_idx])
+                    spherical_coordinates=sat_spherical_coordinates[:, sat_idx]
                 )
             )
 
         # TODO: ALL?
+
+    def calculate_satellite_distances_to_users(
+            self,
+            users: Users,
+    ) -> None:
+        for satellite in self.satellites:
+            pass
+
+
+sat = Satellites(Config())

@@ -1,5 +1,6 @@
 
 from numpy import (
+    array,
     arange,
     zeros,
     ones,
@@ -57,13 +58,13 @@ class Users:
         user_radii = config.radius_earth * ones(config.user_nr)
         user_inclinations = pi / 2 * ones(config.user_nr)
 
+        user_spherical_coordinates = array([user_radii, user_inclinations, user_aods_earth_rad])
+
         self.users: list = []
         for user_idx in range(config.user_nr):
             self.users.append(
                 User(
                     idx=user_idx,
-                    spherical_coordinates=(user_radii[user_idx],
-                                           user_inclinations[user_idx],
-                                           user_aods_earth_rad[user_idx])
+                    spherical_coordinates=user_spherical_coordinates[:, user_idx]
                 )
             )
