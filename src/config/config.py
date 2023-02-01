@@ -40,7 +40,7 @@ class Config:
         self.radius_orbit: float = self.altitude_orbit + self.radius_earth  # Orbit radius with Earth center r0, earth centered
 
         # User
-        self.user_nr: int = 4  # Number of users
+        self.user_nr: int = 5  # Number of users
         self.user_gain_dBi: float = 0  # User gain in dBi
         self.user_dist_average: float = 100**3  # Average user distance
         self.user_dist_variance: float = 0  # Variance of average user distance (normal distribution around the average user distance)
@@ -79,6 +79,7 @@ class Config:
             self,
     ) -> None:
         self.satellite_args: dict = {
+            'rng': self.rng,
             'antenna_nr': self.sat_ant_nr,
             'antenna_distance': self.sat_ant_dist,
             'antenna_gain_linear': self.sat_ant_gain_linear,
