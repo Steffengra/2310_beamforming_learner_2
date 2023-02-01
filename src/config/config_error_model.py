@@ -1,5 +1,5 @@
 
-from src.data.los_channel_error_model_multiplicative_on_cos import (
+from src.data.channel.los_channel_error_model_multiplicative_on_cos import (
     los_channel_error_model_multiplicative_on_cos,
 )
 
