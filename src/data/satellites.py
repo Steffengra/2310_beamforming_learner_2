@@ -68,11 +68,10 @@ class Satellites:
             self.satellites.append(
                 Satellite(
                     idx=sat_idx,
-                    spherical_coordinates=sat_spherical_coordinates[:, sat_idx]
+                    spherical_coordinates=sat_spherical_coordinates[:, sat_idx],
+                    **config.satellite_args,
                 )
             )
-
-        # TODO: ALL?
 
     def calculate_satellite_distances_to_users(
             self,
@@ -97,6 +96,17 @@ class Satellites:
         for satellite in self.satellites:
             satellite.calculate_aods_to_users(users=users)
 
+    def calculate_steering_vectors_to_users(
+            self,
+            users: list,
+    ) -> None:
+        # TODO: Realistische Annahme, wavelength wird beim satellite hinterlegt?
+        for satellite in self.satellites:
+            satellite.calculate_steering_vectors(users=users)
+
+
+
+
 
 cfg = Config()
 sat = Satellites(cfg)
@@ -104,3 +114,4 @@ usr = Users(cfg)
 
 sat.calculate_satellite_distances_to_users(usr.users)
 sat.calculate_satellite_aods_to_users(usr.users)
+sat.calculate_steering_vectors_to_users(usr.users)
