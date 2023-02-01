@@ -35,7 +35,7 @@ class Satellites:
         self._initialize_satellites(config=config)
 
         self.channel_state_information: ndarray = array([])  # ndarray[user_idx, ant_idx, satellite_idx]
-        self.erroneous_channel_state_information: ndarray = array([])  # # ndarray[user_idx, ant_idx, satellite_idx]
+        self.erroneous_channel_state_information: ndarray = array([])  # ndarray[user_idx, ant_idx, satellite_idx]
 
     def _initialize_satellites(
             self,
