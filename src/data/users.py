@@ -18,7 +18,7 @@ from src.data.user import (
 
 class Users:
     """
-    Satellites holds all satellite objects
+    Users holds all user objects
     TODO: And helper functions?
     """
 
@@ -48,7 +48,7 @@ class Users:
 
         user_center_aod_earth_rad = config.user_center_aod_earth_deg * pi / 180
 
-        # TODO: if any(sat_pos_average == 0) == 1, vllt Fallunterscheidung für gerade und ungerade
+        # TODO: if any(user_pos_average == 0) == 1, vllt Fallunterscheidung für gerade und ungerade
 
         # calculate user_aods_earth_rad
         user_aods_earth_rad = user_center_aod_earth_rad + user_aods_diff_earth_rad
