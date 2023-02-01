@@ -71,7 +71,8 @@ class Satellites:
                 )
             )
 
-        self.channel_state_information: ndarray = array([])  # TODO ndarray[user_idx, ant_idx, satellite_idx]
+        self.channel_state_information: ndarray = array([])  # ndarray[user_idx, ant_idx, satellite_idx]
+        self.erroneous_channel_state_information: ndarray = array([])  # # ndarray[user_idx, ant_idx, satellite_idx]
 
     def calculate_satellite_distances_to_users(
             self,
@@ -129,6 +130,7 @@ class Satellites:
                                             dtype='complex')
         for satellite in self.satellites:
             channel_state_per_satellite[:, :, satellite.idx] = satellite.channel_state_to_users
+        self.channel_state_information = channel_state_per_satellite
 
     def update_erroneous_channel_state_information(
             self,
@@ -139,3 +141,12 @@ class Satellites:
         # apply error model per satellite
         for satellite in self.satellites:
             satellite.update_erroneous_channel_state_information(error_model_config=error_model_config, users=users)
+
+        # gather global erroneous channel state information
+        erroneous_channel_state_per_satellite = zeros(
+            (len(users), self.satellites[0].antenna_nr, len(self.satellites)),
+            dtype='complex',
+        )
+        for satellite in self.satellites:
+            erroneous_channel_state_per_satellite[:, :, satellite.idx] = satellite.erroneous_channel_state_to_users
+        self.erroneous_channel_state_information = erroneous_channel_state_per_satellite
