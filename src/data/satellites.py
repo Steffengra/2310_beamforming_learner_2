@@ -22,8 +22,7 @@ from src.data.users import (
 
 class Satellites:
     """
-    Satellites holds all satellite objects
-    TODO: And helper functions?
+    Satellites holds all satellite objects and helper functions
     """
 
     def __init__(
@@ -77,10 +76,11 @@ class Satellites:
 
     def calculate_satellite_distances_to_users(
             self,
-            users: Users,
+            users: list,
     ) -> None:
+        """
+        This function calculates the distances between each satellite and user
+        """
+
         for satellite in self.satellites:
-            pass
-
-
-sat = Satellites(Config())
+            satellite.calculate_distance_to_users(users=users)
