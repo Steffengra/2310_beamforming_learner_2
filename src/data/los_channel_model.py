@@ -17,11 +17,11 @@ def los_channel_model(
         users: list,
 ) -> ndarray:
     """
-    # TODO: describe this
+    TODO: describe this
     """
 
-    # channel_state_information = zeros((len(users), satellite.antenna_nr), dtype='complex')
-    channel_state_information = zeros((satellite.antenna_nr, len(users)), dtype='complex')
+    channel_state_information = zeros((len(users), satellite.antenna_nr), dtype='complex')
+    # channel_state_information = zeros((satellite.antenna_nr, len(users)), dtype='complex')
     for user in users:
         power_ratio = (
                 satellite.antenna_gain_linear
@@ -32,7 +32,7 @@ def los_channel_model(
 
         phase_shift = satellite.distance_to_users[user.idx] % satellite.wavelength * 2 * pi / satellite.wavelength
 
-        channel_state_information[:, user.idx] = (
+        channel_state_information[user.idx, :] = (
                 amplitude_damping
                 * exp(1j * phase_shift)
                 * satellite.steering_vectors_to_users[user.idx]
