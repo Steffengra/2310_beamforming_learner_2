@@ -27,6 +27,9 @@ from src.data.calc_sum_rate import (
     calc_sum_rate,
 )
 
+# TODO: move this to proper place
+import matplotlib.pyplot as plt
+
 
 def main():
     def progress_print() -> None:
@@ -53,7 +56,7 @@ def main():
 
     satellites.update_channel_state_information(channel_model=los_channel_model, users=users.users)
 
-    csit_error_sweep_range = arange(0, 1, 0.1)
+    csit_error_sweep_range = arange(0, 0.6, 0.1)
     mean_sum_rate_per_error_value = zeros(len(csit_error_sweep_range))
 
     for error_sweep_idx, error_sweep_value in enumerate(csit_error_sweep_range):
@@ -84,10 +87,16 @@ def main():
 
         mean_sum_rate_per_error_value[error_sweep_idx] = mean(sum_rate_per_monte_carlo)
 
-    print(mean_sum_rate_per_error_value)
     if config.profile:
         profiler.disable()
         profiler.print_stats(sort='cumulative')
+
+    fig, ax = plt.subplots()
+    ax.scatter(csit_error_sweep_range, mean_sum_rate_per_error_value)
+    ax.grid()
+
+    if config.show_plots:
+        plt.show()
 
 
 if __name__ == '__main__':

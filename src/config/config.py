@@ -31,6 +31,7 @@ class Config:
 
         # General
         self.profile: bool = True  # performance profiling
+        self.show_plots: bool = True
 
         # Basic Communication Parameters (freq, wavelength, noise, tx power)
         self.freq: float = 2 * 10**9
