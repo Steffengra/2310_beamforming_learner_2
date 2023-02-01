@@ -29,6 +29,9 @@ class Config:
 
         self._pre_init()
 
+        # General
+        self.profile: bool = True  # performance profiling
+
         # Basic Communication Parameters (freq, wavelength, noise, tx power)
         self.freq: float = 2 * 10**9
         self.noise_power_watt: float = 10**(7 / 10) * 290 * constants.value('Boltzmann constant') * 30 * 10**6  # Noise power TODO: is watt?
@@ -67,8 +70,8 @@ class Config:
         # Channel Model
         self.channel_model = los_channel_model
 
-        # Error Model
-        self.error_model = ConfigErrorModel()
+        # Sweep Settings
+        self.monte_carlo_iterations: int = 1_000
 
         self._post_init()
 
@@ -81,6 +84,11 @@ class Config:
     def _post_init(
             self,
     ) -> None:
+
+        # Error Model
+        self.error_model = ConfigErrorModel()
+
+        # Collected args
         self.satellite_args: dict = {
             'rng': self.rng,
             'antenna_nr': self.sat_ant_nr,
