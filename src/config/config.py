@@ -62,7 +62,7 @@ class Config:
         self.sat_gain_linear: float = 10**(self.sat_gain_dBi / 10)  # Gain per satellite linear
         self.sat_ant_nr: int = int(self.sat_tot_ant_nr / self.sat_nr)  # Number of Tx antennas per satellite
         self.sat_ant_gain_linear: float = self.sat_gain_linear / self.sat_tot_ant_nr  # Gain per satellite antenna
-        self.sat_ant_dist: float = self.wavelength / 2  # Distance between antenna elements in m
+        self.sat_ant_dist: float = self.wavelength / 2  # Distance between antenna elements in meter
 
         # Channel Model
         self.channel_model = los_channel_model
