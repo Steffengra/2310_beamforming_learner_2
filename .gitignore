@@ -1,0 +1,15 @@
+
+# Folders
+__pycache__/
+.idea/
+.git/
+venv/
+
+/data/
+/models/
+/outputs/
+/references/
+/reports/
+/scr/analysis/
+/src/notebooks/
+/src/tests/
