@@ -65,6 +65,7 @@ class Users:
             self.users.append(
                 User(
                     idx=user_idx,
-                    spherical_coordinates=user_spherical_coordinates[:, user_idx]
+                    spherical_coordinates=user_spherical_coordinates[:, user_idx],
+                    **config.user_args,
                 )
             )

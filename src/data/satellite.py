@@ -1,6 +1,7 @@
 
 from numpy import (
     ndarray,
+    array,
     arange,
     pi,
     exp,
@@ -24,6 +25,7 @@ class Satellite:
             spherical_coordinates: ndarray,
             antenna_nr: int,
             antenna_distance: float,
+            antenna_gain_linear: float,
             wavelength: float,
     ) -> None:
 
@@ -33,11 +35,14 @@ class Satellite:
 
         self.antenna_nr: int = antenna_nr
         self.antenna_distance: float = antenna_distance  # antenna distance in meters
+        self.antenna_gain_linear: float = antenna_gain_linear
         self.wavelength: float = wavelength
 
         self.distance_to_users: dict = {}  # user_idx[int]: dist[float]
         self.aods_to_users: dict = {}  # user_idx[int]: aod[float]
         self.steering_vectors_to_users: dict = {}  # user_idx[int]: steering_vector[ndarray] \in 1 x antenna_nr
+
+        self.channel_state_to_users: ndarray = array([])
 
     def calculate_distance_to_users(
             self,
@@ -97,3 +102,13 @@ class Satellite:
                     * cos(self.aods_to_users[user.idx])
                 )
             )
+
+    def update_channel_state_information(
+            self,
+            channel_model,
+            users: list,
+    ) -> None:
+        """
+        TODO description
+        """
+        self.channel_state_to_users = channel_model(self, users)

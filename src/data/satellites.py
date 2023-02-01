@@ -1,5 +1,6 @@
 
 from numpy import (
+    ndarray,
     array,
     arange,
     zeros,
@@ -14,9 +15,6 @@ from src.config.config import (
 )
 from src.data.satellite import (
     Satellite,
-)
-from src.data.users import (
-    Users,
 )
 
 
@@ -73,6 +71,8 @@ class Satellites:
                 )
             )
 
+        self.channel_state_information: ndarray = array([])  # TODO ndarray[sat_idx, ant_idx, user_idx]
+
     def calculate_satellite_distances_to_users(
             self,
             users: list,
@@ -100,18 +100,30 @@ class Satellites:
             self,
             users: list,
     ) -> None:
+        """
+        This function calculates the steering vectors (one value per antenna) for each satellite to
+        each user
+        """
         # TODO: Realistische Annahme, wavelength wird beim satellite hinterlegt?
         for satellite in self.satellites:
             satellite.calculate_steering_vectors(users=users)
 
+    def update_channel_state_information(
+            self,
+            channel_model,
+            users: list,
+    ) -> None:
+        """
+        This function builds channel state information between each satellite antenna and user, then
+        accumulates all into a global channel state information matrix
+        """
 
+        for satellite in self.satellites:
+            satellite.update_channel_state_information(channel_model=channel_model, users=users)
 
-
-
-cfg = Config()
-sat = Satellites(cfg)
-usr = Users(cfg)
-
-sat.calculate_satellite_distances_to_users(usr.users)
-sat.calculate_satellite_aods_to_users(usr.users)
-sat.calculate_steering_vectors_to_users(usr.users)
+        channel_state_per_satellite = []
+        for satellite in self.satellites:
+            channel_state_per_satellite.append(satellite.channel_state_to_users)
+        self.channel_state_information = array(channel_state_per_satellite)
+        # TODO: this flips the indices to self.csit[sat_idx, ant_idx, user_idx],
+        #  imo makes more sense, but is that ok with alea?
