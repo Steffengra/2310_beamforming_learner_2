@@ -31,6 +31,20 @@ class Satellites:
         self.rng = config.rng
         self.logger = config.logger.getChild(__name__)
 
+        self.satellites: list[Satellite] = []
+        self._initialize_satellites(config=config)
+
+        self.channel_state_information: ndarray = array([])  # ndarray[user_idx, ant_idx, satellite_idx]
+        self.erroneous_channel_state_information: ndarray = array([])  # # ndarray[user_idx, ant_idx, satellite_idx]
+
+    def _initialize_satellites(
+            self,
+            config,
+    ) -> None:
+        """
+        Initializes satellite object list for given configuration
+        """
+
         # calculate average satellite positions
         sat_pos_average = (arange(0, config.sat_nr) - (config.sat_nr - 1) / 2) * config.sat_dist_average
 
@@ -61,7 +75,6 @@ class Satellites:
 
         sat_spherical_coordinates = array([sat_radii, sat_inclinations, sat_aods_earth_rad])
 
-        self.satellites = []
         for sat_idx in range(config.sat_nr):
             self.satellites.append(
                 Satellite(
@@ -70,9 +83,6 @@ class Satellites:
                     **config.satellite_args,
                 )
             )
-
-        self.channel_state_information: ndarray = array([])  # ndarray[user_idx, ant_idx, satellite_idx]
-        self.erroneous_channel_state_information: ndarray = array([])  # # ndarray[user_idx, ant_idx, satellite_idx]
 
     def calculate_satellite_distances_to_users(
             self,
