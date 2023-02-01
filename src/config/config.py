@@ -7,7 +7,7 @@ from scipy import (
     constants,
 )
 
-from src.data.los_channel_model import (
+from src.data.channel.los_channel_model import (
     los_channel_model,
 )
 from src.config.config_error_model import (
@@ -31,8 +31,8 @@ class Config:
 
         # Basic Communication Parameters (freq, wavelength, noise, tx power)
         self.freq: float = 2 * 10**9
-        self.noise: float = 10**(7 / 10) * 290 * constants.value('Boltzmann constant') * 30 * 10**6  # Noise power
-        self.power_constraint = 100  # in watt
+        self.noise_power_watt: float = 10**(7 / 10) * 290 * constants.value('Boltzmann constant') * 30 * 10**6  # Noise power TODO: is watt?
+        self.power_constraint_watt = 100  # in watt
 
         self.wavelength: float = get_wavelength(self.freq)
 
