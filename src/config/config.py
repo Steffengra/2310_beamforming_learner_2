@@ -13,6 +13,9 @@ from src.data.los_channel_model import (
 from src.config.config_error_model import (
     ConfigErrorModel,
 )
+from src.utils.get_wavelength import (
+    get_wavelength,
+)
 
 
 class Config:
@@ -31,7 +34,7 @@ class Config:
         self.noise: float = 10**(7 / 10) * 290 * constants.value('Boltzmann constant') * 30 * 10**6  # Noise power
         self.power_constraint = 100  # in watt
 
-        self.wavelength: float = constants.value('speed of light in vacuum') / self.freq
+        self.wavelength: float = get_wavelength(self.freq)
 
         # Orbit
         self.altitude_orbit: float = 600 * 10**3  # Orbit altitude d0
@@ -83,7 +86,7 @@ class Config:
             'antenna_nr': self.sat_ant_nr,
             'antenna_distance': self.sat_ant_dist,
             'antenna_gain_linear': self.sat_ant_gain_linear,
-            'wavelength': self.wavelength,
+            'freq': self.freq,
         }
 
         self.user_args: dict = {

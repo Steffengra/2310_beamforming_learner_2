@@ -15,6 +15,9 @@ from src.utils.spherical_to_cartesian_coordinates import (
 from src.utils.euclidian_distance import (
     euclidian_distance,
 )
+from src.utils.get_wavelength import (
+    get_wavelength,
+)
 
 
 class Satellite:
@@ -27,7 +30,7 @@ class Satellite:
             antenna_nr: int,
             antenna_distance: float,
             antenna_gain_linear: float,
-            wavelength: float,
+            freq: float,
     ) -> None:
 
         self.rng = rng
@@ -40,8 +43,8 @@ class Satellite:
         self.antenna_distance: float = antenna_distance  # antenna distance in meters
         self.antenna_gain_linear: float = antenna_gain_linear
 
-        # TODO: add sat freq
-        self.wavelength: float = wavelength
+        self.freq: float = freq
+        self.wavelength: float = get_wavelength(self.freq)
 
         self.distance_to_users: dict = {}  # user_idx[int]: dist[float]
         self.aods_to_users: dict = {}  # user_idx[int]: aod[float] in rad
