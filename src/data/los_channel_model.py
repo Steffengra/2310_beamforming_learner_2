@@ -21,7 +21,6 @@ def los_channel_model(
     """
 
     channel_state_information = zeros((len(users), satellite.antenna_nr), dtype='complex')
-    # channel_state_information = zeros((satellite.antenna_nr, len(users)), dtype='complex')
     for user in users:
         power_ratio = (
                 satellite.antenna_gain_linear
