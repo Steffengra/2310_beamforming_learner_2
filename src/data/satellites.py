@@ -71,7 +71,7 @@ class Satellites:
                 )
             )
 
-        self.channel_state_information: ndarray = array([])  # TODO ndarray[sat_idx, ant_idx, user_idx]
+        self.channel_state_information: ndarray = array([])  # TODO ndarray[user_idx, ant_idx, satellite_idx]
 
     def calculate_satellite_distances_to_users(
             self,
@@ -104,7 +104,7 @@ class Satellites:
         This function calculates the steering vectors (one value per antenna) for each satellite to
         each user
         """
-        # TODO: Realistische Annahme, wavelength wird beim satellite hinterlegt?
+
         for satellite in self.satellites:
             satellite.calculate_steering_vectors(users=users)
 
@@ -118,12 +118,24 @@ class Satellites:
         accumulates all into a global channel state information matrix
         """
 
+        # TODO: This will break when satellites dont have the same nr of antennas
+
+        # update channel state per satellite
         for satellite in self.satellites:
             satellite.update_channel_state_information(channel_model=channel_model, users=users)
 
-        channel_state_per_satellite = []
+        # build global channel state information
+        channel_state_per_satellite = zeros((len(users), self.satellites[0].antenna_nr, len(self.satellites)),
+                                            dtype='complex')
         for satellite in self.satellites:
-            channel_state_per_satellite.append(satellite.channel_state_to_users)
-        self.channel_state_information = array(channel_state_per_satellite)
-        # TODO: this flips the indices to self.csit[sat_idx, ant_idx, user_idx],
-        #  imo makes more sense, but is that ok with alea?
+            channel_state_per_satellite[:, :, satellite.idx] = satellite.channel_state_to_users
+
+    def update_erroneous_channel_state_information(
+            self,
+            error_model_config,
+            users: list,
+    ) -> None:
+
+        # apply error model per satellite
+        for satellite in self.satellites:
+            satellite.update_erroneous_channel_state_information(error_model_config=error_model_config, users=users)

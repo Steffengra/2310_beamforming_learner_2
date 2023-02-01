@@ -36,10 +36,12 @@ class Satellite:
         self.antenna_nr: int = antenna_nr
         self.antenna_distance: float = antenna_distance  # antenna distance in meters
         self.antenna_gain_linear: float = antenna_gain_linear
+
+        # TODO: add sat freq
         self.wavelength: float = wavelength
 
         self.distance_to_users: dict = {}  # user_idx[int]: dist[float]
-        self.aods_to_users: dict = {}  # user_idx[int]: aod[float]
+        self.aods_to_users: dict = {}  # user_idx[int]: aod[float] in rad
         self.steering_vectors_to_users: dict = {}  # user_idx[int]: steering_vector[ndarray] \in 1 x antenna_nr
 
         self.channel_state_to_users: ndarray = array([])
@@ -61,21 +63,18 @@ class Satellite:
         """
         The calculation of the AODs is given by
         AOD = asin(
-            ((orbit+radius_earth)^2 + sat_user_dist - radius_earth^2)
+            ((orbit+radius_earth)^2 + sat_user_dist^2 - radius_earth^2)
             /
             (2 * (orbit+radius_earth) * sat_user_dist)
         )
         """
-        # TODO: Stimmt die Formel mit radius = coordinates?
-        # TODO: Fehlt in Formel ein **2?
         # TODO: This doesn't change values of users that might have disappeared
-        # TODO: Sind die in rad?
         for user in users:
 
             self.aods_to_users[user.idx] = arcsin(
                 (
                     + self.spherical_coordinates[0]**2
-                    + self.distance_to_users[user.idx]
+                    + self.distance_to_users[user.idx]**2
                     - user.spherical_coordinates[0]**2
                 )  # numerator
                 /
@@ -112,3 +111,13 @@ class Satellite:
         TODO description
         """
         self.channel_state_to_users = channel_model(self, users)
+
+    def update_erroneous_channel_state_information(
+            self,
+            error_model_config,
+            users: list,
+    ) -> None:
+        """
+        TODO description
+        """
+        error_model_config.error_model(config=error_model_config, satellite=self, users=users)
