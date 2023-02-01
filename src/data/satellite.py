@@ -21,6 +21,7 @@ class Satellite:
 
     def __init__(
             self,
+            rng,
             idx,
             spherical_coordinates: ndarray,
             antenna_nr: int,
@@ -28,6 +29,8 @@ class Satellite:
             antenna_gain_linear: float,
             wavelength: float,
     ) -> None:
+
+        self.rng = rng
 
         self.idx: int = idx
         self.spherical_coordinates: ndarray = spherical_coordinates
@@ -44,7 +47,8 @@ class Satellite:
         self.aods_to_users: dict = {}  # user_idx[int]: aod[float] in rad
         self.steering_vectors_to_users: dict = {}  # user_idx[int]: steering_vector[ndarray] \in 1 x antenna_nr
 
-        self.channel_state_to_users: ndarray = array([])
+        self.channel_state_to_users: ndarray = array([])  # depends on channel model
+        self.erroneous_channel_state_to_users: ndarray = array([])  # depends on channel & error model
 
     def calculate_distance_to_users(
             self,
@@ -120,4 +124,7 @@ class Satellite:
         """
         TODO description
         """
-        error_model_config.error_model(config=error_model_config, satellite=self, users=users)
+
+        self.erroneous_channel_state_to_users = error_model_config.error_model(error_model_config=error_model_config,
+                                                                               satellite=self,
+                                                                               users=users)
