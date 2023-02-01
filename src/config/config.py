@@ -7,6 +7,13 @@ from scipy import (
     constants,
 )
 
+from src.data.los_channel_model import (
+    los_channel_model,
+)
+from src.config.config_error_model import (
+    ConfigErrorModel,
+)
+
 
 class Config:
     """
@@ -54,6 +61,12 @@ class Config:
         self.sat_ant_gain_linear: float = self.sat_gain_linear / self.sat_tot_ant_nr  # Gain per satellite antenna
         self.sat_ant_dist: float = self.wavelength / 2  # Distance between antenna elements in m
 
+        # Channel Model
+        self.channel_model = los_channel_model
+
+        # Error Model
+        self.error_model = ConfigErrorModel()
+
         self._post_init()
 
     def _pre_init(
@@ -68,7 +81,12 @@ class Config:
         self.satellite_args: dict = {
             'antenna_nr': self.sat_ant_nr,
             'antenna_distance': self.sat_ant_dist,
+            'antenna_gain_linear': self.sat_ant_gain_linear,
             'wavelength': self.wavelength,
+        }
+
+        self.user_args: dict = {
+            'gain_linear': self.user_gain_linear,
         }
 
 
