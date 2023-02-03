@@ -39,9 +39,11 @@ class Satellites:
                                                              #  per user: sat 1 ant1, sat 1 ant 2, sat 1 ant 3, sat 1 ant 1, ...
         self.erroneous_channel_state_information: ndarray = array([])  # ndarray \in dim_user x (nr_antennas * nr_satellites)
 
+        self.logger.info('satellites setup complete')
+
     def _initialize_satellites(
             self,
-            config,
+            config: Config,
     ) -> None:
         """
         Initializes satellite object list for given configuration
