@@ -1,21 +1,37 @@
 
 import logging
+from pathlib import (
+    Path,
+)
+from sys import (
+    stdout,
+)
 from numpy.random import (
     default_rng,
 )
 from scipy import (
     constants,
 )
-
-from src.data.channel.los_channel_model import (
-    los_channel_model,
+from tensorflow import (
+    get_logger as tf_get_logger,
 )
+
 from src.config.config_error_model import (
     ConfigErrorModel,
+)
+from src.config.config_td3_learner import (
+    ConfigTD3Learner,
+)
+from src.data.channel.los_channel_model import (
+    los_channel_model,
 )
 from src.utils.get_wavelength import (
     get_wavelength,
 )
+
+
+# TODO: At the moment, the policy network output is softmax. thats not necessary, but if
+#  we change it, we also need to change the scale of the exploration noise somehow
 
 
 class Config:
@@ -30,12 +46,17 @@ class Config:
         self._pre_init()
 
         # General
-        self.profile: bool = True  # performance profiling
+        self.profile: bool = False  # performance profiling
         self.show_plots: bool = True
+
+        self.verbosity: int = 1  # 0 = no prints, 1 = prints
+        self._logging_level_stdio = logging.INFO  # DEBUG < INFO < WARNING < ERROR < CRITICAL
+        self._logging_level_file = logging.WARNING
+        self._logging_level_tensorflow = logging.WARNING
 
         # Basic Communication Parameters (freq, wavelength, noise, tx power)
         self.freq: float = 2 * 10**9
-        self.noise_power_watt: float = 10**(7 / 10) * 290 * constants.value('Boltzmann constant') * 30 * 10**6  # Noise power TODO: is watt?
+        self.noise_power_watt: float = 10**(7 / 10) * 290 * constants.value('Boltzmann constant') * 30 * 10**6  # Noise power
         self.power_constraint_watt = 100  # in watt
 
         self.wavelength: float = get_wavelength(self.freq)
@@ -47,9 +68,9 @@ class Config:
         self.radius_orbit: float = self.altitude_orbit + self.radius_earth  # Orbit radius with Earth center r0, earth centered
 
         # User
-        self.user_nr: int = 5  # Number of users
+        self.user_nr: int = 4  # Number of users
         self.user_gain_dBi: float = 0  # User gain in dBi
-        self.user_dist_average: float = 100**3  # Average user distance
+        self.user_dist_average: float = 10_000  # Average user distance in m
         self.user_dist_variance: float = 0  # Variance of average user distance (normal distribution around the average user distance)
         self.user_center_aod_earth_deg: float = 90  # Average center of users
 
@@ -59,7 +80,7 @@ class Config:
         self.sat_nr: int = 3  # Number of satellites
         self.sat_tot_ant_nr: int = 12  # Total number of  Tx antennas, should be a number larger than sat nr
         self.sat_gain_dBi: float = 20  # Total sat TODO: Wert nochmal checken
-        self.sat_dist_average: float = 100**3  # Average satellite distance in meter
+        self.sat_dist_average: float = 100_000  # Average satellite distance in meter
         self.sat_dist_variance: float = 0  # Variance of Average satellite distance (normal distribution)
         self.sat_center_aod_earth_deg: float = 90  # Average center of satellites
 
@@ -74,6 +95,10 @@ class Config:
         # Sweep Settings
         self.monte_carlo_iterations: int = 1_000
 
+        # Learner
+        self.config_learner = ConfigTD3Learner(size_state=2*self.sat_nr*self.sat_ant_nr*self.user_nr,
+                                               num_actions=2*self.sat_nr*self.sat_ant_nr*self.user_nr)
+
         self._post_init()
 
     def _pre_init(
@@ -82,12 +107,23 @@ class Config:
         self.rng = default_rng()
         self.logger = logging.getLogger()
 
+        self.project_root_path = Path(__file__).parent.parent.parent
+        self.performance_profile_path = Path(self.project_root_path, 'outputs', 'performance_profiles')
+        self.trained_models_path = Path(self.project_root_path, 'models')
+
+        self.performance_profile_path.mkdir(parents=True, exist_ok=True)
+        self.trained_models_path.mkdir(parents=True, exist_ok=True)
+
     def _post_init(
             self,
     ) -> None:
 
         # Error Model
         self.error_model = ConfigErrorModel()
+
+        # Logging
+        self.logfile_path = Path(self.project_root_path, 'outputs', 'logs', 'log.txt')
+        self.__logging_setup()
 
         # Collected args
         self.satellite_args: dict = {
@@ -102,6 +138,37 @@ class Config:
             'gain_linear': self.user_gain_linear,
         }
 
+    def __logging_setup(
+            self,
+    ) -> None:
+        logging_formatter = logging.Formatter(
+            '{asctime} : {levelname:8s} : {name:30} : {funcName:20s} :: {message}',
+            datefmt='%Y-%m-%d %H:%M:%S',
+            style='{',
+        )
 
-if __name__ == '__main__':
-    cfg = Config()
+        # Create Handlers
+        logging_file_handler = logging.FileHandler(self.logfile_path)
+        logging_stdio_handler = logging.StreamHandler(stdout)
+
+        # Set Logging Level
+        logging_file_handler.setLevel(self._logging_level_file)
+        logging_stdio_handler.setLevel(self._logging_level_stdio)
+
+        tensorflow_logger = tf_get_logger()
+        tensorflow_logger.setLevel(self._logging_level_tensorflow)
+
+        self.logger.setLevel(logging.NOTSET)  # set primary logger level to lowest to catch all
+
+        # Set Formatting
+        logging_file_handler.setFormatter(logging_formatter)
+        logging_stdio_handler.setFormatter(logging_formatter)
+
+        # Add Handlers
+        self.logger.addHandler(logging_file_handler)
+        self.logger.addHandler(logging_stdio_handler)
+
+        # Check Log File Size
+        large_log_file_size = 30_000_000
+        if self.logfile_path.stat().st_size > large_log_file_size:
+            self.logger.warning(f'log file size >{large_log_file_size / 1_000_000} MB')
