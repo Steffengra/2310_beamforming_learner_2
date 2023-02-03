@@ -30,6 +30,15 @@ class Users:
         self.rng = config.rng
         self.logger = config.logger.getChild(__name__)
 
+        self.users: list = []
+        self._initialize_users(config=config)
+
+        self.logger.info('user setup complete')
+
+    def _initialize_users(
+            self,
+            config: Config,
+    ) -> None:
         # calculate average user positions
         user_pos_average = (arange(0, config.user_nr) - (config.user_nr - 1) / 2) * config.user_dist_average
 
@@ -59,7 +68,6 @@ class Users:
 
         user_spherical_coordinates = array([user_radii, user_inclinations, user_aods_earth_rad])
 
-        self.users: list = []
         for user_idx in range(config.user_nr):
             self.users.append(
                 User(
