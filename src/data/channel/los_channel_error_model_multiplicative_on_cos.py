@@ -21,7 +21,7 @@ def los_channel_error_model_multiplicative_on_cos(
     # calculate indices for steering vectors
     steering_idx = arange(0, satellite.antenna_nr) - (satellite.antenna_nr - 1) / 2
 
-    # TODO: entschleifen für performance
+    # OLD IMPLEMENTATION - LESS PERFORMANCE
     # erroneous_channel_state_to_users: ndarray = zeros((len(users), satellite.antenna_nr), dtype='complex')
     # for user in users:
     #     steering_error = exp(
@@ -30,7 +30,7 @@ def los_channel_error_model_multiplicative_on_cos(
     #             * satellite.antenna_distance
     #             * satellite.rng.uniform(low=error_model_config.uniform_error_interval['low'],
     #                                     high=error_model_config.uniform_error_interval['high'],
-    #                                     size=satellite.antenna_nr)
+    #                                     size=1)
     #         )
     #     )
     #
@@ -42,7 +42,7 @@ def los_channel_error_model_multiplicative_on_cos(
                 * satellite.antenna_distance
                 * satellite.rng.uniform(low=error_model_config.uniform_error_interval['low'],
                                         high=error_model_config.uniform_error_interval['high'],
-                                        size=(len(users), satellite.antenna_nr))
+                                        size=len(users))
 
         )
     )
