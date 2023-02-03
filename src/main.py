@@ -56,7 +56,7 @@ def main():
 
     satellites.update_channel_state_information(channel_model=los_channel_model, users=users.users)
 
-    csit_error_sweep_range = arange(0, 0.6, 0.1)
+    csit_error_sweep_range = arange(0.0, 0.6, 0.1)
     mean_sum_rate_per_error_value = zeros(len(csit_error_sweep_range))
 
     for error_sweep_idx, error_sweep_value in enumerate(csit_error_sweep_range):
@@ -86,6 +86,9 @@ def main():
                 progress_print()
 
         mean_sum_rate_per_error_value[error_sweep_idx] = mean(sum_rate_per_monte_carlo)
+
+    print(mean_sum_rate_per_error_value)
+    print(datetime.now()-real_time_start)
 
     if config.profile:
         profiler.disable()
