@@ -51,7 +51,7 @@ class Satellites:
         sat_pos_average = (arange(0, config.sat_nr) - (config.sat_nr - 1) / 2) * config.sat_dist_average
 
         # add random value on satellite distances
-        sat_dist = sat_pos_average + sqrt(config.sat_dist_average) * self.rng.normal(size=config.sat_nr)
+        sat_dist = sat_pos_average + sqrt(config.sat_dist_average) * self.rng.normal(loc=0, scale=sqrt(config.sat_dist_variance), size=config.sat_nr)
 
         # calculate sat_aods_diff_earth_rad
         sat_aods_diff_earth_rad = zeros(config.sat_nr)
