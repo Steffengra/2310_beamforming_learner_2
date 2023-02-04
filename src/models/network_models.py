@@ -83,7 +83,9 @@ class PolicyNetwork(tf.keras.Model):
                     bias_initializer='zeros'  # default: 'zeros'
                 ))
 
-        self.output_layer = tf.keras.layers.Dense(num_actions, activation='softmax', dtype=tf.float32)
+        self.output_layer = tf.keras.layers.Dense(num_actions,
+                                                  # activation='softmax',
+                                                  dtype=tf.float32)
         # --------------------------------------------------------------------------------------------------------------
 
     @tf.function
