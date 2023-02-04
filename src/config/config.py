@@ -34,6 +34,7 @@ from src.utils.get_wavelength import (
 #  we change it, we also need to change the scale of the exploration noise somehow
 # TODO: Implement copy config to saved model
 # TODO: improve calc sum rate performance
+# TODO: Fix add random distribution
 
 
 class Config:
