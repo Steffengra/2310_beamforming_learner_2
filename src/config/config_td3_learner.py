@@ -11,9 +11,6 @@ from src.models.dl_internals_with_expl import (
 )
 
 
-# TODO: Implement copy config to saved model
-
-
 class ConfigTD3Learner:
     """
     Defines parameters for the TD3 Learner

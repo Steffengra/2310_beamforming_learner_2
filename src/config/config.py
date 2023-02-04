@@ -32,6 +32,8 @@ from src.utils.get_wavelength import (
 
 # TODO: At the moment, the policy network output is softmax. thats not necessary, but if
 #  we change it, we also need to change the scale of the exploration noise somehow
+# TODO: Implement copy config to saved model
+# TODO: improve calc sum rate performance
 
 
 class Config:

@@ -3,6 +3,7 @@ from numpy import (
     matmul,
     zeros,
     log2,
+    sum as np_sum,
 )
 
 
