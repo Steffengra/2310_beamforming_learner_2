@@ -19,6 +19,27 @@ def mmse_precoder(
         power_constraint_watt: float,
 ) -> ndarray:
 
+    precoding_matrix = mmse_precoder_no_norm(
+        channel_matrix=channel_matrix,
+        noise_power_watt=noise_power_watt,
+        power_constraint_watt=power_constraint_watt,
+    )
+
+    # tr(A^H * A) is the sum of squared elements
+    # after applying norm_factor, the trace of norm_factor * (A^H * A) will be == power_constraint_watt
+    norm_factor = sqrt(power_constraint_watt / trace(matmul(precoding_matrix.conj().T, precoding_matrix)))
+
+    w_mmse = norm_factor * precoding_matrix
+
+    return w_mmse
+
+
+def mmse_precoder_no_norm(
+        channel_matrix,
+        noise_power_watt: float,
+        power_constraint_watt: float,
+) -> ndarray:
+
     # inversion_constant_lambda = finfo('float32').tiny
     inversion_constant_lambda = 0
 
@@ -35,6 +56,8 @@ def mmse_precoder(
         )
     )
 
+    # tr(A^H * A) is the sum of squared elements
+    # after applying norm_factor, the trace of norm_factor * (A^H * A) will be == power_constraint_watt
     norm_factor = sqrt(power_constraint_watt / trace(matmul(precoding_matrix.conj().T, precoding_matrix)))
 
     w_mmse = norm_factor * precoding_matrix
