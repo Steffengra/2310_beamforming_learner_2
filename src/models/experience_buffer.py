@@ -40,7 +40,7 @@ class ExperienceBuffer:
             self,
             experience: dict,
     ) -> None:
-        self.buffer[self.write_pointer] = experience
+        self.buffer[self.write_pointer] = experience.copy()
         self.priorities[self.write_pointer] = self.max_priority
 
         self.write_pointer += 1
