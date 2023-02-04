@@ -1,7 +1,7 @@
 
-from tensorflow.keras.optimizers import (
+from keras.optimizers import (
     Adam,
-    Nadam
+    Nadam,
 )
 
 from tensorflow import (
