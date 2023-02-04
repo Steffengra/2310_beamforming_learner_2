@@ -32,6 +32,7 @@ import matplotlib.pyplot as plt
 
 
 def main():
+
     def progress_print() -> None:
         progress = (error_sweep_idx * config.monte_carlo_iterations + iter_idx + 1) / (len(csit_error_sweep_range) * config.monte_carlo_iterations)
         timedelta = datetime.now() - real_time_start
