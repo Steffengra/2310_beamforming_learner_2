@@ -37,6 +37,7 @@ from src.models.get_state import (
 )
 from src.models.add_random_distribution import (
     add_random_distribution,
+    add_mmse_precoder,
 )
 from src.utils.real_complex_vector_reshaping import (
     real_vector_to_half_complex_vector,
@@ -113,34 +114,34 @@ def main():
         satellites.update_channel_state_information(channel_model=los_channel_model, users=users.users)
         satellites.update_erroneous_channel_state_information(error_model_config=config.error_model, users=users.users)
 
-        state_next = get_state(satellites=satellites).copy()
+        state_next = get_state(satellites=satellites)
         state_next = complex_vector_to_double_real_vector(state_next)
 
         for training_step_id in range(config.config_learner.training_steps_per_episode):
 
             simulation_step = training_episode_id * config.config_learner.training_steps_per_episode + training_step_id
 
-            satellites.update_erroneous_channel_state_information(
-                error_model_config=config.error_model,
-                users=users.users
-            )
-
             # determine state
-            state_current = state_next.copy()
-            step_experience['state'] = state_current.copy()
+            state_current = state_next
+            step_experience['state'] = state_current
 
             # determine action based on state
             w_precoder_vector = td3.get_action(state=state_current)
-            # TODO: Remember that the output of add_random_distribution must be a valid output for
-            #  the network too, e.g., be normalized in the same way
-            # TODO: At the moment, the policy network output is softmax. that's not necessary, but if
-            #  we change it, we also need to change the scale of the exploration noise somehow
+
             # add exploration noise
             noisy_w_precoder_vector = add_random_distribution(
                 rng=config.rng,
                 action=w_precoder_vector,
                 tau_momentum=exploration_noise_momentum)
-            step_experience['action'] = noisy_w_precoder_vector.copy()
+            # TODO: mmse "noise" might be interesting for "transfer learning"
+            # noisy_w_precoder_vector = add_mmse_precoder(
+            #     action=w_precoder_vector,
+            #     tau_momentum=exploration_noise_momentum,
+            #     channel_matrix=satellites.erroneous_channel_state_information,
+            #     noise_power_watt=config.noise_power_watt,
+            #     power_constraint_watt=config.power_constraint_watt,
+            # )
+            step_experience['action'] = noisy_w_precoder_vector
 
             # reshape to fit reward calculation
             noisy_w_precoder_vector = real_vector_to_half_complex_vector(noisy_w_precoder_vector)
@@ -156,13 +157,14 @@ def main():
                 w_precoder=w_precoder_normalized,
                 noise_power_watt=config.noise_power_watt,
             )
-            step_experience['reward'] = reward.copy()
+            step_experience['reward'] = reward
 
             # update simulation state
-            satellites.update_erroneous_channel_state_information(error_model_config=config.error_model, users=users.users)
+            satellites.update_erroneous_channel_state_information(error_model_config=config.error_model,
+                                                                  users=users.users)
 
             # get new state
-            state_next = get_state(satellites=satellites).copy()
+            state_next = get_state(satellites=satellites)
             state_next = complex_vector_to_double_real_vector(state_next)
             step_experience['next_state'] = state_next
 
@@ -178,7 +180,7 @@ def main():
             exploration_noise_momentum = anneal_parameters()
 
             # log results
-            episode_metrics['sum_rate_per_step'][training_step_id] = reward.copy()
+            episode_metrics['sum_rate_per_step'][training_step_id] = reward
 
             if config.verbosity > 0:
                 if training_step_id % 50 == 0:
@@ -187,7 +189,7 @@ def main():
         # log episode results
         metrics['mean_sum_rate_per_episode'][training_episode_id] = mean(episode_metrics['sum_rate_per_step'])
         if config.verbosity == 1:
-            print(f' Episode mean reward: {mean(episode_metrics["sum_rate_per_step"])}, current exploration: {exploration_noise_momentum:.2f}')
+            print(f' Episode mean reward: {mean(episode_metrics["sum_rate_per_step"]):.4f}, current exploration: {exploration_noise_momentum:.2f}')
 
     # end compute performance profiling
     if config.profile:
@@ -195,6 +197,10 @@ def main():
         if config.verbosity == 1:
             profiler.print_stats(sort='cumulative')
         profiler.dump_stats(Path(config.performance_profile_path, f'{config.config_learner.training_name}.profile'))
+
+    # TODO: fix path etc hardcoding
+    td3.networks['policy'][0]['primary'].save(
+        Path(config.project_root_path, 'models', 'single_error', config.config_learner.training_name, f'error_0.1'))
 
     # TODO: Move this to proper place
     fig, ax = plt.subplots()
