@@ -24,9 +24,6 @@ from tensorflow import (
 from tensorflow.random import (
     normal as tf_normal,
 )
-from tensorflow.math import (
-    subtract,
-)
 
 from src.models.network_models import (
     ValueNetwork,
@@ -137,7 +134,7 @@ class TD3ActorCritic:
                     network.initialize_inputs(dummy_input)
                 network_pair['primary'].compile(
                     optimizer=optimizer(**optimizer_args),
-                    loss=loss,
+                    # loss=loss,  # TODO: doesnt work anymore when saving/loading currently, probably fixable
                 )
         self.update_target_networks(tau_target_update_momentum=1.0)
 
@@ -192,6 +189,7 @@ class TD3ActorCritic:
         actions = array([experience['action'] for experience in sample_experiences], dtype='float32')
         rewards = array([experience['reward'] for experience in sample_experiences], dtype='float32')
         next_states = array([experience['next_state'] for experience in sample_experiences], dtype='float32')
+        train_policy = array(train_policy)
 
         self.train_graph(
             train_policy=train_policy,
@@ -215,7 +213,6 @@ class TD3ActorCritic:
         """
         Wraps as much as possible of the training process into a tf.function graph for performance
         """
-
         # TRAIN VALUE NETWORKS
         target_q = rewards
 
@@ -248,7 +245,7 @@ class TD3ActorCritic:
             with tf_GradientTape() as tape:  # autograd
                 estimate = tf_squeeze(self.networks['value'][network_id]['primary'].call(input_vector))
                 td_error = target_q - estimate
-                weighted_loss = self.networks['value'][network_id]['primary'].loss(td_error, sample_importance_weights)
+                weighted_loss = tf_reduce_mean(sample_importance_weights * td_error**2)
 
                 loss = (
                     weighted_loss
@@ -267,10 +264,10 @@ class TD3ActorCritic:
                 value_network_input = tf_concat([input_vector, actor_actions], axis=1)
                 # Original Paper, DDPG Paper and other implementations train on primary network. Why?
                 #  Because otherwise the value net is always one gradient step behind
-                value_network_score = tf_reduce_mean(
+                value_network_score_1 = tf_reduce_mean(
                     self.networks['value'][0]['primary'].call(value_network_input))
                 loss = (
-                    - value_network_score
+                    - value_network_score_1
                 )
             gradients = tape.gradient(target=loss,  # d_loss / d_parameters
                                       sources=self.networks['policy'][0]['primary'].trainable_variables)
