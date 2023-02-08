@@ -18,3 +18,11 @@ class User:
         self.cartesian_coordinates = spherical_to_cartesian_coordinates(spherical_coordinates)
 
         self.gain_linear: float = gain_linear
+
+    def update_position(
+            self,
+            spherical_coordinates,
+    ) -> None:
+
+        self.spherical_coordinates = spherical_coordinates
+        self.cartesian_coordinates = spherical_to_cartesian_coordinates(spherical_coordinates)
