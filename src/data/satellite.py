@@ -31,6 +31,7 @@ class Satellite:
             antenna_distance: float,
             antenna_gain_linear: float,
             freq: float,
+            center_aod_earth_deg: float,
     ) -> None:
 
         self.rng = rng
@@ -46,12 +47,22 @@ class Satellite:
         self.freq: float = freq
         self.wavelength: float = get_wavelength(self.freq)
 
+        self.center_aod_earth_deg: float = center_aod_earth_deg
+
         self.distance_to_users: dict = {}  # user_idx[int]: dist[float]
         self.aods_to_users: dict = {}  # user_idx[int]: aod[float] in rad
         self.steering_vectors_to_users: dict = {}  # user_idx[int]: steering_vector[ndarray] \in 1 x antenna_nr
 
         self.channel_state_to_users: ndarray = array([])  # depends on channel model
         self.erroneous_channel_state_to_users: ndarray = array([])  # depends on channel & error model
+
+    def update_position(
+            self,
+            spherical_coordinates,
+    ):
+
+        self.spherical_coordinates = spherical_coordinates
+        self.cartesian_coordinates = spherical_to_cartesian_coordinates(spherical_coordinates)
 
     def calculate_distance_to_users(
             self,
@@ -76,19 +87,51 @@ class Satellite:
         )
         """
         # TODO: This doesn't change values of users that might have disappeared
+
+        user_pos_idx = arange(0, len(users)) - (len(users) - 1) / 2
+
         for user in users:
 
             self.aods_to_users[user.idx] = arcsin(
                 (
-                    + self.spherical_coordinates[0]**2
-                    + self.distance_to_users[user.idx]**2
-                    - user.spherical_coordinates[0]**2
+                        + self.spherical_coordinates[0] ** 2
+                        + self.distance_to_users[user.idx] ** 2
+                        - user.spherical_coordinates[0] ** 2
                 )  # numerator
                 /
                 (
-                    2 * self.spherical_coordinates[0] * self.distance_to_users[user.idx]
+                        2 * self.spherical_coordinates[0] * self.distance_to_users[user.idx]
                 )  # denominator
             )
+
+            if user_pos_idx[user.idx] < 0:
+                self.aods_to_users[user.idx] = 2 * (self.center_aod_earth_deg * pi/180) - self.aods_to_users[user.idx]
+
+            # if user_pos_idx[user.idx] >= 0:
+            #     self.aods_to_users[user.idx] = arcsin(
+            #         (
+            #             + self.spherical_coordinates[0]**2
+            #             + self.distance_to_users[user.idx]**2
+            #             - user.spherical_coordinates[0]**2
+            #         )  # numerator
+            #         /
+            #         (
+            #             2 * self.spherical_coordinates[0] * self.distance_to_users[user.idx]
+            #         )  # denominator
+            #     )
+            # elif user_pos_idx[user.idx] < 0:
+            #     aod_temp = arcsin(
+            #         (
+            #             + self.spherical_coordinates[0]**2
+            #             + self.distance_to_users[user.idx]**2
+            #             - user.spherical_coordinates[0]**2
+            #         )  # numerator
+            #         /
+            #         (
+            #             2 * self.spherical_coordinates[0] * self.distance_to_users[user.idx]
+            #         )  # denominator
+            #     )
+            #     self.aods_to_users[user.idx] = 2 * (90 * pi/180) - aod_temp
 
     def calculate_steering_vectors(
             self,
@@ -115,7 +158,8 @@ class Satellite:
             users: list,
     ) -> None:
         """
-        TODO description
+        This function updates the channel state to given users
+        according to a given channel model
         """
         self.channel_state_to_users = channel_model(self, users)
 
@@ -125,7 +169,8 @@ class Satellite:
             users: list,
     ) -> None:
         """
-        TODO description
+        This function updates erroneous channel state information to users
+        according to a given user list and error model config
         """
 
         self.erroneous_channel_state_to_users = error_model_config.error_model(error_model_config=error_model_config,
