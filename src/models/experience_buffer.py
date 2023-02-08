@@ -50,6 +50,7 @@ class ExperienceBuffer:
             self,
             batch_size: int,
     ) -> tuple[list, ndarray, ndarray]:
+
         # Update Probabilities
         priority_sum = np_sum(self.priorities)
         self.probabilities = np_divide(self.priorities, priority_sum, dtype='float32')
@@ -58,7 +59,7 @@ class ExperienceBuffer:
         sample_experience_ids = self.rng.choice(
             a=self.buffer_size,
             size=batch_size,
-            replace=True,  # Can an experience id be selected multiple times? Yes/No
+            replace=False,  # Can an experience id be selected multiple times? Yes/No
             p=self.probabilities,
         )
 
@@ -81,6 +82,7 @@ class ExperienceBuffer:
             experience_ids: ndarray,
             new_priorities: ndarray,
     ) -> None:
+
         new_priorities = np_power(new_priorities, self.priority_scale_alpha, dtype='float32')
         self.priorities[experience_ids] = np_where(new_priorities > self.min_priority,
                                                    new_priorities, self.min_priority)
