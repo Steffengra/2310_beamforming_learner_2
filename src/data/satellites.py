@@ -36,24 +36,22 @@ class Satellites:
         self._initialize_satellites(config=config)
 
         self.channel_state_information: ndarray = array([])  # ndarray \in dim_user x (nr_antennas * nr_satellites)
-                                                             #  per user: sat 1 ant1, sat 1 ant 2, sat 1 ant 3, sat 1 ant 1, ...
+                                                             #  per user: sat 1 ant1, sat 1 ant 2, sat 1 ant 3, sat 2 ant 1, ...
         self.erroneous_channel_state_information: ndarray = array([])  # ndarray \in dim_user x (nr_antennas * nr_satellites)
 
         self.logger.info('satellites setup complete')
 
-    def _initialize_satellites(
+    def calc_spherical_coordinates(
             self,
-            config: Config,
-    ) -> None:
-        """
-        Initializes satellite object list for given configuration
-        """
+            config,
+    ) -> ndarray:
+
 
         # calculate average satellite positions
         sat_pos_average = (arange(0, config.sat_nr) - (config.sat_nr - 1) / 2) * config.sat_dist_average
 
         # add random value on satellite distances
-        sat_dist = sat_pos_average + sqrt(config.sat_dist_average) * self.rng.normal(loc=0, scale=sqrt(config.sat_dist_variance), size=config.sat_nr)
+        sat_dist = sat_pos_average + self.rng.normal(loc=0, scale=sqrt(config.sat_dist_variance), size=config.sat_nr)
 
         # calculate sat_aods_diff_earth_rad
         sat_aods_diff_earth_rad = zeros(config.sat_nr)
@@ -79,6 +77,18 @@ class Satellites:
 
         sat_spherical_coordinates = array([sat_radii, sat_inclinations, sat_aods_earth_rad])
 
+        return sat_spherical_coordinates
+
+    def _initialize_satellites(
+            self,
+            config: Config,
+    ) -> None:
+        """
+        Initializes satellite object list for given configuration
+        """
+
+        sat_spherical_coordinates = self.calc_spherical_coordinates(config=config)
+
         for sat_idx in range(config.sat_nr):
             self.satellites.append(
                 Satellite(
@@ -86,6 +96,18 @@ class Satellites:
                     spherical_coordinates=sat_spherical_coordinates[:, sat_idx],
                     **config.satellite_args,
                 )
+            )
+
+    def update_positions(
+            self,
+            config,
+    ) -> None:
+
+        sat_spherical_coordinates = self.calc_spherical_coordinates(config=config)
+
+        for satellite in self.satellites:
+            satellite.update_position(
+                spherical_coordinates=sat_spherical_coordinates[:, satellite.idx],
             )
 
     def calculate_satellite_distances_to_users(
@@ -170,3 +192,13 @@ class Satellites:
             erroneous_channel_state_per_satellite[:, :, satellite.idx] = satellite.erroneous_channel_state_to_users
         self.erroneous_channel_state_information = reshape(
             erroneous_channel_state_per_satellite, (len(users), self.satellites[0].antenna_nr * len(self.satellites)))
+
+    def get_aods_to_users(
+            self,
+    ) -> ndarray:
+
+        aods_to_users = zeros((len(self.satellites), len(self.satellites[0].aods_to_users)))
+        for satellite_id, satellite in enumerate(self.satellites):
+            aods_to_users[satellite_id, :] = array(list(satellite.aods_to_users.values()))
+
+        return aods_to_users
