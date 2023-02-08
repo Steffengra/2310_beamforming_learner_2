@@ -30,16 +30,29 @@ from src.data.calc_sum_rate import (
 # TODO: move this to proper place
 import matplotlib.pyplot as plt
 
+csit_error_sweep_range = arange(0.0, 0.6, 0.1)
+monte_carlo_iterations: int = 1_000
+
 
 def main():
 
     def progress_print() -> None:
-        progress = (error_sweep_idx * config.monte_carlo_iterations + iter_idx + 1) / (len(csit_error_sweep_range) * config.monte_carlo_iterations)
+        progress = (error_sweep_idx * monte_carlo_iterations + iter_idx + 1) / (len(csit_error_sweep_range) * monte_carlo_iterations)
         timedelta = datetime.now() - real_time_start
         finish_time = real_time_start + timedelta / progress
 
         print(f'\rSimulation completed: {progress:.2%}, '
               f'est. finish {finish_time.hour:02d}:{finish_time.minute:02d}:{finish_time.second:02d}', end='')
+
+    def sim_update():
+        users.update_positions(config=config)
+        satellites.update_positions(config=config)
+
+        satellites.calculate_satellite_distances_to_users(users=users.users)
+        satellites.calculate_satellite_aods_to_users(users=users.users)
+        satellites.calculate_steering_vectors_to_users(users=users.users)
+        satellites.update_channel_state_information(channel_model=los_channel_model, users=users.users)
+        satellites.update_erroneous_channel_state_information(error_model_config=config.error_model, users=users.users)
 
     config = Config()
     satellites = Satellites(config=config)
@@ -51,11 +64,7 @@ def main():
         profiler = cProfile.Profile()
         profiler.enable()
 
-    satellites.calculate_satellite_distances_to_users(users=users.users)
-    satellites.calculate_satellite_aods_to_users(users=users.users)
-    satellites.calculate_steering_vectors_to_users(users=users.users)
-
-    satellites.update_channel_state_information(channel_model=los_channel_model, users=users.users)
+    sim_update()
 
     csit_error_sweep_range = arange(0.0, 0.6, 0.1)
     mean_sum_rate_per_error_value = zeros(len(csit_error_sweep_range))
@@ -63,18 +72,19 @@ def main():
     for error_sweep_idx, error_sweep_value in enumerate(csit_error_sweep_range):
         config.error_model.uniform_error_interval['low'] = -1 * error_sweep_value
         config.error_model.uniform_error_interval['high'] = error_sweep_value
+        # print('\n', config.sat_dist_average, '\n')
 
-        sum_rate_per_monte_carlo = zeros(config.monte_carlo_iterations)
-        for iter_idx in range(config.monte_carlo_iterations):
-            satellites.update_erroneous_channel_state_information(
-                error_model_config=config.error_model,
-                users=users.users
-            )
+        sum_rate_per_monte_carlo = zeros(monte_carlo_iterations)
+        for iter_idx in range(monte_carlo_iterations):
+
+            sim_update()
 
             w_mmse = mmse_precoder(
                 channel_matrix=satellites.erroneous_channel_state_information,
                 power_constraint_watt=config.power_constraint_watt,
-                noise_power_watt=config.noise_power_watt
+                noise_power_watt=config.noise_power_watt,
+                sat_nr=config.sat_nr,
+                sat_ant_nr=config.sat_ant_nr,
             )
             sum_rate = calc_sum_rate(
                 channel_state=satellites.channel_state_information,
@@ -96,7 +106,7 @@ def main():
         profiler.print_stats(sort='cumulative')
 
     fig, ax = plt.subplots()
-    ax.scatter(csit_error_sweep_range, mean_sum_rate_per_error_value)
+    ax.plot(csit_error_sweep_range, mean_sum_rate_per_error_value)
     ax.grid()
 
     if config.show_plots:
