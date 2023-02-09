@@ -4,6 +4,10 @@ from numpy import (
     concatenate,
     real,
     imag,
+    sqrt,
+    sin,
+    cos,
+    arctan2,
 )
 
 
@@ -22,5 +26,29 @@ def real_vector_to_half_complex_vector(
     real_part_cutoff_index = int(len(input_vector) / 2)
 
     half_length_complex_vector = input_vector[:real_part_cutoff_index] + 1j * input_vector[real_part_cutoff_index:]
+
+    return half_length_complex_vector
+
+
+def complex_vector_to_rad_and_phase(
+        input_vector: ndarray,
+) -> ndarray:
+
+    radius = sqrt(real(input_vector)**2 + imag(input_vector)**2)
+    angle = arctan2(imag(input_vector), real(input_vector))
+
+    return concatenate([radius, angle])
+
+
+def rad_and_phase_to_complex_vector(
+        input_vector: ndarray,
+) -> ndarray:
+
+    real_part_cutoff_index = int(len(input_vector) / 2)
+
+    half_length_complex_vector = (
+            input_vector[:real_part_cutoff_index] * cos(input_vector[real_part_cutoff_index:])
+            + 1j * input_vector[:real_part_cutoff_index] * sin(input_vector[real_part_cutoff_index:])
+    )
 
     return half_length_complex_vector
