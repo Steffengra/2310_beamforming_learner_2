@@ -39,6 +39,7 @@ from src.data.calc_sum_rate import (
 )
 from src.models.get_state import (
     get_state_erroneous_channel_state_information,
+    get_state_aods,
 )
 from src.utils.real_complex_vector_reshaping import (
     real_vector_to_half_complex_vector,
@@ -49,15 +50,28 @@ from src.utils.real_complex_vector_reshaping import (
 import matplotlib.pyplot as plt
 
 
+monte_carlo_iterations: int = 10_000
+
+
 def main():
 
     def progress_print() -> None:
-        progress = (error_sweep_idx * config.monte_carlo_iterations + iter_idx + 1) / (len(csit_error_sweep_range) * config.monte_carlo_iterations)
+        progress = (error_sweep_idx * monte_carlo_iterations + iter_idx + 1) / (len(csit_error_sweep_range) * monte_carlo_iterations)
         timedelta = datetime.now() - real_time_start
         finish_time = real_time_start + timedelta / progress
 
         print(f'\rSimulation completed: {progress:.2%}, '
               f'est. finish {finish_time.hour:02d}:{finish_time.minute:02d}:{finish_time.second:02d}', end='')
+
+    def sim_update():
+        users.update_positions(config=config)
+        satellites.update_positions(config=config)
+
+        satellites.calculate_satellite_distances_to_users(users=users.users)
+        satellites.calculate_satellite_aods_to_users(users=users.users)
+        satellites.calculate_steering_vectors_to_users(users=users.users)
+        satellites.update_channel_state_information(channel_model=los_channel_model, users=users.users)
+        satellites.update_erroneous_channel_state_information(error_model_config=config.error_model, users=users.users)
 
     config = Config()
     satellites = Satellites(config=config)
@@ -69,11 +83,7 @@ def main():
         profiler = cProfile.Profile()
         profiler.enable()
 
-    satellites.calculate_satellite_distances_to_users(users=users.users)
-    satellites.calculate_satellite_aods_to_users(users=users.users)
-    satellites.calculate_steering_vectors_to_users(users=users.users)
-
-    satellites.update_channel_state_information(channel_model=los_channel_model, users=users.users)
+    sim_update()
 
     precoder_network = load_model(Path(config.project_root_path, 'models', 'single_error', 'test', 'error_0.1'))
 
@@ -88,18 +98,17 @@ def main():
         config.error_model.uniform_error_interval['high'] = error_sweep_value
 
         sum_rate_per_monte_carlo = {
-            'learned': zeros(config.monte_carlo_iterations),
-            'mmse': zeros(config.monte_carlo_iterations),
+            'learned': zeros(monte_carlo_iterations),
+            'mmse': zeros(monte_carlo_iterations),
         }
-        for iter_idx in range(config.monte_carlo_iterations):
-            satellites.update_erroneous_channel_state_information(
-                error_model_config=config.error_model,
-                users=users.users
-            )
+        for iter_idx in range(monte_carlo_iterations):
 
-            state = get_state_erroneous_channel_state_information(satellites=satellites)
-            state = complex_vector_to_double_real_vector(state)
+            sim_update()
+
+            state = get_state_aods(satellites=satellites)
+            # state = complex_vector_to_double_real_vector(state)
             w_precoder = precoder_network(state[newaxis]).numpy().flatten()
+            # print(state)
 
             # reshape to fit reward calculation
             w_precoder = real_vector_to_half_complex_vector(w_precoder)
@@ -113,7 +122,9 @@ def main():
             w_mmse = mmse_precoder(
                 channel_matrix=satellites.erroneous_channel_state_information,
                 power_constraint_watt=config.power_constraint_watt,
-                noise_power_watt=config.noise_power_watt
+                noise_power_watt=config.noise_power_watt,
+                sat_nr=config.sat_nr,
+                sat_ant_nr=config.sat_ant_nr,
             )
 
             # get sum rate
