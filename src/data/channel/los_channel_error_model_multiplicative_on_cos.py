@@ -22,30 +22,30 @@ def los_channel_error_model_multiplicative_on_cos(
     steering_idx = arange(0, satellite.antenna_nr) - (satellite.antenna_nr - 1) / 2
 
     # OLD IMPLEMENTATION - LESS PERFORMANCE
-    # erroneous_channel_state_to_users: ndarray = zeros((len(users), satellite.antenna_nr), dtype='complex')
-    # for user in users:
-    #     steering_error = exp(
-    #         steering_idx * (
-    #             1j * 2 * pi / satellite.wavelength
-    #             * satellite.antenna_distance
-    #             * satellite.rng.uniform(low=error_model_config.uniform_error_interval['low'],
-    #                                     high=error_model_config.uniform_error_interval['high'],
-    #                                     size=1)
-    #         )
-    #     )
-    #
-    #     erroneous_channel_state_to_users[user.idx] = satellite.channel_state_to_users[user.idx] * steering_error
-
-    steering_error = exp(
-        steering_idx * (
+    erroneous_channel_state_to_users: ndarray = zeros((len(users), satellite.antenna_nr), dtype='complex')
+    for user in users:
+        steering_error = exp(
+            steering_idx * (
                 1j * 2 * pi / satellite.wavelength
                 * satellite.antenna_distance
                 * satellite.rng.uniform(low=error_model_config.uniform_error_interval['low'],
                                         high=error_model_config.uniform_error_interval['high'],
-                                        size=len(users))
-
+                                        size=1)
+            )
         )
-    )
-    erroneous_channel_state_to_users = satellite.channel_state_to_users * steering_error
+
+        erroneous_channel_state_to_users[user.idx] = satellite.channel_state_to_users[user.idx] * steering_error
+
+    # steering_error = exp(
+    #     steering_idx * (
+    #             1j * 2 * pi / satellite.wavelength
+    #             * satellite.antenna_distance
+    #             * satellite.rng.uniform(low=error_model_config.uniform_error_interval['low'],
+    #                                     high=error_model_config.uniform_error_interval['high'],
+    #                                     size=len(users))
+    #
+    #     )
+    # )
+    # erroneous_channel_state_to_users = satellite.channel_state_to_users * steering_error
 
     return erroneous_channel_state_to_users
