@@ -8,6 +8,7 @@ from numpy import (
     sqrt,
     arccos,
     pi,
+    clip,
 )
 
 from src.config.config import (
@@ -45,7 +46,11 @@ class Users:
         user_pos_average = (arange(0, config.user_nr) - (config.user_nr - 1) / 2) * config.user_dist_average
 
         # add random value on user distances
-        user_dist = user_pos_average + self.rng.normal(loc=0, scale=sqrt(config.user_dist_variance), size=config.user_nr)
+        random_factor = clip(self.rng.normal(loc=0, scale=sqrt(config.user_dist_variance), size=config.user_nr),
+                             a_min=-config.user_dist_average/2+1,
+                             a_max=config.user_dist_average/2-1)
+        user_dist = user_pos_average + random_factor
+        # print(random_factor > config.user_dist_average/2)
 
         # calculate user_aods_diff_earth_rad
         user_aods_diff_earth_rad = zeros(config.user_nr)
