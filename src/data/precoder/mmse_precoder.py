@@ -10,13 +10,18 @@ from numpy import (
 from numpy.linalg import (
     inv,
 )
-import numpy as np
+
+from src.utils.norm_precoder import (
+    norm_precoder,
+)
 
 
 def mmse_precoder(
         channel_matrix,
         noise_power_watt: float,
         power_constraint_watt: float,
+        sat_nr,
+        sat_ant_nr,
 ) -> ndarray:
 
     precoding_matrix = mmse_precoder_no_norm(
@@ -25,13 +30,15 @@ def mmse_precoder(
         power_constraint_watt=power_constraint_watt,
     )
 
-    # tr(A^H * A) is the sum of squared elements
-    # after applying norm_factor, the trace of norm_factor * (A^H * A) will be == power_constraint_watt
-    norm_factor = sqrt(power_constraint_watt / trace(matmul(precoding_matrix.conj().T, precoding_matrix)))
+    precoding_matrix_normed = norm_precoder(
+        precoding_matrix=precoding_matrix,
+        power_constraint_watt=power_constraint_watt,
+        per_satellite=True,
+        sat_nr=sat_nr,
+        sat_ant_nr=sat_ant_nr,
+    )
 
-    w_mmse = norm_factor * precoding_matrix
-
-    return w_mmse
+    return precoding_matrix_normed
 
 
 def mmse_precoder_no_norm(
