@@ -20,6 +20,7 @@ from tensorflow import (
     squeeze as tf_squeeze,
     minimum as tf_minimum,
     reduce_mean as tf_reduce_mean,
+    print as tf_print,
 )
 from tensorflow.random import (
     normal as tf_normal,
@@ -191,7 +192,7 @@ class TD3ActorCritic:
         next_states = array([experience['next_state'] for experience in sample_experiences], dtype='float32')
         train_policy = array(train_policy)
 
-        self.train_graph(
+        td_error = self.train_graph(
             train_policy=train_policy,
             states=states,
             actions=actions,
@@ -199,6 +200,8 @@ class TD3ActorCritic:
             next_states=next_states,
             sample_importance_weights=sample_importance_weights,
         )
+
+        self.experience_buffer.adjust_priorities(experience_ids=sample_experience_ids, new_priorities=td_error.numpy())
 
     @tf_function
     def train_graph(
@@ -213,6 +216,7 @@ class TD3ActorCritic:
         """
         Wraps as much as possible of the training process into a tf.function graph for performance
         """
+
         # TRAIN VALUE NETWORKS
         target_q = rewards
 
@@ -239,6 +243,7 @@ class TD3ActorCritic:
             range_value_net_training = 2
         else:
             range_value_net_training = 1
+        # range_value_net_training = 2
 
         # gradient steps:
         for network_id in range(range_value_net_training):
@@ -246,10 +251,11 @@ class TD3ActorCritic:
                 estimate = tf_squeeze(self.networks['value'][network_id]['primary'].call(input_vector))
                 td_error = target_q - estimate
                 weighted_loss = tf_reduce_mean(sample_importance_weights * td_error**2)
-
                 loss = (
                     weighted_loss
                 )
+            # tf_print(loss)
+            # tf_print(target_q, estimate)
             gradients = tape.gradient(target=loss,  # d_loss / d_parameters
                                       sources=self.networks['value'][network_id]['primary'].trainable_variables)
             self.networks['value'][network_id]['primary'].optimizer.apply_gradients(  # apply gradient update
@@ -266,13 +272,25 @@ class TD3ActorCritic:
                 #  Because otherwise the value net is always one gradient step behind
                 value_network_score_1 = tf_reduce_mean(
                     self.networks['value'][0]['primary'].call(value_network_input))
+                # value_network_score_2 = tf_reduce_mean(
+                #     self.networks['value'][0]['primary'].call(value_network_input))
+                # conservative_q_estimate = tf_squeeze(tf_minimum(value_network_score_1, value_network_score_2))
                 loss = (
                     - value_network_score_1
+                    # - conservative_q_estimate
                 )
+            # tf_print('b', loss)
             gradients = tape.gradient(target=loss,  # d_loss / d_parameters
                                       sources=self.networks['policy'][0]['primary'].trainable_variables)
             self.networks['policy'][0]['primary'].optimizer.apply_gradients(
                 zip(gradients, self.networks['policy'][0]['primary'].trainable_variables))  # apply gradient update
 
+            # actor_actions = self.networks['policy'][0]['primary'].call(input_vector)
+            # value_network_input = tf_concat([input_vector, actor_actions], axis=1)
+            # tf_print('a', tf_reduce_mean(
+            #         self.networks['value'][0]['primary'].call(value_network_input)))
+
         # UPDATE TARGET NETWORKS
         self.update_target_networks(tau_target_update_momentum=self.training_target_update_momentum_tau)
+
+        return td_error
