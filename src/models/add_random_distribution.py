@@ -59,6 +59,7 @@ def add_mmse_precoder(
         noise_power_watt=noise_power_watt,
         power_constraint_watt=power_constraint_watt,
     )
+    w_mmse = w_mmse.flatten()
     w_mmse_real = complex_vector_to_double_real_vector(w_mmse)
 
     noisy_action = tau_momentum * w_mmse_real + (1 - tau_momentum) * action
