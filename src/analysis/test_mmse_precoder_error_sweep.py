@@ -3,6 +3,7 @@ from numpy import (
     arange,
     zeros,
     mean,
+    std,
 )
 from datetime import (
     datetime,
@@ -25,6 +26,9 @@ from src.data.precoder.mmse_precoder import (
 )
 from src.data.calc_sum_rate import (
     calc_sum_rate,
+)
+from src.utils.plot_sweep import (
+    plot_sweep,
 )
 
 # TODO: move this to proper place
@@ -68,6 +72,7 @@ def main():
 
     csit_error_sweep_range = arange(0.0, 0.6, 0.1)
     mean_sum_rate_per_error_value = zeros(len(csit_error_sweep_range))
+    std_sum_rate_per_error_value = zeros(len(csit_error_sweep_range))
 
     for error_sweep_idx, error_sweep_value in enumerate(csit_error_sweep_range):
         config.error_model.uniform_error_interval['low'] = -1 * error_sweep_value
@@ -97,6 +102,7 @@ def main():
                 progress_print()
 
         mean_sum_rate_per_error_value[error_sweep_idx] = mean(sum_rate_per_monte_carlo)
+        std_sum_rate_per_error_value[error_sweep_idx] = std(sum_rate_per_monte_carlo)
 
     print(mean_sum_rate_per_error_value)
     print(datetime.now()-real_time_start)
@@ -105,9 +111,8 @@ def main():
         profiler.disable()
         profiler.print_stats(sort='cumulative')
 
-    fig, ax = plt.subplots()
-    ax.plot(csit_error_sweep_range, mean_sum_rate_per_error_value)
-    ax.grid()
+    plot_sweep(csit_error_sweep_range, mean_sum_rate_per_error_value,
+               'Error', 'Mean Sum Rate', yerr=std_sum_rate_per_error_value)
 
     if config.show_plots:
         plt.show()
