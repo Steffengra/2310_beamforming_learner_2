@@ -95,12 +95,14 @@ class Config:
         # Channel Model
         self.channel_model = los_channel_model
 
-        # Sweep Settings
-        self.monte_carlo_iterations: int = 1_000
-
         # Learner
-        self.config_learner = ConfigTD3Learner(size_state=2*self.sat_nr*self.sat_ant_nr*self.user_nr,
-                                               num_actions=2*self.sat_nr*self.sat_ant_nr*self.user_nr)
+        # self.config_learner = ConfigTD3Learner(size_state=self.sat_nr*self.user_nr,
+        #                                        num_actions=2*self.sat_nr*self.sat_ant_nr*self.user_nr)
+        self.config_learner = ConfigSACLearner(
+            # size_state=self.sat_nr*self.user_nr,
+            size_state=2*self.sat_nr*self.sat_ant_nr*self.user_nr,
+            num_actions=2*self.sat_nr*self.sat_ant_nr*self.user_nr,
+        )
 
         self._post_init()
 
@@ -135,6 +137,7 @@ class Config:
             'antenna_distance': self.sat_ant_dist,
             'antenna_gain_linear': self.sat_ant_gain_linear,
             'freq': self.freq,
+            'center_aod_earth_deg': self.sat_center_aod_earth_deg,
         }
 
         self.user_args: dict = {
