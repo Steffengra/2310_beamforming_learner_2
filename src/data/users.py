@@ -50,7 +50,6 @@ class Users:
                              a_min=-config.user_dist_average/2+1,
                              a_max=config.user_dist_average/2-1)
         user_dist = user_pos_average + random_factor
-        # print(random_factor > config.user_dist_average/2)
 
         # calculate user_aods_diff_earth_rad
         user_aods_diff_earth_rad = zeros(config.user_nr)
