@@ -90,3 +90,15 @@ class ExperienceBuffer:
         sample_max_priority = np_max(new_priorities)
         if sample_max_priority > self.max_priority:
             self.max_priority = sample_max_priority
+
+    def clear(
+            self,
+    ) -> None:
+
+        self.write_pointer: int = 0
+
+        self.buffer: list = [{}] * self.buffer_size
+        self.priorities: ndarray = zeros(self.buffer_size, dtype='float32')
+        self.probabilities: ndarray = zeros(self.buffer_size, dtype='float32')  # prob_i = prio_i / sum_i(prio_i)
+
+        self.max_priority: float = self.min_priority
