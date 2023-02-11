@@ -2,6 +2,7 @@
 from numpy import (
     ndarray,
     array,
+    zeros,
     arange,
     pi,
     exp,
@@ -49,9 +50,9 @@ class Satellite:
 
         self.center_aod_earth_deg: float = center_aod_earth_deg
 
-        self.distance_to_users: dict = {}  # user_idx[int]: dist[float]
-        self.aods_to_users: dict = {}  # user_idx[int]: aod[float] in rad
-        self.steering_vectors_to_users: dict = {}  # user_idx[int]: steering_vector[ndarray] \in 1 x antenna_nr
+        self.distance_to_users = None  # user_idx[int]: dist[float]
+        self.aods_to_users = None  # user_idx[int]: aod[float] in rad
+        self.steering_vectors_to_users = None  # user_idx[int]: steering_vector[ndarray] \in 1 x antenna_nr
 
         self.channel_state_to_users: ndarray = array([])  # depends on channel model
         self.erroneous_channel_state_to_users: ndarray = array([])  # depends on channel & error model
@@ -69,6 +70,9 @@ class Satellite:
             users: list,
     ) -> None:
         # TODO: This doesn't change values of users that might have disappeared
+
+        if self.distance_to_users is None:
+            self.distance_to_users = zeros(len(users))
 
         for user in users:
             self.distance_to_users[user.idx] = euclidian_distance(self.cartesian_coordinates,
@@ -88,6 +92,9 @@ class Satellite:
         """
         # TODO: This doesn't change values of users that might have disappeared
 
+        if self.aods_to_users is None:
+            self.aods_to_users = zeros(len(users))
+
         user_pos_idx = arange(0, len(users)) - (len(users) - 1) / 2
 
         for user in users:
@@ -104,34 +111,8 @@ class Satellite:
                 )  # denominator
             )
 
-            if user_pos_idx[user.idx] < 0:
+            if user_pos_idx[user.idx] >= 0:
                 self.aods_to_users[user.idx] = 2 * (self.center_aod_earth_deg * pi/180) - self.aods_to_users[user.idx]
-
-            # if user_pos_idx[user.idx] >= 0:
-            #     self.aods_to_users[user.idx] = arcsin(
-            #         (
-            #             + self.spherical_coordinates[0]**2
-            #             + self.distance_to_users[user.idx]**2
-            #             - user.spherical_coordinates[0]**2
-            #         )  # numerator
-            #         /
-            #         (
-            #             2 * self.spherical_coordinates[0] * self.distance_to_users[user.idx]
-            #         )  # denominator
-            #     )
-            # elif user_pos_idx[user.idx] < 0:
-            #     aod_temp = arcsin(
-            #         (
-            #             + self.spherical_coordinates[0]**2
-            #             + self.distance_to_users[user.idx]**2
-            #             - user.spherical_coordinates[0]**2
-            #         )  # numerator
-            #         /
-            #         (
-            #             2 * self.spherical_coordinates[0] * self.distance_to_users[user.idx]
-            #         )  # denominator
-            #     )
-            #     self.aods_to_users[user.idx] = 2 * (90 * pi/180) - aod_temp
 
     def calculate_steering_vectors(
             self,
@@ -141,10 +122,13 @@ class Satellite:
         This function provides the steering vectors for a given ULA and AOD
         """
 
+        if self.steering_vectors_to_users is None:
+            self.steering_vectors_to_users = zeros((len(users), self.antenna_nr), dtype='complex64')
+
         steering_idx = arange(0, self.antenna_nr) - (self.antenna_nr - 1) / 2
 
         for user in users:
-            self.steering_vectors_to_users[user.idx] = exp(
+            self.steering_vectors_to_users[user.idx, :] = exp(
                 steering_idx * (
                     -1j * 2 * pi / self.wavelength
                     * self.antenna_distance
