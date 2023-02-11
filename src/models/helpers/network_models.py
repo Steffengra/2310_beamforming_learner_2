@@ -2,7 +2,7 @@
 import tensorflow as tf
 import tensorflow_probability as tf_p
 
-from src.models.activation_functions import (
+from src.models.helpers.activation_functions import (
     activation_penalized_tanh,
 )
 
