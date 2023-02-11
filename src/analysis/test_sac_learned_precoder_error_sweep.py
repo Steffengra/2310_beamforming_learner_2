@@ -1,14 +1,9 @@
 
-
-
 from numpy import (
-    newaxis,
     arange,
     zeros,
     mean,
-    trace,
-    sqrt,
-    matmul,
+    std,
 )
 from keras.models import (
     load_model,
@@ -33,18 +28,20 @@ from src.data.channel.los_channel_model import (
     los_channel_model,
 )
 from src.data.precoder.mmse_precoder import (
-    mmse_precoder,
+    mmse_precoder_normalized,
 )
 from src.data.calc_sum_rate import (
     calc_sum_rate,
 )
-from src.models.get_state import (
-    get_state_erroneous_channel_state_information,
-    get_state_aods,
-)
 from src.utils.real_complex_vector_reshaping import (
     real_vector_to_half_complex_vector,
-    complex_vector_to_double_real_vector,
+    complex_vector_to_rad_and_phase,
+)
+from src.utils.norm_precoder import (
+    norm_precoder,
+)
+from src.utils.plot_sweep import (
+    plot_sweep,
 )
 
 # TODO: move this to proper place
@@ -52,6 +49,8 @@ import matplotlib.pyplot as plt
 
 
 monte_carlo_iterations: int = 10_000
+csit_error_sweep_range = arange(0.0, 0.6, 0.1)
+model_name = 'error_0_userwiggle_9'
 
 
 def main():
@@ -74,9 +73,33 @@ def main():
         satellites.update_channel_state_information(channel_model=los_channel_model, users=users.users)
         satellites.update_erroneous_channel_state_information(error_model_config=config.error_model, users=users.users)
 
+    def get_learned_precoder():
+        state = config.config_learner.get_state(satellites=satellites, **config.config_learner.get_state_args)
+        w_precoder, _ = precoder_network.get_action_and_log_prob_density(state)
+        w_precoder = w_precoder.numpy().flatten()
+
+        # reshape to fit reward calculation
+        w_precoder = real_vector_to_half_complex_vector(w_precoder)
+        w_precoder = w_precoder.reshape((config.sat_nr * config.sat_ant_nr, config.user_nr))
+
+        # normalize
+        return norm_precoder(
+            precoding_matrix=w_precoder,
+            power_constraint_watt=config.power_constraint_watt,
+            per_satellite=True,
+            sat_nr=config.sat_nr,
+            sat_ant_nr=config.sat_ant_nr)
+
+    def get_precoder_mmse():
+        return mmse_precoder_normalized(
+            channel_matrix=satellites.erroneous_channel_state_information,
+            **config.mmse_args)
+
     config = Config()
     satellites = Satellites(config=config)
     users = Users(config=config)
+
+    precoder_network = load_model(Path(config.project_root_path, 'models', 'test', 'single_error', model_name, 'model'))
 
     real_time_start = datetime.now()
     if config.profile:
@@ -84,84 +107,77 @@ def main():
         profiler = cProfile.Profile()
         profiler.enable()
 
-    sim_update()
-
-    precoder_network = load_model(Path(config.project_root_path, 'models', 'test', 'single_error', 'error_0_userwiggle_1000000', 'model'))
-
-    csit_error_sweep_range = arange(0.0, 0.6, 0.1)
-    mean_sum_rate_per_error_value = {
-        'learned': zeros(len(csit_error_sweep_range)),
-        'mmse': zeros(len(csit_error_sweep_range)),
+    metrics = {
+        'sum_rate': {
+            'learned': {
+                'mean': zeros(len(csit_error_sweep_range)),
+                'std': zeros(len(csit_error_sweep_range)),
+            },
+            'mmse': {
+                'mean': zeros(len(csit_error_sweep_range)),
+                'std': zeros(len(csit_error_sweep_range)),
+            },
+        },
     }
 
     for error_sweep_idx, error_sweep_value in enumerate(csit_error_sweep_range):
+
+        # set new error value
         config.error_model.uniform_error_interval['low'] = -1 * error_sweep_value
         config.error_model.uniform_error_interval['high'] = error_sweep_value
 
+        # set up per monte carlo metrics
         sum_rate_per_monte_carlo = {
             'learned': zeros(monte_carlo_iterations),
             'mmse': zeros(monte_carlo_iterations),
         }
+
         for iter_idx in range(monte_carlo_iterations):
 
             sim_update()
 
-            state = get_state_erroneous_channel_state_information(satellites=satellites)
-            state = complex_vector_to_double_real_vector(state)
-            w_precoder, _ = precoder_network.get_action_and_log_prob_density(state)
-            w_precoder = w_precoder.numpy().flatten()
-            # print(state)
-
-            # reshape to fit reward calculation
-            w_precoder = real_vector_to_half_complex_vector(w_precoder)
-            w_precoder = w_precoder.reshape((config.sat_nr*config.sat_ant_nr, config.user_nr))
-
-            # normalize
-            norm_factor = sqrt(config.power_constraint_watt / trace(matmul(w_precoder.conj().T, w_precoder)))
-            w_precoder_normalized = norm_factor * w_precoder
-
-            # mmse baseline
-            w_mmse = mmse_precoder(
-                channel_matrix=satellites.erroneous_channel_state_information,
-                power_constraint_watt=config.power_constraint_watt,
-                noise_power_watt=config.noise_power_watt,
-                sat_nr=config.sat_nr,
-                sat_ant_nr=config.sat_ant_nr,
-            )
+            precoder_learned = get_learned_precoder()
+            precoder_mmse = get_precoder_mmse()
 
             # get sum rate
             sum_rate_learned = calc_sum_rate(
                 channel_state=satellites.channel_state_information,
-                w_precoder=w_precoder_normalized,
-                noise_power_watt=config.noise_power_watt
-            )
-            sum_rate_per_monte_carlo['learned'][iter_idx] = sum_rate_learned
+                w_precoder=precoder_learned,
+                noise_power_watt=config.noise_power_watt)
 
             sum_rate_mmse = calc_sum_rate(
                 channel_state=satellites.channel_state_information,
-                w_precoder=w_mmse,
-                noise_power_watt=config.noise_power_watt
-            )
+                w_precoder=precoder_mmse,
+                noise_power_watt=config.noise_power_watt)
+
+            # log results
+            sum_rate_per_monte_carlo['learned'][iter_idx] = sum_rate_learned
             sum_rate_per_monte_carlo['mmse'][iter_idx] = sum_rate_mmse
 
             if iter_idx % 50 == 0:
                 progress_print()
 
-        mean_sum_rate_per_error_value['learned'][error_sweep_idx] = mean(sum_rate_per_monte_carlo['learned'])
-        mean_sum_rate_per_error_value['mmse'][error_sweep_idx] = mean(sum_rate_per_monte_carlo['mmse'])
-
-    print(mean_sum_rate_per_error_value)
-    print(datetime.now() - real_time_start)
+        # log results
+        metrics['sum_rate']['learned']['mean'][error_sweep_idx] = mean(sum_rate_per_monte_carlo['learned'])
+        metrics['sum_rate']['learned']['std'][error_sweep_idx] = std(sum_rate_per_monte_carlo['learned'])
+        metrics['sum_rate']['mmse']['mean'][error_sweep_idx] = mean(sum_rate_per_monte_carlo['mmse'])
+        metrics['sum_rate']['mmse']['std'][error_sweep_idx] = std(sum_rate_per_monte_carlo['mmse'])
 
     if config.profile:
         profiler.disable()
         profiler.print_stats(sort='cumulative')
 
-    fig, ax = plt.subplots()
-    ax.scatter(csit_error_sweep_range, mean_sum_rate_per_error_value['learned'])
-    ax.scatter(csit_error_sweep_range, mean_sum_rate_per_error_value['mmse'])
-    ax.grid()
-    ax.legend(['learned', 'mmse'])
+    plot_sweep(
+        x=csit_error_sweep_range,
+        y=[metrics['sum_rate']['learned']['mean'],
+           metrics['sum_rate']['mmse']['mean'],],
+        yerr=[metrics['sum_rate']['learned']['std'],
+              metrics['sum_rate']['mmse']['std'],],
+        xlabel='error value',
+        ylabel='sum rate',
+        legend=['learned', 'mmse'],
+        title=model_name,
+    )
 
     if config.show_plots:
         plt.show()
