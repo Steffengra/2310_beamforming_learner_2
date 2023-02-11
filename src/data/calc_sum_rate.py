@@ -3,7 +3,6 @@ from numpy import (
     matmul,
     zeros,
     log2,
-    sum as np_sum,
 )
 
 
@@ -35,11 +34,7 @@ def calc_sum_rate(
                 power_fading_precoded_sigma_x / (noise_power_watt + sum_power_fading_precoded_other_users_sigma_int)
         )
 
-    info_rate_users = zeros(user_nr)
-
-    for user_idx in range(user_nr):
-        info_rate_users[user_idx] = log2(1 + sinr_users[user_idx])
-
+    info_rate_users = log2(1 + sinr_users)
     sum_rate = sum(info_rate_users)
 
     return sum_rate
