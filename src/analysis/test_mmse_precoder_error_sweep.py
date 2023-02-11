@@ -22,7 +22,7 @@ from src.data.channel.los_channel_model import (
     los_channel_model,
 )
 from src.data.precoder.mmse_precoder import (
-    mmse_precoder,
+    mmse_precoder_normalized,
 )
 from src.data.calc_sum_rate import (
     calc_sum_rate,
@@ -68,28 +68,21 @@ def main():
         profiler = cProfile.Profile()
         profiler.enable()
 
-    sim_update()
-
-    csit_error_sweep_range = arange(0.0, 0.6, 0.1)
     mean_sum_rate_per_error_value = zeros(len(csit_error_sweep_range))
     std_sum_rate_per_error_value = zeros(len(csit_error_sweep_range))
 
     for error_sweep_idx, error_sweep_value in enumerate(csit_error_sweep_range):
         config.error_model.uniform_error_interval['low'] = -1 * error_sweep_value
         config.error_model.uniform_error_interval['high'] = error_sweep_value
-        # print('\n', config.sat_dist_average, '\n')
 
         sum_rate_per_monte_carlo = zeros(monte_carlo_iterations)
         for iter_idx in range(monte_carlo_iterations):
 
             sim_update()
 
-            w_mmse = mmse_precoder(
+            w_mmse = mmse_precoder_normalized(
                 channel_matrix=satellites.erroneous_channel_state_information,
-                power_constraint_watt=config.power_constraint_watt,
-                noise_power_watt=config.noise_power_watt,
-                sat_nr=config.sat_nr,
-                sat_ant_nr=config.sat_ant_nr,
+                **config.mmse_args,
             )
             sum_rate = calc_sum_rate(
                 channel_state=satellites.channel_state_information,
