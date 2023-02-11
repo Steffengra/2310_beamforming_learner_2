@@ -1,6 +1,8 @@
 
 from numpy import (
     ndarray,
+    mean,
+    std,
 )
 
 from src.data.precoder.mmse_precoder import (
@@ -30,7 +32,8 @@ def add_random_distribution(
     # random_distribution = rng.random(size=len(action), dtype='float32')
     # random_distribution = random_distribution / sum(random_distribution)
     # TODO: These values are taken from the mmse precoder, but probably shouldnt be hardcoded
-    random_distribution = rng.normal(loc=0.03353971, scale=0.5, size=len(action))
+    # random_distribution = rng.normal(loc=0.03353971, scale=0.5, size=len(action))
+    random_distribution = rng.normal(loc=mean(action), scale=std(action))
 
     # combine
     noisy_action = tau_momentum * random_distribution + (1 - tau_momentum) * action
