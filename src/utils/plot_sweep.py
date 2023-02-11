@@ -8,15 +8,32 @@ def plot_sweep(
         xlabel,
         ylabel,
         yerr=(),
+        legend=(),
+        title='',
 ):
     fig, ax = plt.subplots()
-    if any(yerr):
-        ax.errorbar(x, y, yerr=yerr)
+
+    if type(y) is list:
+        for y_idx, y_category in enumerate(y):
+            if yerr:
+                ax.errorbar(x, y_category, yerr=yerr[y_idx])
+            else:
+                ax.scatter(x, y_category)
+
     else:
-        ax.scatter(x, y)
+        if any(yerr):
+            ax.errorbar(x, y, yerr=yerr)
+        else:
+            ax.scatter(x, y)
 
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
+
+    if legend:
+        ax.legend(legend)
+
+    if title:
+        fig.suptitle(title)
 
     ax.grid()
 
