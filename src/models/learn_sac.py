@@ -133,8 +133,6 @@ def main():
 
     step_experience: dict = {'state': 0, 'action': 0, 'reward': 0, 'next_state': 0}
 
-    sim_update()
-
     for training_episode_id in range(config.config_learner.training_episodes):
 
         episode_metrics: dict = {
