@@ -16,7 +16,7 @@ from src.utils.norm_precoder import (
 )
 
 
-def mmse_precoder(
+def mmse_precoder_normalized(
         channel_matrix,
         noise_power_watt: float,
         power_constraint_watt: float,
@@ -63,10 +63,4 @@ def mmse_precoder_no_norm(
         )
     )
 
-    # tr(A^H * A) is the sum of squared elements
-    # after applying norm_factor, the trace of norm_factor * (A^H * A) will be == power_constraint_watt
-    norm_factor = sqrt(power_constraint_watt / trace(matmul(precoding_matrix.conj().T, precoding_matrix)))
-
-    w_mmse = norm_factor * precoding_matrix
-
-    return w_mmse
+    return precoding_matrix
