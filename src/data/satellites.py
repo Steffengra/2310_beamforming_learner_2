@@ -47,7 +47,6 @@ class Satellites:
             config,
     ) -> ndarray:
 
-
         # calculate average satellite positions
         sat_pos_average = (arange(0, config.sat_nr) - (config.sat_nr - 1) / 2) * config.sat_dist_average
 
