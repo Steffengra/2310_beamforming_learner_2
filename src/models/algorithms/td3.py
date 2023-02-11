@@ -20,17 +20,16 @@ from tensorflow import (
     squeeze as tf_squeeze,
     minimum as tf_minimum,
     reduce_mean as tf_reduce_mean,
-    print as tf_print,
 )
 from tensorflow.random import (
     normal as tf_normal,
 )
 
-from src.models.network_models import (
+from src.models.helpers.network_models import (
     ValueNetwork,
     PolicyNetwork,
 )
-from src.models.experience_buffer import (
+from src.models.helpers.experience_buffer import (
     ExperienceBuffer,
 )
 
