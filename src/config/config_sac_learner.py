@@ -17,7 +17,7 @@ class ConfigSACLearner:
             num_actions,
     ) -> None:
 
-        self.training_name: str = 'test_performance'
+        self.training_name: str = 'test'
 
         self.get_state = get_state_erroneous_channel_state_information
         self.get_state_args = {
@@ -34,8 +34,8 @@ class ConfigSACLearner:
                 'learning_rate': 1e-4,  # LR=0.0 -> No adaptive entropy scale -> manually tune initial entropy scale
             },
             'training_minimum_experiences': 1_000,
-            'training_batch_size': 256,
-            'training_target_update_momentum_tau': 1e-2,  # How much of the primary network copy to target networks
+            'training_batch_size': 512,
+            'training_target_update_momentum_tau': 0,  # How much of the primary network copy to target networks
         }
         self.experience_buffer_args: dict = {
             'buffer_size': 10_000,
@@ -66,12 +66,8 @@ class ConfigSACLearner:
         }
 
         # TRAINING
-        self.training_episodes: int = 6  # a new episode is a full reset of the simulation environment
+        self.training_episodes: int = 400  # a new episode is a full reset of the simulation environment
         self.training_steps_per_episode: int = 1_000
-
-        self.exploration_noise_momentum_initial: float = 1.0
-        self.exploration_noise_decay_start_percent: float = 0.0  # After which % of training to start decay
-        self.exploration_noise_decay_threshold_percent: float = 0.8  # after which % of training noise == 0
 
         self.train_policy_every_k_steps: int = 1  # train policy only every k steps to give value approx. time to settle
         self.train_policy_after_j_steps: int = 0  # start training policy only after value approx. starts being sensible
@@ -88,19 +84,6 @@ class ConfigSACLearner:
                                                                  self.training_args['training_batch_size'])
         self.network_args['size_state'] = size_state
         self.network_args['num_actions'] = num_actions
-
-        # Arithmetic
-        self.exploration_noise_step_start_decay: int = ceil(
-            self.exploration_noise_decay_start_percent * self.training_episodes * self.training_steps_per_episode
-        )
-
-        self.exploration_noise_linear_decay_per_step: float = (
-            self.exploration_noise_momentum_initial / (
-                self.exploration_noise_decay_threshold_percent * (
-                    self.training_episodes * self.training_steps_per_episode - self.exploration_noise_step_start_decay
-                )
-            )
-        )
 
         # Collected args
         self.algorithm_args = {
