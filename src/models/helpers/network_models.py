@@ -172,8 +172,6 @@ class PolicyNetworkSoft(tf.keras.Model):
         stds = tf.exp(log_stds)
         distributions = tf_p.distributions.Normal(loc=means, scale=stds)
         actions = distributions.sample()
-        # TODO: Possibly need to sum the logprobs here for multi-action scenario.
-        #  Or look into multivariate gaussian prob
         action_log_prob_densities = distributions.log_prob(actions)
 
         return (
