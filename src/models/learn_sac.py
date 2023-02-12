@@ -65,17 +65,6 @@ def main():
         print(f'\rSimulation completed: {progress:.2%}, '
               f'est. finish {finish_time.hour:02d}:{finish_time.minute:02d}:{finish_time.second:02d}', end='')
 
-    def anneal_parameters() -> tuple:
-        if simulation_step > config.config_learner.exploration_noise_step_start_decay:
-            exploration_noise_momentum_new = max(
-                0.0,
-                exploration_noise_momentum - config.config_learner.exploration_noise_linear_decay_per_step
-            )
-        else:
-            exploration_noise_momentum_new = exploration_noise_momentum
-
-        return exploration_noise_momentum_new
-
     def policy_training_criterion() -> bool:
         """Train policy networks only every k steps and/or only after j total steps to ensure a good value function"""
         if (
@@ -118,8 +107,6 @@ def main():
     satellites = Satellites(config=config)
     users = Users(config=config)
     sac = SoftActorCritic(rng=config.rng, **config.config_learner.algorithm_args)
-
-    exploration_noise_momentum = config.config_learner.exploration_noise_momentum_initial
 
     metrics: dict = {
         'mean_sum_rate_per_episode': -infty * ones(config.config_learner.training_episodes)
@@ -193,9 +180,6 @@ def main():
                 toggle_train_policy_network=train_policy,
                 toggle_train_entropy_scale_alpha=True,
             )
-
-            # anneal parameters
-            exploration_noise_momentum = anneal_parameters()
 
             # log results
             episode_metrics['sum_rate_per_step'][training_step_id] = reward
