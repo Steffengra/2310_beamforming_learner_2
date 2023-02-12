@@ -103,6 +103,22 @@ def main():
         }
         sac.add_experience(mmse_experience)
 
+    def save_model_checkpoint(extra=''):
+
+        # TODO: Fix hardcoding etc
+        name = f'error_{config.error_model.uniform_error_interval["high"]}_userwiggle_{config.user_dist_variance}'
+        if extra != '':
+            name += f'_snapshot_{extra:.2f}'
+        sac.networks['policy'][0]['primary'].save(
+            Path(config.project_root_path, 'models', config.config_learner.training_name, 'single_error', name,
+                 'model'))
+
+        # save config
+        copytree(Path(config.project_root_path, 'src', 'config'),
+                 Path(config.project_root_path, 'models', config.config_learner.training_name, 'single_error', name,
+                      'config'),
+                 dirs_exist_ok=True)
+
     config = Config()
     satellites = Satellites(config=config)
     users = Users(config=config)
@@ -111,6 +127,7 @@ def main():
     metrics: dict = {
         'mean_sum_rate_per_episode': -infty * ones(config.config_learner.training_episodes)
     }
+    high_score = -infty
 
     real_time_start = datetime.now()
     if config.profile:
@@ -191,13 +208,19 @@ def main():
                     progress_print()
 
         # log episode results
-        metrics['mean_sum_rate_per_episode'][training_episode_id] = mean(episode_metrics['sum_rate_per_step'])
+        episode_mean_sum_rate = mean(episode_metrics['sum_rate_per_step'])
+        metrics['mean_sum_rate_per_episode'][training_episode_id] = episode_mean_sum_rate
         if config.verbosity == 1:
-            print(f'Episode mean reward: {mean(episode_metrics["sum_rate_per_step"]):.4f}'
+            print(f' Episode mean reward: {episode_mean_sum_rate:.4f}'
                   f' std {std(episode_metrics["sum_rate_per_step"]):.2f},'
                   f' current exploration: {mean(episode_metrics["mean_log_prob_density"]):.2f},'
                   f' value loss: {mean(episode_metrics["value_loss"]):.5f}'
                   )
+
+        # save network snapshot
+        if training_episode_id > 10 and episode_mean_sum_rate > high_score:
+            high_score = mean(episode_metrics['sum_rate_per_step'])
+            save_model_checkpoint(extra=episode_mean_sum_rate)
 
     # end compute performance profiling
     if config.profile:
@@ -206,16 +229,7 @@ def main():
             profiler.print_stats(sort='cumulative')
         profiler.dump_stats(Path(config.performance_profile_path, f'{config.config_learner.training_name}.profile'))
 
-    # TODO: fix path etc hardcoding
-    name = f'error_{config.error_model.uniform_error_interval["high"]}_userwiggle_{config.user_dist_variance}'
-    # save policy network
-    sac.networks['policy'][0]['primary'].save(
-        Path(config.project_root_path, 'models', config.config_learner.training_name, 'single_error', name, 'model'))
-
-    # save config
-    copytree(Path(config.project_root_path, 'src', 'config'),
-             Path(config.project_root_path, 'models', config.config_learner.training_name, 'single_error', name, 'config'),
-             dirs_exist_ok=True)
+    save_model_checkpoint()
 
     # TODO: Move this to proper place
     plot_sweep(range(config.config_learner.training_episodes), metrics['mean_sum_rate_per_episode'],
