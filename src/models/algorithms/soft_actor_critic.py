@@ -135,6 +135,9 @@ class SoftActorCritic:
             tau_target_update_momentum: float,
     ) -> None:
 
+        if tau_target_update_momentum == 0:
+            return
+
         for network_list in self.networks.values():
             for network_pair in network_list:
                 for v_primary, v_target in zip(network_pair['primary'].trainable_variables,
