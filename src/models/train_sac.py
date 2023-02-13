@@ -111,13 +111,18 @@ def train_sac_single_error(config):
 
     def save_model_checkpoint(extra=''):
 
-        # TODO: Fix hardcoding etc
         name = f'error_{config.error_model.uniform_error_interval["high"]}_userwiggle_{config.user_dist_variance}'
         if extra != '':
             name += f'_snapshot_{extra:.2f}'
         sac.networks['policy'][0]['primary'].save(
-            Path(config.project_root_path, 'models', config.config_learner.training_name, 'single_error', name,
-                 'model'))
+            Path(
+                config.trained_models_path,
+                config.config_learner.training_name,
+                'single_error',
+                name,
+                'model'
+            )
+        )
 
         # save config
         copytree(Path(config.project_root_path, 'src', 'config'),
