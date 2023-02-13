@@ -33,14 +33,6 @@ from src.utils.get_wavelength import (
 )
 
 
-# TODO: At the moment, the policy network output is softmax. thats not necessary, but if
-#  we change it, we also need to change the scale of the exploration noise somehow
-# TODO: improve calc sum rate performance
-# TODO: Fix add random distribution
-
-# l2 penalty auf gewichte?
-
-
 class Config:
     """
     The config sets up all global parameters
