@@ -58,7 +58,7 @@ from src.utils.plot_sweep import (
 import matplotlib.pyplot as plt
 
 
-def main():
+def train_sac_single_error(config):
 
     def progress_print() -> None:
         progress = (
@@ -253,4 +253,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    cfg = Config()
+    train_sac_single_error(config=cfg)
