@@ -8,6 +8,12 @@ from pathlib import (
 from shutil import (
     copytree,
 )
+from gzip import (
+    open as gzip_open,
+)
+from pickle import (
+    dump as pickle_dump,
+)
 from numpy import (
     ones,
     infty,
@@ -119,7 +125,14 @@ def main():
                       'config'),
                  dirs_exist_ok=True)
 
-    config = Config()
+    def save_results():
+
+        name = f'training_error_{config.error_model.uniform_error_interval["high"]}_userwiggle_{config.user_dist_variance}.gzip'
+        results_path = Path(config.output_metrics_path, config.config_learner.training_name, 'single_error')
+        results_path.mkdir(parents=True, exist_ok=True)
+        with gzip_open(Path(results_path, name), 'wb') as file:
+            pickle_dump(metrics, file=file)
+
     satellites = Satellites(config=config)
     users = Users(config=config)
     sac = SoftActorCritic(rng=config.rng, **config.config_learner.algorithm_args)
@@ -229,7 +242,8 @@ def main():
             profiler.print_stats(sort='cumulative')
         profiler.dump_stats(Path(config.performance_profile_path, f'{config.config_learner.training_name}.profile'))
 
-    save_model_checkpoint()
+    save_model_checkpoint(extra=episode_mean_sum_rate)
+    save_results()
 
     # TODO: Move this to proper place
     plot_sweep(range(config.config_learner.training_episodes), metrics['mean_sum_rate_per_episode'],
