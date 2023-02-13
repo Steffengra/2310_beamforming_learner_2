@@ -25,6 +25,8 @@ class ConfigSACLearner:
             'norm_csi': True,
         }
 
+        self.percentage_mmse_samples_added_to_exp_buffer: float = 0.0  # [0.0, 1.0] chance for mmse action to be added
+
         self.training_args: dict = {
             'future_reward_discount_gamma': 0.0,  # Exponential future reward discount for stability
             'entropy_scale_alpha_initial': 1,  # weights the 'soft' entropy penalty against the td error

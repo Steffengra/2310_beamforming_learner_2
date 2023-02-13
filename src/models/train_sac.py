@@ -194,7 +194,7 @@ def train_sac_single_error(config):
             step_experience['reward'] = reward
 
             # optionally add the corresponding mmse precoder to the data set
-            if config.rng.random() < 0.0:
+            if config.rng.random() < config.config_learner.percentage_mmse_samples_added_to_exp_buffer:
                 add_mmse_experience()  # todo note: currently state_next saved in the mmse experience is not correct
 
             # update simulation state
