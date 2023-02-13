@@ -110,9 +110,11 @@ class Config:
 
         self.project_root_path = Path(__file__).parent.parent.parent
         self.performance_profile_path = Path(self.project_root_path, 'outputs', 'performance_profiles')
+        self.output_metrics_path = Path(self.project_root_path, 'outputs', 'metrics')
         self.trained_models_path = Path(self.project_root_path, 'models')
 
         self.performance_profile_path.mkdir(parents=True, exist_ok=True)
+        self.output_metrics_path.mkdir(parents=True, exist_ok=True)
         self.trained_models_path.mkdir(parents=True, exist_ok=True)
 
     def _post_init(
