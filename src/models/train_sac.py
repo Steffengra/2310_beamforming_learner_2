@@ -7,6 +7,7 @@ from pathlib import (
 )
 from shutil import (
     copytree,
+    rmtree,
 )
 from gzip import (
     open as gzip_open,
@@ -113,7 +114,7 @@ def train_sac_single_error(config):
 
         name = f'error_{config.error_model.uniform_error_interval["high"]}_userwiggle_{config.user_dist_variance}'
         if extra != '':
-            name += f'_snapshot_{extra:.2f}'
+            name += f'_snapshot_{extra:.3f}'
         sac.networks['policy'][0]['primary'].save(
             Path(
                 config.trained_models_path,
@@ -129,6 +130,14 @@ def train_sac_single_error(config):
                  Path(config.project_root_path, 'models', config.config_learner.training_name, 'single_error', name,
                       'config'),
                  dirs_exist_ok=True)
+
+        # clean model checkpoints
+        for high_score_prior in reversed(high_scores):
+            if high_score > 1.05 * high_score_prior:
+                name = f'error_{config.error_model.uniform_error_interval["high"]}_userwiggle_{config.user_dist_variance}_snapshot_{high_score_prior:.3f}'
+                checkpoint_path = Path(config.trained_models_path, config.config_learner.training_name, 'single_error', name)
+                rmtree(path=checkpoint_path, ignore_errors=True)
+                high_scores.remove(high_score_prior)
 
     def save_results():
 
@@ -146,6 +155,7 @@ def train_sac_single_error(config):
         'mean_sum_rate_per_episode': -infty * ones(config.config_learner.training_episodes)
     }
     high_score = -infty
+    high_scores = []
 
     real_time_start = datetime.now()
     if config.profile:
@@ -238,6 +248,7 @@ def train_sac_single_error(config):
         # save network snapshot
         if training_episode_id > 10 and episode_mean_sum_rate > high_score:
             high_score = mean(episode_metrics['sum_rate_per_step'])
+            high_scores.append(high_score)
             save_model_checkpoint(extra=episode_mean_sum_rate)
 
     # end compute performance profiling
