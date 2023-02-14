@@ -14,6 +14,12 @@ from pathlib import (
 from datetime import (
     datetime,
 )
+from gzip import (
+    open as gzip_open,
+)
+from pickle import (
+    dump as pickle_dump,
+)
 
 from src.config.config import (
     Config,
@@ -50,7 +56,7 @@ import matplotlib.pyplot as plt
 
 monte_carlo_iterations: int = 10_000
 csit_error_sweep_range = arange(0.0, 0.6, 0.1)
-model_name = 'error_0_userwiggle_9'
+model_name = 'error_0.1_userwiggle_100_snapshot_3.05'
 
 
 def main():
@@ -94,6 +100,13 @@ def main():
         return mmse_precoder_normalized(
             channel_matrix=satellites.erroneous_channel_state_information,
             **config.mmse_args)
+
+    def save_results():
+        name = f'testing_{csit_error_sweep_range[0]}_{csit_error_sweep_range[-1]}_userwiggle_{config.user_dist_variance}.gzip'
+        results_path = Path(config.output_metrics_path, config.config_learner.training_name, 'error_sweep')
+        results_path.mkdir(parents=True, exist_ok=True)
+        with gzip_open(Path(results_path, name), 'wb') as file:
+            pickle_dump(metrics, file=file)
 
     config = Config()
     satellites = Satellites(config=config)
@@ -166,6 +179,8 @@ def main():
     if config.profile:
         profiler.disable()
         profiler.print_stats(sort='cumulative')
+
+    save_results()
 
     plot_sweep(
         x=csit_error_sweep_range,
