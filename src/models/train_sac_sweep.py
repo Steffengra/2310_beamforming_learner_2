@@ -17,7 +17,7 @@ def main():
         cfg = Config()
         cfg.profile = False
         cfg.show_plots = False
-        cfg.config_learner.training_name = f'sat_{cfg.sat_nr}_ant_{cfg.sat_tot_ant_nr}_usr_{cfg.user_nr}_usrdist_{userdist}_mult_error_{mult_error}'
+        cfg.config_learner.training_name = f'sat_{cfg.sat_nr}_ant_{cfg.sat_tot_ant_nr}_usr_{cfg.user_nr}_satdist_{cfg.sat_dist_average}_usrdist_{userdist}'
         cfg.user_dist_average = userdist
         cfg.error_model.uniform_error_interval['low'] = -mult_error
         cfg.error_model.uniform_error_interval['high'] = mult_error
