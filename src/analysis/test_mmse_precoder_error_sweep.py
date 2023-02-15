@@ -8,6 +8,15 @@ from numpy import (
 from datetime import (
     datetime,
 )
+from pathlib import (
+    Path,
+)
+from gzip import (
+    open as gzip_open,
+)
+from pickle import (
+    dump as pickle_dump,
+)
 
 from src.config.config import (
     Config,
@@ -34,11 +43,12 @@ from src.utils.plot_sweep import (
 # TODO: move this to proper place
 import matplotlib.pyplot as plt
 
-csit_error_sweep_range = arange(0.0, 0.6, 0.1)
-monte_carlo_iterations: int = 1_000
 
-
-def main():
+def test_mmse_precoder_error_sweep(
+        config,
+        monte_carlo_iterations,
+        csit_error_sweep_range,
+) -> None:
 
     def progress_print() -> None:
         progress = (error_sweep_idx * monte_carlo_iterations + iter_idx + 1) / (len(csit_error_sweep_range) * monte_carlo_iterations)
@@ -58,7 +68,13 @@ def main():
         satellites.update_channel_state_information(channel_model=los_channel_model, users=users.users)
         satellites.update_erroneous_channel_state_information(error_model_config=config.error_model, users=users.users)
 
-    config = Config()
+    def save_results():
+        name = f'testing_mmse_sweep_{csit_error_sweep_range[0]}_{csit_error_sweep_range[-1]}_userwiggle_{config.user_dist_variance}.gzip'
+        results_path = Path(config.output_metrics_path, config.config_learner.training_name, 'error_sweep')
+        results_path.mkdir(parents=True, exist_ok=True)
+        with gzip_open(Path(results_path, name), 'wb') as file:
+            pickle_dump([csit_error_sweep_range, metrics], file=file)
+
     satellites = Satellites(config=config)
     users = Users(config=config)
 
@@ -68,8 +84,14 @@ def main():
         profiler = cProfile.Profile()
         profiler.enable()
 
-    mean_sum_rate_per_error_value = zeros(len(csit_error_sweep_range))
-    std_sum_rate_per_error_value = zeros(len(csit_error_sweep_range))
+    metrics = {
+        'sum_rate': {
+            'mmse': {
+                'mean': zeros(len(csit_error_sweep_range)),
+                'std': zeros(len(csit_error_sweep_range)),
+            },
+        },
+    }
 
     for error_sweep_idx, error_sweep_value in enumerate(csit_error_sweep_range):
         config.error_model.uniform_error_interval['low'] = -1 * error_sweep_value
@@ -94,22 +116,35 @@ def main():
             if iter_idx % 50 == 0:
                 progress_print()
 
-        mean_sum_rate_per_error_value[error_sweep_idx] = mean(sum_rate_per_monte_carlo)
-        std_sum_rate_per_error_value[error_sweep_idx] = std(sum_rate_per_monte_carlo)
+        metrics['sum_rate']['mmse']['mean'][error_sweep_idx] = mean(sum_rate_per_monte_carlo)
+        metrics['sum_rate']['mmse']['std'][error_sweep_idx] = std(sum_rate_per_monte_carlo)
 
-    print(mean_sum_rate_per_error_value)
+    print(metrics['sum_rate']['mmse']['mean'])
     print(datetime.now()-real_time_start)
 
     if config.profile:
         profiler.disable()
         profiler.print_stats(sort='cumulative')
 
-    plot_sweep(csit_error_sweep_range, mean_sum_rate_per_error_value,
-               'Error', 'Mean Sum Rate', yerr=std_sum_rate_per_error_value)
+    save_results()
+
+    plot_sweep(csit_error_sweep_range, metrics['sum_rate']['mmse']['mean'],
+               'Error', 'Mean Sum Rate', yerr=metrics['sum_rate']['mmse']['std'])
 
     if config.show_plots:
         plt.show()
 
 
 if __name__ == '__main__':
-    main()
+
+    cfg = Config()
+    cfg.config_learner.training_name = f'sat_{cfg.sat_nr}_ant_{cfg.sat_tot_ant_nr}_usr_{cfg.user_nr}_satdist_{cfg.sat_dist_average}_usrdist_{cfg.user_dist_average}'
+
+    iterations: int = 10_000
+    sweep_range = arange(0.0, 0.6, 0.1)
+
+    test_mmse_precoder_error_sweep(
+        config=cfg,
+        csit_error_sweep_range=sweep_range,
+        monte_carlo_iterations=iterations,
+    )

@@ -53,7 +53,8 @@ from src.utils.plot_sweep import (
 
 def test_sac_precoder_error_sweep(
         config,
-        network_path,
+        model_parent_path,
+        model_name,
         csit_error_sweep_range,
         monte_carlo_iterations,
 ):
@@ -95,16 +96,17 @@ def test_sac_precoder_error_sweep(
             sat_ant_nr=config.sat_ant_nr)
 
     def save_results():
-        name = f'testing_sac_{csit_error_sweep_range[0]}_{csit_error_sweep_range[-1]}_userwiggle_{config.user_dist_variance}.gzip'
+        name = f'testing_sac_{model_name}_sweep_{csit_error_sweep_range[0]}_{csit_error_sweep_range[-1]}_userwiggle_{config.user_dist_variance}.gzip'
         results_path = Path(config.output_metrics_path, config.config_learner.training_name, 'error_sweep')
         results_path.mkdir(parents=True, exist_ok=True)
         with gzip_open(Path(results_path, name), 'wb') as file:
-            pickle_dump(metrics, file=file)
+            pickle_dump([csit_error_sweep_range, metrics], file=file)
 
     config = Config()
     satellites = Satellites(config=config)
     users = Users(config=config)
 
+    network_path = Path(model_parent_path, model_name, 'model'),
     precoder_network = load_model(network_path)
 
     real_time_start = datetime.now()
@@ -131,7 +133,6 @@ def test_sac_precoder_error_sweep(
         # set up per monte carlo metrics
         sum_rate_per_monte_carlo = {
             'learned': zeros(monte_carlo_iterations),
-            'mmse': zeros(monte_carlo_iterations),
         }
 
         for iter_idx in range(monte_carlo_iterations):
@@ -178,15 +179,17 @@ def test_sac_precoder_error_sweep(
 if __name__ == '__main__':
 
     cfg = Config()
+    cfg.config_learner.training_name = f'sat_{cfg.sat_nr}_ant_{cfg.sat_tot_ant_nr}_usr_{cfg.user_nr}_satdist_{cfg.sat_dist_average}_usrdist_{cfg.user_dist_average}'
 
     iterations: int = 10_000
     sweep_range = arange(0.0, 0.6, 0.1)
-    model_path = Path(cfg.trained_models_path, 'sat_2_ant_6_usr_3_satdist_10000_usrdist_1000', 'single_error')
-    model_name = 'error_0.0_userwiggle_100_snapshot_3.391'
+    model_path = Path(cfg.trained_models_path, 'sat_2_ant_4_usr_3_satdist_10000_usrdist_1000', 'single_error')
+    model = 'error_0.1_userwiggle_100_snapshot_3.303'
 
     test_sac_precoder_error_sweep(
         config=cfg,
-        network_path=Path(model_path, model_name, 'model'),
+        model_name=model,
+        model_parent_path=model_path,
         csit_error_sweep_range=sweep_range,
         monte_carlo_iterations=iterations,
     )
