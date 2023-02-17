@@ -106,7 +106,7 @@ def test_sac_precoder_error_sweep(
     satellites = Satellites(config=config)
     users = Users(config=config)
 
-    network_path = Path(model_parent_path, model_name, 'model'),
+    network_path = Path(model_parent_path, model_name, 'model')
     precoder_network = load_model(network_path)
 
     real_time_start = datetime.now()
