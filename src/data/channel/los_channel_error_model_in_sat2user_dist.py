@@ -1,8 +1,6 @@
 
 from numpy import (
     ndarray,
-    array,
-    newaxis,
     zeros,
     sqrt,
     exp,
@@ -20,14 +18,21 @@ def los_channel_error_model_in_sat2user_dist(
         users: list,
 ) -> ndarray:
     """
-    TODO: describe this
+    This error model calculates an erroneous channel state information estimate based on a
+    perturbed sat2user distance estimate.
     """
 
-    channel_state_information = zeros((len(users), satellite.antenna_nr), dtype='complex')
+    erroneous_channel_state_to_users = zeros((len(users), satellite.antenna_nr), dtype='complex')
+
     for user in users:
 
-        satellite_to_user_distance_estimate = satellite.distance_to_users[user.idx] * (1 + satellite.rng.normal(loc=0, scale=error_model_config.distance_error_variance))
+        # Perturb the satellite-to-user distance according to config
+        satellite_to_user_distance_estimate = (
+                satellite.distance_to_users[user.idx]
+                * (1 + satellite.rng.normal(loc=0, scale=error_model_config.distance_error_variance))
+        )
 
+        # Calculate channel state estimation based on the perturbed distance estimate
         power_ratio = (
                 satellite.antenna_gain_linear
                 * user.gain_linear
@@ -37,11 +42,10 @@ def los_channel_error_model_in_sat2user_dist(
 
         phase_shift = satellite_to_user_distance_estimate % satellite.wavelength * 2 * pi / satellite.wavelength
 
-        channel_state_information[user.idx, :] = (
+        erroneous_channel_state_to_users[user.idx, :] = (
             amplitude_damping
             * exp(1j * phase_shift)
             * satellite.steering_vectors_to_users[user.idx]
         )
 
-    return channel_state_information
-
+    return erroneous_channel_state_to_users
