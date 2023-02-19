@@ -21,6 +21,9 @@ from numpy import (
     mean,
     std,
 )
+from matplotlib.pyplot import (
+    show as plt_show,
+)
 
 from src.config.config import (
     Config,
@@ -54,9 +57,10 @@ from src.utils.norm_precoder import (
 from src.utils.plot_sweep import (
     plot_sweep,
 )
-
-# TODO: Move this to proper place
-import matplotlib.pyplot as plt
+from src.utils.profiling import (
+    start_profiling,
+    end_profiling,
+)
 
 
 def train_sac_single_error(config):
@@ -112,13 +116,20 @@ def train_sac_single_error(config):
 
     def save_model_checkpoint(extra=''):
 
-        name = f'error_{config.error_model.uniform_error_interval["high"]}_userwiggle_{config.user_dist_variance}'
+        if config.error_model.error_model_name == 'err_mult_on_steering_cos':
+            name = f'error_{config.error_model.uniform_error_interval["high"]}_userwiggle_{config.user_dist_bound}'
+        elif config.error_model.error_model_name == 'err_sat2userdist':
+            name = f'error_{config.error_model.distance_error_std}_userwiggle_{config.user_dist_bound}'
+        else:
+            raise ValueError('unknown error model name')
+
         if extra != '':
             name += f'_snapshot_{extra:.3f}'
         sac.networks['policy'][0]['primary'].save(
             Path(
                 config.trained_models_path,
                 config.config_learner.training_name,
+                config.error_model.error_model_name,
                 'single_error',
                 name,
                 'model'
@@ -127,22 +138,33 @@ def train_sac_single_error(config):
 
         # save config
         copytree(Path(config.project_root_path, 'src', 'config'),
-                 Path(config.project_root_path, 'models', config.config_learner.training_name, 'single_error', name,
+                 Path(config.project_root_path, 'models', config.config_learner.training_name, config.error_model.error_model_name, 'single_error', name,
                       'config'),
                  dirs_exist_ok=True)
 
         # clean model checkpoints
         for high_score_prior in reversed(high_scores):
             if high_score > 1.05 * high_score_prior:
-                name = f'error_{config.error_model.uniform_error_interval["high"]}_userwiggle_{config.user_dist_variance}_snapshot_{high_score_prior:.3f}'
-                checkpoint_path = Path(config.trained_models_path, config.config_learner.training_name, 'single_error', name)
+
+                if config.error_model.error_model_name == 'err_mult_on_steering_cos':
+                    name = f'error_{config.error_model.uniform_error_interval["high"]}_userwiggle_{config.user_dist_bound}_snapshot_{high_score_prior:.3f}'
+                elif config.error_model.error_model_name == 'err_sat2userdist':
+                    name = f'error_{config.error_model.distance_error_std}_userwiggle_{config.user_dist_bound}_snapshot_{high_score_prior:.3f}'
+
+                checkpoint_path = Path(config.trained_models_path, config.config_learner.training_name, config.error_model.error_model_name, 'single_error', name)
                 rmtree(path=checkpoint_path, ignore_errors=True)
                 high_scores.remove(high_score_prior)
 
     def save_results():
 
-        name = f'training_error_{config.error_model.uniform_error_interval["high"]}_userwiggle_{config.user_dist_variance}.gzip'
-        results_path = Path(config.output_metrics_path, config.config_learner.training_name, 'single_error')
+        if config.error_model.error_model_name == 'err_mult_on_steering_cos':
+            name = f'training_error_{config.error_model.uniform_error_interval["high"]}_userwiggle_{config.user_dist_bound}.gzip'
+        elif config.error_model.error_model_name == 'err_sat2userdist':
+            name = f'training_error_{config.error_model.distance_error_std}_userwiggle_{config.user_dist_bound}.gzip'
+        else:
+            raise ValueError('unknown model name')
+
+        results_path = Path(config.output_metrics_path, config.config_learner.training_name, config.error_model.error_model_name, 'single_error')
         results_path.mkdir(parents=True, exist_ok=True)
         with gzip_open(Path(results_path, name), 'wb') as file:
             pickle_dump(metrics, file=file)
@@ -158,10 +180,10 @@ def train_sac_single_error(config):
     high_scores = []
 
     real_time_start = datetime.now()
+
+    profiler = None
     if config.profile:
-        import cProfile
-        profiler = cProfile.Profile()
-        profiler.enable()
+        profiler = start_profiling()
 
     step_experience: dict = {'state': 0, 'action': 0, 'reward': 0, 'next_state': 0}
 
@@ -252,11 +274,8 @@ def train_sac_single_error(config):
             save_model_checkpoint(extra=episode_mean_sum_rate)
 
     # end compute performance profiling
-    if config.profile:
-        profiler.disable()
-        if config.verbosity == 1:
-            profiler.print_stats(sort='cumulative')
-        profiler.dump_stats(Path(config.performance_profile_path, f'{config.config_learner.training_name}.profile'))
+    if profiler is not None:
+        end_profiling(profiler)
 
     save_model_checkpoint(extra=episode_mean_sum_rate)
     save_results()
@@ -265,7 +284,7 @@ def train_sac_single_error(config):
     plot_sweep(range(config.config_learner.training_episodes), metrics['mean_sum_rate_per_episode'],
                'Training Episode', 'Sum Rate')
     if config.show_plots:
-        plt.show()
+        plt_show()
 
 
 if __name__ == '__main__':
