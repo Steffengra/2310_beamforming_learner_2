@@ -1,8 +1,5 @@
 
 import tensorflow as tf
-from numpy import (
-    ceil,
-)
 
 from src.models.helpers.get_state import (
     get_state_erroneous_channel_state_information,
