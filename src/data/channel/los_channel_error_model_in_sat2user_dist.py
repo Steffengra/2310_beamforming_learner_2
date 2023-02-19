@@ -7,14 +7,10 @@ from numpy import (
     pi,
 )
 
-from src.data.satellite import (
-    Satellite,
-)
-
 
 def los_channel_error_model_in_sat2user_dist(
         error_model_config,
-        satellite: Satellite,
+        satellite,
         users: list,
 ) -> ndarray:
     """
