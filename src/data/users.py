@@ -5,10 +5,8 @@ from numpy import (
     arange,
     zeros,
     ones,
-    sqrt,
     arccos,
     pi,
-    clip,
 )
 
 from src.config.config import (
@@ -46,9 +44,9 @@ class Users:
         user_pos_average = (arange(0, config.user_nr) - (config.user_nr - 1) / 2) * config.user_dist_average
 
         # add random value on user distances
-        random_factor = clip(self.rng.normal(loc=0, scale=sqrt(config.user_dist_variance), size=config.user_nr),
-                             a_min=-config.user_dist_average/2+1,
-                             a_max=config.user_dist_average/2-1)
+        random_factor = self.rng.uniform(low=-config.user_dist_bound,
+                                         high=config.user_dist_bound,
+                                         size=config.user_nr)
         user_dist = user_pos_average + random_factor
 
         # calculate user_aods_diff_earth_rad

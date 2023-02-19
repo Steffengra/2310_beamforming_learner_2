@@ -3,11 +3,9 @@ from numpy import (
     ndarray,
     array,
     reshape,
-    clip,
     arange,
     zeros,
     ones,
-    sqrt,
     arccos,
     pi,
 )
@@ -51,9 +49,9 @@ class Satellites:
         sat_pos_average = (arange(0, config.sat_nr) - (config.sat_nr - 1) / 2) * config.sat_dist_average
 
         # add random value on satellite distances
-        random_factor = clip(self.rng.normal(loc=0, scale=sqrt(config.sat_dist_variance), size=config.sat_nr),
-                             a_min=-config.sat_dist_average/2+1,
-                             a_max=config.sat_dist_average/2-1)
+        random_factor = self.rng.uniform(low=-config.sat_dist_bound,
+                                         high=config.sat_dist_bound,
+                                         size=config.sat_nr)
         sat_dist = sat_pos_average + random_factor
 
         # calculate sat_aods_diff_earth_rad
