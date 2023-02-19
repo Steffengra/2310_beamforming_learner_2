@@ -49,7 +49,7 @@ from src.utils.profiling import (
 )
 
 
-def test_mmse_precoder_error_sweep(
+def test_mmse_precoder_distance_sweep(
         config,
         distance_sweep_range,
 ) -> None:
@@ -141,7 +141,7 @@ if __name__ == '__main__':
 
     sweep_range = arange(10**5-30, 10**5+30, 0.01)
 
-    test_mmse_precoder_error_sweep(
+    test_mmse_precoder_distance_sweep(
         config=cfg,
         distance_sweep_range=sweep_range,
     )
