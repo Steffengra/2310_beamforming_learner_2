@@ -63,7 +63,7 @@ from src.utils.profiling import (
 )
 
 
-def train_sac_single_error(config):
+def train_sac_single_error(config) -> Path:
 
     def progress_print() -> None:
         progress = (
@@ -114,7 +114,7 @@ def train_sac_single_error(config):
         }
         sac.add_experience(mmse_experience)
 
-    def save_model_checkpoint(extra=''):
+    def save_model_checkpoint(extra=None):
 
         if config.error_model.error_model_name == 'err_mult_on_steering_cos':
             name = f'error_{config.error_model.uniform_error_interval["high"]}_userwiggle_{config.user_dist_bound}'
@@ -122,38 +122,37 @@ def train_sac_single_error(config):
             name = f'error_{config.error_model.distance_error_std}_userwiggle_{config.user_dist_bound}'
         else:
             raise ValueError('unknown error model name')
-
-        if extra != '':
-            name += f'_snapshot_{extra:.3f}'
-        sac.networks['policy'][0]['primary'].save(
-            Path(
-                config.trained_models_path,
-                config.config_learner.training_name,
-                config.error_model.error_model_name,
-                'single_error',
-                name,
-                'model'
-            )
+        if extra is not None:
+            name += f'_snap_{extra:.3f}'
+        checkpoint_path = Path(
+            config.trained_models_path,
+            config.config_learner.training_name,
+            config.error_model.error_model_name,
+            'single_error',
+            name,
         )
+
+        sac.networks['policy'][0]['primary'].save(Path(checkpoint_path, 'model'))
 
         # save config
         copytree(Path(config.project_root_path, 'src', 'config'),
-                 Path(config.project_root_path, 'models', config.config_learner.training_name, config.error_model.error_model_name, 'single_error', name,
-                      'config'),
+                 Path(checkpoint_path, 'config'),
                  dirs_exist_ok=True)
 
         # clean model checkpoints
-        for high_score_prior in reversed(high_scores):
-            if high_score > 1.05 * high_score_prior:
+        for high_score_prior_id, high_score_prior in enumerate(reversed(high_scores)):
+            if high_score > 1.05 * high_score_prior or high_score_prior_id > 3:
 
                 if config.error_model.error_model_name == 'err_mult_on_steering_cos':
-                    name = f'error_{config.error_model.uniform_error_interval["high"]}_userwiggle_{config.user_dist_bound}_snapshot_{high_score_prior:.3f}'
+                    name = f'error_{config.error_model.uniform_error_interval["high"]}_userwiggle_{config.user_dist_bound}_snap_{high_score_prior:.3f}'
                 elif config.error_model.error_model_name == 'err_sat2userdist':
-                    name = f'error_{config.error_model.distance_error_std}_userwiggle_{config.user_dist_bound}_snapshot_{high_score_prior:.3f}'
+                    name = f'error_{config.error_model.distance_error_std}_userwiggle_{config.user_dist_bound}_snap_{high_score_prior:.3f}'
 
-                checkpoint_path = Path(config.trained_models_path, config.config_learner.training_name, config.error_model.error_model_name, 'single_error', name)
-                rmtree(path=checkpoint_path, ignore_errors=True)
+                prior_checkpoint_path = Path(config.trained_models_path, config.config_learner.training_name, config.error_model.error_model_name, 'single_error', name)
+                rmtree(path=prior_checkpoint_path, ignore_errors=True)
                 high_scores.remove(high_score_prior)
+
+        return checkpoint_path
 
     def save_results():
 
@@ -268,16 +267,15 @@ def train_sac_single_error(config):
                   )
 
         # save network snapshot
-        if training_episode_id > 10 and episode_mean_sum_rate > high_score:
+        if episode_mean_sum_rate > high_score:
             high_score = mean(episode_metrics['sum_rate_per_step'])
             high_scores.append(high_score)
-            save_model_checkpoint(extra=episode_mean_sum_rate)
+            best_model_path = save_model_checkpoint(extra=episode_mean_sum_rate)
 
     # end compute performance profiling
     if profiler is not None:
         end_profiling(profiler)
 
-    save_model_checkpoint(extra=episode_mean_sum_rate)
     save_results()
 
     # TODO: Move this to proper place
@@ -285,6 +283,8 @@ def train_sac_single_error(config):
                'Training Episode', 'Sum Rate')
     if config.show_plots:
         plt_show()
+
+    return best_model_path
 
 
 if __name__ == '__main__':
