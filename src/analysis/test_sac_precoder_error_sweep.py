@@ -5,14 +5,14 @@ from numpy import (
     mean,
     std,
 )
+from datetime import (
+    datetime,
+)
 from keras.models import (
     load_model,
 )
 from pathlib import (
     Path,
-)
-from datetime import (
-    datetime,
 )
 from gzip import (
     open as gzip_open,
@@ -49,6 +49,10 @@ from src.utils.norm_precoder import (
 from src.utils.plot_sweep import (
     plot_sweep,
 )
+from src.utils.profiling import (
+    start_profiling,
+    end_profiling,
+)
 
 
 def test_sac_precoder_error_sweep(
@@ -57,16 +61,25 @@ def test_sac_precoder_error_sweep(
         model_name,
         csit_error_sweep_range,
         monte_carlo_iterations,
-):
+) -> None:
 
     def progress_print() -> None:
         progress = (error_sweep_idx * monte_carlo_iterations + iter_idx + 1) / (
-                    len(csit_error_sweep_range) * monte_carlo_iterations)
+                len(csit_error_sweep_range) * monte_carlo_iterations)
         timedelta = datetime.now() - real_time_start
         finish_time = real_time_start + timedelta / progress
 
         print(f'\rSimulation completed: {progress:.2%}, '
               f'est. finish {finish_time.hour:02d}:{finish_time.minute:02d}:{finish_time.second:02d}', end='')
+
+    def set_new_error_value() -> None:
+        if config.error_model.error_model_name == 'err_mult_on_steering_cos':
+            config.error_model.uniform_error_interval['low'] = -1 * error_sweep_value
+            config.error_model.uniform_error_interval['high'] = error_sweep_value
+        elif config.error_model.error_model_name == 'err_sat2userdist':
+            config.error_model.distance_error_std = error_sweep_value
+        else:
+            raise ValueError('Unknown error model name')
 
     def sim_update():
         users.update_positions(config=config)
@@ -95,14 +108,16 @@ def test_sac_precoder_error_sweep(
             sat_nr=config.sat_nr,
             sat_ant_nr=config.sat_ant_nr)
 
-    def save_results():
-        name = f'testing_sac_{model_name}_sweep_{csit_error_sweep_range[0]}_{csit_error_sweep_range[-1]}_userwiggle_{config.user_dist_variance}.gzip'
-        results_path = Path(config.output_metrics_path, config.config_learner.training_name, 'error_sweep')
+    def save_results() -> None:
+        name = f'testing_sac_{model_name}_sweep_{csit_error_sweep_range[0]}_{csit_error_sweep_range[-1]}_userwiggle_{config.user_dist_bound}.gzip'
+        results_path = Path(config.output_metrics_path,
+                            config.config_learner.training_name,
+                            config.error_model.error_model_name,
+                            'error_sweep')
         results_path.mkdir(parents=True, exist_ok=True)
         with gzip_open(Path(results_path, name), 'wb') as file:
             pickle_dump([csit_error_sweep_range, metrics], file=file)
 
-    config = Config()
     satellites = Satellites(config=config)
     users = Users(config=config)
 
@@ -110,10 +125,10 @@ def test_sac_precoder_error_sweep(
     precoder_network = load_model(network_path)
 
     real_time_start = datetime.now()
+
+    profiler = None
     if config.profile:
-        import cProfile
-        profiler = cProfile.Profile()
-        profiler.enable()
+        profiler = start_profiling()
 
     metrics = {
         'sum_rate': {
@@ -127,13 +142,10 @@ def test_sac_precoder_error_sweep(
     for error_sweep_idx, error_sweep_value in enumerate(csit_error_sweep_range):
 
         # set new error value
-        config.error_model.uniform_error_interval['low'] = -1 * error_sweep_value
-        config.error_model.uniform_error_interval['high'] = error_sweep_value
+        set_new_error_value()
 
         # set up per monte carlo metrics
-        sum_rate_per_monte_carlo = {
-            'learned': zeros(monte_carlo_iterations),
-        }
+        sum_rate_per_monte_carlo = zeros(monte_carlo_iterations)
 
         for iter_idx in range(monte_carlo_iterations):
 
@@ -142,25 +154,26 @@ def test_sac_precoder_error_sweep(
             precoder_learned = get_learned_precoder()
 
             # get sum rate
-            sum_rate_learned = calc_sum_rate(
+            sum_rate = calc_sum_rate(
                 channel_state=satellites.channel_state_information,
                 w_precoder=precoder_learned,
                 noise_power_watt=config.noise_power_watt)
 
             # log results
-            sum_rate_per_monte_carlo['learned'][iter_idx] = sum_rate_learned
+            sum_rate_per_monte_carlo[iter_idx] = sum_rate
 
             if iter_idx % 50 == 0:
                 progress_print()
 
         # log results
-        metrics['sum_rate']['learned']['mean'][error_sweep_idx] = mean(sum_rate_per_monte_carlo['learned'])
-        metrics['sum_rate']['learned']['std'][error_sweep_idx] = std(sum_rate_per_monte_carlo['learned'])
+        metrics['sum_rate']['learned']['mean'][error_sweep_idx] = mean(sum_rate_per_monte_carlo)
+        metrics['sum_rate']['learned']['std'][error_sweep_idx] = std(sum_rate_per_monte_carlo)
 
-    if config.profile:
-        profiler.disable()
-        profiler.print_stats(sort='cumulative')
+    # finish profiling
+    if profiler is not None:
+        end_profiling(profiler)
 
+    # save results
     save_results()
 
     plot_sweep(
@@ -183,8 +196,12 @@ if __name__ == '__main__':
 
     iterations: int = 10_000
     sweep_range = arange(0.0, 0.6, 0.1)
-    model_path = Path(cfg.trained_models_path, 'sat_2_ant_4_usr_3_satdist_10000_usrdist_1000', 'single_error')
-    model = 'error_0.1_userwiggle_100_snapshot_3.303'
+    # sweep_range = arange(0.0, 1/10_000_000, 1/100_000_000)
+    model_path = Path(cfg.trained_models_path,
+                      'sat_2_ant_4_usr_3_satdist_10000_usrdist_1000',
+                      'err_mult_on_steering_cos',
+                      'single_error')
+    model = 'error_0.1_userwiggle_100_snapshot_3.357'
 
     test_sac_precoder_error_sweep(
         config=cfg,
