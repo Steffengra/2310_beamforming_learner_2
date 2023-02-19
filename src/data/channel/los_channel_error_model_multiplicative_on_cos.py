@@ -2,8 +2,6 @@
 from numpy import (
     ndarray,
     arange,
-    tile,
-    zeros,
     exp,
     pi,
 )
