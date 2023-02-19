@@ -25,7 +25,7 @@ def los_channel_error_model_in_sat2user_dist(
         # Perturb the satellite-to-user distance according to config
         satellite_to_user_distance_estimate = (
                 satellite.distance_to_users[user.idx]
-                * (1 + satellite.rng.normal(loc=0, scale=error_model_config.distance_error_variance))
+                * satellite.rng.normal(loc=1, scale=error_model_config.distance_error_std)
         )
 
         # Calculate channel state estimation based on the perturbed distance estimate
