@@ -45,7 +45,7 @@ class Config:
         self._pre_init()
 
         # General
-        self.profile: bool = True  # performance profiling
+        self.profile: bool = False  # performance profiling
         self.show_plots: bool = True
 
         self.verbosity: int = 1  # 0 = no prints, 1 = prints
