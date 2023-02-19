@@ -57,7 +57,7 @@ from src.utils.profiling import (
 )
 
 
-def test_sac_precoder_error_sweep(
+def test_sac_precoder_distance_sweep(
         config,
         model_parent_path,
         model_name,
@@ -175,7 +175,7 @@ if __name__ == '__main__':
                       'single_error')
     model = 'error_0.0_userwiggle_100_snapshot_3.449'
 
-    test_sac_precoder_error_sweep(
+    test_sac_precoder_distance_sweep(
         config=cfg,
         distance_sweep_range=sweep_range,
         model_parent_path=model_path,
