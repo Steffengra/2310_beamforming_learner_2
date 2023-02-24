@@ -1,5 +1,6 @@
 
 from numpy import (
+    newaxis,
     arange,
     zeros,
     mean,
@@ -93,7 +94,7 @@ def test_sac_precoder_error_sweep(
 
     def get_learned_precoder():
         state = config.config_learner.get_state(satellites=satellites, **config.config_learner.get_state_args)
-        w_precoder, _ = precoder_network.get_action_and_log_prob_density(state)
+        w_precoder, _ = precoder_network.call(state.astype('float32')[newaxis])
         w_precoder = w_precoder.numpy().flatten()
 
         # reshape to fit reward calculation
