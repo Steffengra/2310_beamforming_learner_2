@@ -100,17 +100,17 @@ def train_sac_single_error(config) -> Path:
         w_mmse = mmse_precoder_normalized(
             channel_matrix=satellites.erroneous_channel_state_information,
             **config.mmse_args
-        ).flatten()
+        )
         reward_mmse = calc_sum_rate(
             channel_state=satellites.channel_state_information,
-            w_precoder=w_precoder_normed,
+            w_precoder=w_mmse,
             noise_power_watt=config.noise_power_watt,
         )
         mmse_experience = {
             'state': state_current,
-            'action': complex_vector_to_double_real_vector(w_mmse),
+            'action': complex_vector_to_double_real_vector(w_mmse.flatten()),
             'reward': reward_mmse,
-            'state_next': state_next,
+            'next_state': state_next,
         }
         sac.add_experience(mmse_experience)
 
