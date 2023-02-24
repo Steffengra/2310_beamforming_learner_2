@@ -16,6 +16,9 @@ from src.data.channel.los_channel_error_model_multiplicative_on_cos import (
 from src.data.channel.los_channel_error_model_in_sat2user_dist import (
     los_channel_error_model_in_sat2user_dist,
 )
+from src.data.channel.los_channel_error_model_in_sat_and_user_pos import (
+    los_channel_error_model_in_sat_and_user_pos,
+)
 from src.analysis.test_sac_precoder_error_sweep import (
     test_sac_precoder_error_sweep,
 )
@@ -67,6 +70,30 @@ def learn_on_userdist_and_sat2userdist_error(
         test_precoder(config=deepcopy(cfg),
                       model_path=best_model_path,
                       error_sweep_range=testing_error_sweep_range_sat2userdist)
+
+
+def learn_on_userdist_and_satpos_and_userpos_error(
+        userdist,
+        phase_sat_error_std,
+        mult_error_bound,
+):
+    cfg = Config()
+    cfg.profile = False
+    cfg.show_plots = False
+    cfg.config_learner.training_name = f'sat_{cfg.sat_nr}_ant_{cfg.sat_tot_ant_nr}_usr_{cfg.user_nr}_satdist_{cfg.sat_dist_average}_usrdist_{userdist}'
+    cfg.user_dist_average = userdist
+    cfg.error_model.error_model = los_channel_error_model_in_sat_and_user_pos
+    cfg.error_model.update()
+    cfg.error_model.uniform_error_interval['low'] = -mult_error_bound
+    cfg.error_model.uniform_error_interval['high'] = mult_error_bound
+    cfg.error_model.phase_sat_error_std = phase_sat_error_std
+
+    best_model_path = train_sac_single_error(config=cfg)
+
+    if test:
+        test_precoder(config=cfg,
+                      model_path=best_model_path,
+                      error_sweep_range=testing_error_sweep_range_err_satpos_and_userpos)
 
 
 def test_precoder(
@@ -123,6 +150,7 @@ def test_precoder(
 test = True
 testing_error_sweep_range_sat2userdist = np.arange(0.0, 1 / 10_000_000, 1 / 100_000_000)
 testing_error_sweep_range_mult_on_steering = np.arange(0.0, 0.6, 0.1)
+testing_error_sweep_range_err_satpos_and_userpos = np.arange(0.0, 0.1, 0.01)
 
 
 def main():
@@ -134,12 +162,22 @@ def main():
     # learn_on_userdist_and_mult_error(userdist=1000, mult_error=0.4)
     # learn_on_userdist_and_mult_error(userdist=1000, mult_error=0.5)
 
-    learn_on_userdist_and_mult_error(userdist=10**5, mult_error=0.0)
-    learn_on_userdist_and_mult_error(userdist=10**5, mult_error=0.1)
-    # learn_on_userdist_and_mult_error(userdist=10**5, mult_error=0.)
-    # learn_on_userdist_and_mult_error(userdist=10**5, mult_error=0.3)
-    # learn_on_userdist_and_mult_error(userdist=10**5, mult_error=0.4)
-    # learn_on_userdist_and_mult_error(userdist=10**5, mult_error=0.5)
+    # learn_on_userdist_and_mult_error(userdist=50_000, mult_error=0.0)
+    # learn_on_userdist_and_mult_error(userdist=50_000, mult_error=0.1)
+    # learn_on_userdist_and_mult_error(userdist=50_000, mult_error=0.)
+    # learn_on_userdist_and_mult_error(userdist=50_000, mult_error=0.3)
+    # learn_on_userdist_and_mult_error(userdist=50_000, mult_error=0.4)
+    # learn_on_userdist_and_mult_error(userdist=50_000, mult_error=0.5)
+
+    # learn_on_userdist_and_satpos_and_userpos_error(userdist=1_000, phase_sat_error_std=0.0, mult_error_bound=0.0)
+    learn_on_userdist_and_satpos_and_userpos_error(userdist=1_000, phase_sat_error_std=0.005, mult_error_bound=0.05)
+
+    # learn_on_userdist_and_mult_error(userdist=100_000, mult_error=0.0)
+    # learn_on_userdist_and_mult_error(userdist=100_000, mult_error=0.1)
+    # learn_on_userdist_and_mult_error(userdist=100_000, mult_error=0.)
+    # learn_on_userdist_and_mult_error(userdist=100_000, mult_error=0.3)
+    # learn_on_userdist_and_mult_error(userdist=100_000, mult_error=0.4)
+    # learn_on_userdist_and_mult_error(userdist=100_000, mult_error=0.5)
 
     # learn_on_userdist_and_sat2userdist_error(userdist=1000, sat2userdisterror_std=0)
     # learn_on_userdist_and_sat2userdist_error(userdist=1000, sat2userdisterror_std=1/100_000_000)
