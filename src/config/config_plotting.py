@@ -18,7 +18,7 @@ class PlotConfig:
         plt.rc('axes', labelsize=8.33)  # fontsize of the axes labels in pt, default: 10
         plt.rc('xtick', labelsize=8.33)  # fontsize of the x tick labels in pt, default: 10
         plt.rc('ytick', labelsize=8.33)  # fontsize of the y tick labels in pt, default: 10
-        plt.rc('legend', fontsize=8.33)  # fontsize of the legend in pt, default: 10
+        plt.rc('legend', fontsize=6.67)  # fontsize of the legend in pt, default: 10
 
         # latex \pt         8   8.5     9   9.5    10  10.5    11  11.5    12
         #               -----------------------------------------------------
@@ -33,6 +33,10 @@ class PlotConfig:
         # \huge         16.59 17.63 18.67 19.70 20.74 21.78 22.81 23.85 24.89
         # \Huge         19.90 21.15 22.39 23.64 24.88 26.12 27.37 28.61 29.86
         # \HUGE         24.05 25.55 27.05 28.56 30.06 31.56 33.07 34.57 36.07
+
+        plt.rc('lines', linewidth=1)
+        plt.rc('lines', markersize=4)
+        plt.rc('errorbar', capsize=3)
 
         plt.rc(
             'grid',
@@ -52,9 +56,9 @@ class PlotConfig:
 
         # paths
         self.project_root_path = Path(__file__).parent.parent.parent
-        self.plot_path = Path(self.project_root_path, 'reports', 'figures')
+        self.plots_parent_path = Path(self.project_root_path, 'reports', 'figures')
 
-        self.plot_path.mkdir(parents=True, exist_ok=True)
+        self.plots_parent_path.mkdir(parents=True, exist_ok=True)
 
         # color palettes
         self.cp2: dict[str: str] = {  # colorblindness palette
