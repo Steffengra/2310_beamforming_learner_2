@@ -123,18 +123,19 @@ class PlotConfig:
             'black': '#000000',
         }
 
-    def save_figures(
-            self,
-            plot_name,
-            padding,
-    ) -> None:
 
-        plt.savefig(Path(self.plot_path, 'pgf', f'{plot_name}.pgf'),
-                    bbox_inches='tight', pad_inches=padding, transparent=True)
-        plt.savefig(Path(self.plot_path, 'pdf', f'{plot_name}.pdf'),
-                    bbox_inches='tight', pad_inches=padding, dpi=800, transparent=True)
-        plt.savefig(Path(self.plot_path, 'eps', f'{plot_name}.eps'),
-                    bbox_inches='tight', pad_inches=padding)
+def save_figures(
+        plots_parent_path,
+        plot_name,
+        padding,
+) -> None:
+
+    plt.savefig(Path(plots_parent_path, 'pgf', f'{plot_name}.pgf'),
+                bbox_inches='tight', pad_inches=padding, transparent=True)
+    plt.savefig(Path(plots_parent_path, 'pdf', f'{plot_name}.pdf'),
+                bbox_inches='tight', pad_inches=padding, dpi=800, transparent=True)
+    plt.savefig(Path(plots_parent_path, 'eps', f'{plot_name}.eps'),
+                bbox_inches='tight', pad_inches=padding)
 
 
 def generic_styling(
