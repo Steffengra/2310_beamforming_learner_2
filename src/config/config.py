@@ -69,7 +69,7 @@ class Config:
         # User
         self.user_nr: int = 3  # Number of users
         self.user_gain_dBi: float = 0  # User gain in dBi
-        self.user_dist_average: float = 1000  # Average user distance in m
+        self.user_dist_average: float = 1_000  # Average user distance in m
         self.user_dist_bound: float = 30  # Variance of user distance, uniform distribution [avg-bound, avg+bound]
         self.user_center_aod_earth_deg: float = 90  # Average center of users
 
@@ -147,6 +147,10 @@ class Config:
             'noise_power_watt': self.noise_power_watt,
             'sat_nr': self.sat_nr,
             'sat_ant_nr': self.sat_ant_nr,
+        }
+
+        self.mrc_args: dict = {
+            'power_constraint_watt': self.power_constraint_watt,
         }
 
     def __logging_setup(
