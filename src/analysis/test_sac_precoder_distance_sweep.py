@@ -1,6 +1,7 @@
 
 
 from numpy import (
+    newaxis,
     arange,
     zeros,
 )
