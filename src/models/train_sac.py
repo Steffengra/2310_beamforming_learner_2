@@ -120,6 +120,8 @@ def train_sac_single_error(config) -> Path:
             name = f'error_{config.error_model.uniform_error_interval["high"]}_userwiggle_{config.user_dist_bound}'
         elif config.error_model.error_model_name == 'err_sat2userdist':
             name = f'error_{config.error_model.distance_error_std}_userwiggle_{config.user_dist_bound}'
+        elif config.error_model.error_model_name == 'err_satpos_and_userpos':
+            name = f'error_st_{config.error_model.uniform_error_interval["high"]}_ph_{config.error_model.phase_sat_error_std}_userwiggle_{config.user_dist_bound}'
         else:
             raise ValueError('unknown error model name')
         if extra is not None:
@@ -147,6 +149,8 @@ def train_sac_single_error(config) -> Path:
                     name = f'error_{config.error_model.uniform_error_interval["high"]}_userwiggle_{config.user_dist_bound}_snap_{high_score_prior:.3f}'
                 elif config.error_model.error_model_name == 'err_sat2userdist':
                     name = f'error_{config.error_model.distance_error_std}_userwiggle_{config.user_dist_bound}_snap_{high_score_prior:.3f}'
+                elif config.error_model.error_model_name == 'err_satpos_and_userpos':
+                    name = f'error_st_{config.error_model.uniform_error_interval["high"]}_ph_{config.error_model.phase_sat_error_std}_userwiggle_{config.user_dist_bound}_snap_{high_score_prior:.3f}'
 
                 prior_checkpoint_path = Path(config.trained_models_path, config.config_learner.training_name, config.error_model.error_model_name, 'single_error', name)
                 rmtree(path=prior_checkpoint_path, ignore_errors=True)
@@ -160,6 +164,8 @@ def train_sac_single_error(config) -> Path:
             name = f'training_error_{config.error_model.uniform_error_interval["high"]}_userwiggle_{config.user_dist_bound}.gzip'
         elif config.error_model.error_model_name == 'err_sat2userdist':
             name = f'training_error_{config.error_model.distance_error_std}_userwiggle_{config.user_dist_bound}.gzip'
+        elif config.error_model.error_model_name == 'err_satpos_and_userpos':
+            name = f'training_error_st_{config.error_model.uniform_error_interval["high"]}_ph_{config.error_model.phase_sat_error_std}_userwiggle_{config.user_dist_bound}.gzip'
         else:
             raise ValueError('unknown model name')
 
