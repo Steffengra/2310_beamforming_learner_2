@@ -79,6 +79,12 @@ def test_sac_precoder_error_sweep(
             config.error_model.uniform_error_interval['high'] = error_sweep_value
         elif config.error_model.error_model_name == 'err_sat2userdist':
             config.error_model.distance_error_std = error_sweep_value
+        elif config.error_model.error_model_name == 'err_satpos_and_userpos':
+            # todo: this model has 2 params
+            # config.error_model.uniform_error_interval['low'] = -1 * error_sweep_value
+            # config.error_model.uniform_error_interval['high'] = error_sweep_value
+            config.error_model.phase_sat_error_std = error_sweep_value
+
         else:
             raise ValueError('Unknown error model name')
 
@@ -196,13 +202,14 @@ if __name__ == '__main__':
     cfg.config_learner.training_name = f'sat_{cfg.sat_nr}_ant_{cfg.sat_tot_ant_nr}_usr_{cfg.user_nr}_satdist_{cfg.sat_dist_average}_usrdist_{cfg.user_dist_average}'
 
     iterations: int = 10_000
-    sweep_range = arange(0.0, 0.6, 0.1)
+    # sweep_range = arange(0.0, 0.6, 0.1)
     # sweep_range = arange(0.0, 1/10_000_000, 1/100_000_000)
+    sweep_range = arange(0, 0.07, 0.005)
     model_path = Path(cfg.trained_models_path,
                       'sat_2_ant_4_usr_3_satdist_10000_usrdist_1000',
-                      'err_mult_on_steering_cos',
+                      'err_satpos_and_userpos',
                       'single_error')
-    model = 'error_0.1_userwiggle_100_snapshot_3.357'
+    model = 'error_st_0.05_ph_0.005_userwiggle_30_snap_2.982'
 
     test_sac_precoder_error_sweep(
         config=cfg,
