@@ -10,7 +10,7 @@ Email: {**gracla**, schroeder, roeper, bockelmann, wuebben, dekorsy}@ant.uni-bre
 
 #### Folder Structure
 
-|                  |                                                  |
+| folder           | explanation                                      |
 |------------------|--------------------------------------------------|
 | models           | trained models or summaries                      |
 | outputs          | outputs produced by src                          |
