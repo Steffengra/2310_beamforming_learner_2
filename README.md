@@ -1,46 +1,28 @@
 
-# Under Construction
+This code was used in the paper "Learning Model-Free Robust Precoding for Cooperative Multibeam Satellite Communications"
+by Steffen Gracla, Alea Schröder, Maik Röper, Carsten Bockelmann, Dirk Wübben, Armin Dekorsy
+submitted to the
+SDPNGS2023: Signal and Data Processing for Next Generation Satellites Workshop of the
+IEEE 2023 IEEE International Conference on Acoustics, Speech and Signal Processing.
 
-
-#### Libraries you should use:
-- logging
-- unittests
+Email: {**gracla**, schroeder, roeper, bockelmann, wuebben, dekorsy}@ant.uni-bremen.de
 
 
 #### Folder Structure
 
 |                  |                                                  |
 |------------------|--------------------------------------------------|
-| data             |                                                  |
-| ├─ interim       | intermediate data                                |
-| ├─ raw           | input data, treat as immutable                   |
-| └─ processed     | final data sets for modeling                     |
 | models           | trained models or summaries                      |
 | outputs          | outputs produced by src                          |
-| references       | manuals etc.                                     |
 | reports          | generated analysis, latex etc.                   |
 | └─ figures       |                                                  |
 | src              |                                                  |
-| ├─ analysis      | results oriented exploration                     |
+| ├─ analysis      | results evaluation                               |
 | ├─ config        | configuration files                              |
 | ├─ data          | data generation, loading, etc.                   |
 | ├─ models        | model training and inference                     |
-| ├─ notebooks     | sketching                                        |
-| ├─ tests         | unit tests etc.                                  |
+| ├─ plotting      | plotting functions                               |
 | └─ utils         | functions shared between different parts of code |
 | .gitignore       | .gitignore                                       |
 | README.md        | readme                                           |
-| requirements.txt | pip freeze > requirements.txt                    |
-
-#### Markdown
-|            |                                  |
-|------------|----------------------------------|
-| Heading    | #, ##, ###, ...                  |
-| Bold       | `**bold**`                       |
-| Italic     | `*italic*`                       |
-| Blockquote | `> blockquote`                   |
-| Enumerate  | 1. a<br/>2. b<br/>...            |
-| Itemize    | - a<br/>- b<br/>...              |
-| code       | `code`                           |
-| Hrule      | ---                              |
-| Link       | [title](https://www.example.com) |
+| requirements.txt | package requirements                             |
