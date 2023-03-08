@@ -16,7 +16,7 @@ Email: {**gracla**, schroeder, roeper, bockelmann, wuebben, dekorsy}@ant.uni-bre
 | outputs          | outputs produced by src                          |
 | reports          | generated analysis, latex etc.                   |
 | └─ figures       |                                                  |
-| src              |                                                  |
+| src              | python source code                               |
 | ├─ analysis      | results evaluation                               |
 | ├─ config        | configuration files                              |
 | ├─ data          | data generation, loading, etc.                   |
