@@ -3,7 +3,7 @@ This code was used in the paper "Learning Model-Free Robust Precoding for Cooper
 by Steffen Gracla, Alea Schröder, Maik Röper, Carsten Bockelmann, Dirk Wübben, Armin Dekorsy
 submitted to the
 SDPNGS2023: Signal and Data Processing for Next Generation Satellites Workshop of the
-IEEE 2023 IEEE International Conference on Acoustics, Speech and Signal Processing.
+2023 IEEE International Conference on Acoustics, Speech and Signal Processing.
 
 Email: {**gracla**, schroeder, roeper, bockelmann, wuebben, dekorsy}@ant.uni-bremen.de
 
