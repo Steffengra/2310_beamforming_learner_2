@@ -24,11 +24,11 @@ from matplotlib.pyplot import (
 from src.config.config import (
     Config,
 )
-from src.data.satellites import (
-    Satellites,
+from src.data.satellite_manager import (
+    SatelliteManager,
 )
-from src.data.users import (
-    Users,
+from src.data.user_manager import (
+    UserManager,
 )
 from src.data.channel.los_channel_model import (
     los_channel_model,
@@ -72,14 +72,14 @@ def test_mrc_precoder_error_sweep(
             raise ValueError('Unknown error model name')
 
     def sim_update():
-        users.update_positions(config=config)
-        satellites.update_positions(config=config)
+        user_manager.update_positions(config=config)
+        satellite_manager.update_positions(config=config)
 
-        satellites.calculate_satellite_distances_to_users(users=users.users)
-        satellites.calculate_satellite_aods_to_users(users=users.users)
-        satellites.calculate_steering_vectors_to_users(users=users.users)
-        satellites.update_channel_state_information(channel_model=los_channel_model, users=users.users)
-        satellites.update_erroneous_channel_state_information(error_model_config=config.error_model, users=users.users)
+        satellite_manager.calculate_satellite_distances_to_users(users=user_manager.users)
+        satellite_manager.calculate_satellite_aods_to_users(users=user_manager.users)
+        satellite_manager.calculate_steering_vectors_to_users(users=user_manager.users)
+        satellite_manager.update_channel_state_information(channel_model=los_channel_model, users=user_manager.users)
+        satellite_manager.update_erroneous_channel_state_information(error_model_config=config.error_model, users=user_manager.users)
 
     def save_results():
         name = f'testing_mrc_sweep_{csit_error_sweep_range[0]}_{csit_error_sweep_range[-1]}_userwiggle_{config.user_dist_bound}.gzip'
@@ -91,8 +91,8 @@ def test_mrc_precoder_error_sweep(
         with gzip_open(Path(results_path, name), 'wb') as file:
             pickle_dump([csit_error_sweep_range, metrics], file=file)
 
-    satellites = Satellites(config=config)
-    users = Users(config=config)
+    satellite_manager = SatelliteManager(config=config)
+    user_manager = UserManager(config=config)
 
     real_time_start = datetime.now()
 
@@ -122,11 +122,11 @@ def test_mrc_precoder_error_sweep(
             sim_update()
 
             w_mrc = mrc_precoder_normalized(
-                channel_matrix=satellites.erroneous_channel_state_information,
+                channel_matrix=satellite_manager.erroneous_channel_state_information,
                 **config.mrc_args,
             )
             sum_rate = calc_sum_rate_no_iui(
-                channel_state=satellites.channel_state_information,
+                channel_state=satellite_manager.channel_state_information,
                 w_precoder=w_mrc,
                 noise_power_watt=config.noise_power_watt
             )

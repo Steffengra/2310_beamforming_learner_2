@@ -27,11 +27,11 @@ from matplotlib.pyplot import (
 from src.config.config import (
     Config,
 )
-from src.data.satellites import (
-    Satellites,
+from src.data.satellite_manager import (
+    SatelliteManager,
 )
-from src.data.users import (
-    Users,
+from src.data.user_manager import (
+    UserManager,
 )
 from src.data.channel.los_channel_model import (
     los_channel_model,
@@ -74,14 +74,14 @@ def test_sac_precoder_distance_sweep(
               f'est. finish {finish_time.hour:02d}:{finish_time.minute:02d}:{finish_time.second:02d}', end='')
 
     def sim_update():
-        users.update_positions(config=config)
-        satellites.update_positions(config=config)
+        user_manager.update_positions(config=config)
+        satellite_manager.update_positions(config=config)
 
-        satellites.calculate_satellite_distances_to_users(users=users.users)
-        satellites.calculate_satellite_aods_to_users(users=users.users)
-        satellites.calculate_steering_vectors_to_users(users=users.users)
-        satellites.update_channel_state_information(channel_model=los_channel_model, users=users.users)
-        satellites.update_erroneous_channel_state_information(error_model_config=config.error_model, users=users.users)
+        satellite_manager.calculate_satellite_distances_to_users(users=user_manager.users)
+        satellite_manager.calculate_satellite_aods_to_users(users=user_manager.users)
+        satellite_manager.calculate_steering_vectors_to_users(users=user_manager.users)
+        satellite_manager.update_channel_state_information(channel_model=los_channel_model, users=user_manager.users)
+        satellite_manager.update_erroneous_channel_state_information(error_model_config=config.error_model, users=user_manager.users)
 
     def save_results():
         name = f'testing_sac_{model_name}_sweep_{distance_sweep_range[0]}_{distance_sweep_range[-1]}.gzip'
@@ -91,7 +91,7 @@ def test_sac_precoder_distance_sweep(
             pickle_dump([distance_sweep_range, metrics], file=file)
 
     def get_learned_precoder():
-        state = config.config_learner.get_state(satellites=satellites, **config.config_learner.get_state_args)
+        state = config.config_learner.get_state(satellites=satellite_manager, **config.config_learner.get_state_args)
         w_precoder, _ = precoder_network.call(state.astype('float32')[newaxis])
         w_precoder = w_precoder.numpy().flatten()
 
@@ -107,8 +107,8 @@ def test_sac_precoder_distance_sweep(
             sat_nr=config.sat_nr,
             sat_ant_nr=config.sat_ant_nr)
 
-    satellites = Satellites(config=config)
-    users = Users(config=config)
+    satellite_manager = SatelliteManager(config=config)
+    user_manager = UserManager(config=config)
 
     network_path = Path(model_parent_path, model_name, 'model')
     precoder_network = load_model(network_path)
@@ -140,7 +140,7 @@ def test_sac_precoder_distance_sweep(
         precoder_learned = get_learned_precoder()
 
         sum_rate = calc_sum_rate(
-            channel_state=satellites.channel_state_information,
+            channel_state=satellite_manager.channel_state_information,
             w_precoder=precoder_learned,
             noise_power_watt=config.noise_power_watt
         )
@@ -171,10 +171,10 @@ if __name__ == '__main__':
     sweep_range = arange(1000-30, 1000+30, 0.01)
 
     model_path = Path(cfg.trained_models_path,
-                      'sat_2_ant_4_usr_3_satdist_10000_usrdist_1000',
+                      'test',
                       'err_mult_on_steering_cos',
                       'single_error')
-    model = 'error_0.0_userwiggle_100_snapshot_3.449'
+    model = 'error_0.0_userwiggle_30_snap_2.974'
 
     test_sac_precoder_distance_sweep(
         config=cfg,

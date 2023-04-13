@@ -18,7 +18,7 @@ from src.data.satellite import (
 )
 
 
-class Satellites:
+class SatelliteManager:
     """
     Satellites holds all satellite objects and helper functions
     """

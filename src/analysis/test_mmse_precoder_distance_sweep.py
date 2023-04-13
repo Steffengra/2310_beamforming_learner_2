@@ -22,11 +22,11 @@ from matplotlib.pyplot import (
 from src.config.config import (
     Config,
 )
-from src.data.satellites import (
-    Satellites,
+from src.data.satellite_manager import (
+    SatelliteManager,
 )
-from src.data.users import (
-    Users,
+from src.data.user_manager import (
+    UserManager,
 )
 from src.data.channel.los_channel_model import (
     los_channel_model,
@@ -63,14 +63,14 @@ def test_mmse_precoder_distance_sweep(
               f'est. finish {finish_time.hour:02d}:{finish_time.minute:02d}:{finish_time.second:02d}', end='')
 
     def sim_update():
-        users.update_positions(config=config)
-        satellites.update_positions(config=config)
+        user_manager.update_positions(config=config)
+        satellite_manager.update_positions(config=config)
 
-        satellites.calculate_satellite_distances_to_users(users=users.users)
-        satellites.calculate_satellite_aods_to_users(users=users.users)
-        satellites.calculate_steering_vectors_to_users(users=users.users)
-        satellites.update_channel_state_information(channel_model=los_channel_model, users=users.users)
-        satellites.update_erroneous_channel_state_information(error_model_config=config.error_model, users=users.users)
+        satellite_manager.calculate_satellite_distances_to_users(users=user_manager.users)
+        satellite_manager.calculate_satellite_aods_to_users(users=user_manager.users)
+        satellite_manager.calculate_steering_vectors_to_users(users=user_manager.users)
+        satellite_manager.update_channel_state_information(channel_model=los_channel_model, users=user_manager.users)
+        satellite_manager.update_erroneous_channel_state_information(error_model_config=config.error_model, users=user_manager.users)
 
     def save_results():
         name = f'testing_mmse_sweep_{distance_sweep_range[0]}_{distance_sweep_range[-1]}.gzip'
@@ -79,8 +79,8 @@ def test_mmse_precoder_distance_sweep(
         with gzip_open(Path(results_path, name), 'wb') as file:
             pickle_dump([distance_sweep_range, metrics], file=file)
 
-    satellites = Satellites(config=config)
-    users = Users(config=config)
+    satellite_manager = SatelliteManager(config=config)
+    user_manager = UserManager(config=config)
 
     real_time_start = datetime.now()
 
@@ -107,11 +107,11 @@ def test_mmse_precoder_distance_sweep(
         sim_update()
 
         w_mmse = mmse_precoder_normalized(
-            channel_matrix=satellites.erroneous_channel_state_information,
+            channel_matrix=satellite_manager.erroneous_channel_state_information,
             **config.mmse_args,
         )
         sum_rate = calc_sum_rate(
-            channel_state=satellites.channel_state_information,
+            channel_state=satellite_manager.channel_state_information,
             w_precoder=w_mmse,
             noise_power_watt=config.noise_power_watt
         )
@@ -139,7 +139,7 @@ if __name__ == '__main__':
     cfg = Config()
     cfg.config_learner.training_name = f'sat_{cfg.sat_nr}_ant_{cfg.sat_tot_ant_nr}_usr_{cfg.user_nr}_satdist_{cfg.sat_dist_average}_usrdist_{cfg.user_dist_average}'
 
-    sweep_range = arange(10**5-30, 10**5+30, 0.01)
+    sweep_range = arange(50_000-30, 50_000+30, 0.01)
 
     test_mmse_precoder_distance_sweep(
         config=cfg,

@@ -17,7 +17,7 @@ from src.data.user import (
 )
 
 
-class Users:
+class UserManager:
     """
     Users holds all user objects
     """
