@@ -28,11 +28,11 @@ from matplotlib.pyplot import (
 from src.config.config import (
     Config,
 )
-from src.data.satellites import (
-    Satellites,
+from src.data.satellite_manager import (
+    SatelliteManager,
 )
-from src.data.users import (
-    Users,
+from src.data.user_manager import (
+    UserManager,
 )
 from src.models.algorithms.soft_actor_critic import (
     SoftActorCritic,
@@ -87,22 +87,26 @@ def train_sac_single_error(config) -> Path:
         return False
 
     def sim_update():
-        users.update_positions(config=config)
-        satellites.update_positions(config=config)
+        user_manager.update_positions(config=config)
+        satellite_manager.update_positions(config=config)
 
-        satellites.calculate_satellite_distances_to_users(users=users.users)
-        satellites.calculate_satellite_aods_to_users(users=users.users)
-        satellites.calculate_steering_vectors_to_users(users=users.users)
-        satellites.update_channel_state_information(channel_model=los_channel_model, users=users.users)
-        satellites.update_erroneous_channel_state_information(error_model_config=config.error_model, users=users.users)
+        satellite_manager.calculate_satellite_distances_to_users(users=user_manager.users)
+        satellite_manager.calculate_satellite_aods_to_users(users=user_manager.users)
+        satellite_manager.calculate_steering_vectors_to_users(users=user_manager.users)
+        satellite_manager.update_channel_state_information(channel_model=los_channel_model, users=user_manager.users)
+        satellite_manager.update_erroneous_channel_state_information(error_model_config=config.error_model, users=user_manager.users)
 
     def add_mmse_experience():
+
+        # this needs to use erroneous csi, otherwise the data distribution in buffer
+        #  is changed significantly from reality, i.e., the learner gets too much confidence that
+        #  the csi is reliable
         w_mmse = mmse_precoder_normalized(
-            channel_matrix=satellites.erroneous_channel_state_information,
+            channel_matrix=satellite_manager.erroneous_channel_state_information,
             **config.mmse_args
         )
         reward_mmse = calc_sum_rate(
-            channel_state=satellites.channel_state_information,
+            channel_state=satellite_manager.channel_state_information,
             w_precoder=w_mmse,
             noise_power_watt=config.noise_power_watt,
         )
@@ -174,8 +178,8 @@ def train_sac_single_error(config) -> Path:
         with gzip_open(Path(results_path, name), 'wb') as file:
             pickle_dump(metrics, file=file)
 
-    satellites = Satellites(config=config)
-    users = Users(config=config)
+    satellite_manager = SatelliteManager(config=config)
+    user_manager = UserManager(config=config)
     sac = SoftActorCritic(rng=config.rng, **config.config_learner.algorithm_args)
 
     metrics: dict = {
@@ -202,7 +206,7 @@ def train_sac_single_error(config) -> Path:
 
         sim_update()
 
-        state_next = config.config_learner.get_state(satellites=satellites, **config.config_learner.get_state_args)
+        state_next = config.config_learner.get_state(satellites=satellite_manager, **config.config_learner.get_state_args)
 
         for training_step_id in range(config.config_learner.training_steps_per_episode):
 
@@ -224,7 +228,7 @@ def train_sac_single_error(config) -> Path:
 
             # step simulation based on action, determine reward
             reward = calc_sum_rate(
-                channel_state=satellites.channel_state_information,
+                channel_state=satellite_manager.channel_state_information,
                 w_precoder=w_precoder_normed,
                 noise_power_watt=config.noise_power_watt,
             )
@@ -238,7 +242,7 @@ def train_sac_single_error(config) -> Path:
             sim_update()
 
             # get new state
-            state_next = config.config_learner.get_state(satellites=satellites, **config.config_learner.get_state_args)
+            state_next = config.config_learner.get_state(satellites=satellite_manager, **config.config_learner.get_state_args)
             step_experience['next_state'] = state_next
 
             sac.add_experience(experience=step_experience)

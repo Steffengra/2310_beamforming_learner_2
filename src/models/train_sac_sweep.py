@@ -164,13 +164,13 @@ def main():
 
     # learn_on_userdist_and_mult_error(userdist=50_000, mult_error=0.0)
     # learn_on_userdist_and_mult_error(userdist=50_000, mult_error=0.1)
-    # learn_on_userdist_and_mult_error(userdist=50_000, mult_error=0.)
+    # learn_on_userdist_and_mult_error(userdist=50_000, mult_error=0.2)
     # learn_on_userdist_and_mult_error(userdist=50_000, mult_error=0.3)
     # learn_on_userdist_and_mult_error(userdist=50_000, mult_error=0.4)
     # learn_on_userdist_and_mult_error(userdist=50_000, mult_error=0.5)
 
     # learn_on_userdist_and_satpos_and_userpos_error(userdist=1_000, phase_sat_error_std=0.0, mult_error_bound=0.0)
-    learn_on_userdist_and_satpos_and_userpos_error(userdist=1_000, phase_sat_error_std=0.005, mult_error_bound=0.05)
+    learn_on_userdist_and_satpos_and_userpos_error(userdist=1_000, phase_sat_error_std=0.01, mult_error_bound=0.1)
 
     # learn_on_userdist_and_mult_error(userdist=100_000, mult_error=0.0)
     # learn_on_userdist_and_mult_error(userdist=100_000, mult_error=0.1)
