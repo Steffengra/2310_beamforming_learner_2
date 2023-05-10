@@ -30,7 +30,7 @@ if __name__ == '__main__':
     ]
 
     plot_width = 0.99 * plot_cfg.textwidth
-    plot_height = plot_width * 9 / 20
+    plot_height = plot_width * 12 / 30
 
     plot_legend = ['MMSE', 'OMA', 'SAC1', 'SAC2']
     plot_markerstyle = ['o', '^', 's', 'x']
@@ -42,8 +42,8 @@ if __name__ == '__main__':
         name='error_sweep_model_1_paper',
         width=plot_width,
         height=plot_height,
-        xlabel='Error Bound',
-        ylabel='Sum Rate',
+        xlabel='User Position Error Bound \( \Delta\epsilon \)',
+        ylabel='Sum Rate \( \hat{R} \) [bps/Hz]',
         legend=plot_legend,
         colors=plot_colors,
         markerstyle=plot_markerstyle,

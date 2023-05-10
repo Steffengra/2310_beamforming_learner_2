@@ -19,11 +19,11 @@ if __name__ == '__main__':
 
         Path(cfg.output_metrics_path,
              'sat_2_ant_4_usr_3_satdist_10000_usrdist_1000', 'err_satpos_and_userpos', 'error_sweep',
-             'testing_sac_error_st_0.05_ph_0.005_userwiggle_30_snap_2.982_sweep_0.0_0.07_userwiggle_30.gzip'),
+             'testing_sac_error_st_0.1_ph_0.01_userwiggle_30_snap_2.785_sweep_0.0_0.07_userwiggle_30.gzip'),
     ]
 
     plot_width = 0.99 * plot_cfg.textwidth
-    plot_height = plot_width * 9 / 20
+    plot_height = plot_width * 12 / 30
 
     plot_legend = ['MMSE', 'SAC3']
     plot_markerstyle = ['o', 'x']
@@ -35,8 +35,8 @@ if __name__ == '__main__':
         name='error_sweep_model_2_paper',
         width=plot_width,
         height=plot_height,
-        xlabel='Error Std.',
-        ylabel='Sum Rate',
+        xlabel='Satellite Position Error Scale \( \sigma_{\eta} \)',
+        ylabel='Sum Rate \( R \) [bps/Hz]',
         legend=plot_legend,
         colors=plot_colors,
         markerstyle=plot_markerstyle,
