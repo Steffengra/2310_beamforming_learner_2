@@ -27,7 +27,7 @@ if __name__ == '__main__':
     ]
 
     plot_width = 0.99 * plot_cfg.textwidth
-    plot_height = plot_width * 1/3
+    plot_height = plot_width * 12 / 30
 
     plot_legend = ['MMSE', 'SAC1', 'OMA']
     plot_markerstyle = ['o', 's', '^']
