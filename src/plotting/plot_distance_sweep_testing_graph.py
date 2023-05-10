@@ -72,8 +72,8 @@ def plot_distance_sweep_testing_graph(
                 linestyle=linestyle
                 )
 
-    ax.set_xlabel('User Distance')
-    ax.set_ylabel('Sum Rate')
+    ax.set_xlabel('User Distance \( D_{usr} \) [m]')
+    ax.set_ylabel('Sum Rate \( R \) [bps/Hz]')
 
     if legend:
         ax.legend(legend, ncols=3)
