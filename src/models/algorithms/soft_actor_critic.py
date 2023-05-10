@@ -193,7 +193,7 @@ class SoftActorCritic:
 
         return mean_log_prob_density, value_loss
 
-    @tf_function(jit_compile=True)
+    @tf_function
     def train_graph(
             self,
             states,
