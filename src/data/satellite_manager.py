@@ -200,6 +200,6 @@ class SatelliteManager:
 
         aods_to_users = zeros((len(self.satellites), len(self.satellites[0].aods_to_users)))
         for satellite_id, satellite in enumerate(self.satellites):
-            aods_to_users[satellite_id, :] = array(list(satellite.aods_to_users.values()))
+            aods_to_users[satellite_id, :] = satellite.aods_to_users
 
         return aods_to_users
