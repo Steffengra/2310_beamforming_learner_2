@@ -33,6 +33,9 @@ def real_vector_to_half_complex_vector(
 def complex_vector_to_rad_and_phase(
         input_vector: ndarray,
 ) -> ndarray:
+    """
+    Angle is [-pi, pi]
+    """
 
     radius = sqrt(real(input_vector)**2 + imag(input_vector)**2)
     angle = arctan2(imag(input_vector), real(input_vector))
