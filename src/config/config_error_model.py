@@ -53,7 +53,7 @@ class ConfigErrorModel:
         #  perturbed satellite to user distance estimate.
         if self.error_model == los_channel_error_model_in_sat2user_dist:
             self.error_model_name: str = 'err_sat2userdist'
-            self.distance_error_std: float = 0/100_000_000  # zB 1/100_000_000, 2/100_000_000..
+            self.distance_error_std: float = 0/100_000_000  # e.g., 1/100_000_000, 2/100_000_000..
 
         # SAT AND USER POSITION ERROR MODEL
         # This error model models unknown phase shifts between satellites + unkown user positions TODO
