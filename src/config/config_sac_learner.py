@@ -65,7 +65,7 @@ class ConfigSACLearner:
         }
 
         # TRAINING
-        self.training_episodes: int = 2_000  # a new episode is a full reset of the simulation environment
+        self.training_episodes: int = 3_000  # a new episode is a full reset of the simulation environment
         self.training_steps_per_episode: int = 1_000
 
         self.train_policy_every_k_steps: int = 1  # train policy only every k steps to give value approx. time to settle

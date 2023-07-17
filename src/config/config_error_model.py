@@ -23,9 +23,9 @@ class ConfigErrorModel:
     ) -> None:
 
         # self.error_model = los_channel_error_model_no_error
-        # self.error_model = los_channel_error_model_multiplicative_on_cos
+        self.error_model = los_channel_error_model_multiplicative_on_cos
         # self.error_model = los_channel_error_model_in_sat2user_dist
-        self.error_model = los_channel_error_model_in_sat_and_user_pos
+        # self.error_model = los_channel_error_model_in_sat_and_user_pos
 
         self.update()
 
@@ -61,8 +61,8 @@ class ConfigErrorModel:
             self.error_model_name: str = 'err_satpos_and_userpos'
             self.phase_sat_error_std: float = 0.005
             self.uniform_error_interval: dict = {
-                'low': -0.05,
-                'high': 0.05,
+                'low': -0.1,
+                'high': 0.1,
             }
 
         # Normal distributed directly on AODs ??? TODO

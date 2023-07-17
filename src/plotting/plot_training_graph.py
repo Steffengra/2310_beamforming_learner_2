@@ -50,7 +50,7 @@ def plot_training_graph(
 
 if __name__ == '__main__':
     cfg = Config()
-    path = Path(cfg.output_metrics_path, 'sat_2_ant_6_usr_3_satdist_10000_usrdist_1000', 'single_error', 'training_error_0.0_userwiggle_100.gzip')
+    path = Path(cfg.output_metrics_path, 'sat_2_ant_4_usr_3_satdist_10000_usrdist_1000', 'err_mult_on_steering_cos', 'single_error', 'training_error_0.0_userwiggle_30.gzip')
 
-    plot_training_graph(path, name='test', xlabel='Training Episode', ylabel='Mean Reward')
+    plot_training_graph(path, name='training_test', xlabel='Training Episode', ylabel='Mean Reward')
     plt.show()
