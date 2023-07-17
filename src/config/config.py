@@ -19,9 +19,6 @@ from tensorflow import (
 from src.config.config_error_model import (
     ConfigErrorModel,
 )
-from src.config.config_td3_learner import (
-    ConfigTD3Learner,
-)
 from src.config.config_sac_learner import (
     ConfigSACLearner,
 )
