@@ -51,7 +51,7 @@ class Satellite:
         self.center_aod_earth_deg: float = center_aod_earth_deg
 
         self.distance_to_users = None  # user_idx[int]: dist[float]
-        self.aods_to_users = None  # user_idx[int]: aod[float] in rad
+        self.aods_to_users = None  # user_idx[int]: aod[float] in rad, [0, 2pi], most commonly ~pi/2, aod looks from sat towards users
         self.steering_vectors_to_users = None  # user_idx[int]: steering_vector[ndarray] \in 1 x antenna_nr
 
         self.channel_state_to_users: ndarray = array([])  # depends on channel model
