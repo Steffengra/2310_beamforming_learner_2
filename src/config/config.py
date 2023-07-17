@@ -88,15 +88,6 @@ class Config:
         # Channel Model
         self.channel_model = los_channel_model
 
-        # Learner
-        # self.config_learner = ConfigTD3Learner(size_state=self.sat_nr*self.user_nr,
-        #                                        num_actions=2*self.sat_nr*self.sat_ant_nr*self.user_nr)
-        self.config_learner = ConfigSACLearner(
-            # size_state=self.sat_nr*self.user_nr,
-            size_state=2*self.sat_nr*self.sat_ant_nr*self.user_nr,
-            num_actions=2*self.sat_nr*self.sat_ant_nr*self.user_nr,
-        )
-
         self._post_init()
 
     def _pre_init(
@@ -120,6 +111,13 @@ class Config:
 
         # Error Model
         self.error_model = ConfigErrorModel()
+
+        # Learner
+        self.config_learner = ConfigSACLearner(
+            sat_nr=self.sat_nr,
+            sat_ant_nr=self.sat_ant_nr,
+            user_nr=self.user_nr,
+        )
 
         # Logging
         self.logfile_path = Path(self.project_root_path, 'outputs', 'logs', 'log.txt')

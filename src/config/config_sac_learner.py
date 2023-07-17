@@ -10,16 +10,18 @@ from src.models.helpers.get_state import (
 class ConfigSACLearner:
     def __init__(
             self,
-            size_state,
-            num_actions,
+            sat_nr,
+            sat_ant_nr,
+            user_nr,
     ) -> None:
 
         self.training_name: str = 'test'
 
         self.get_state = get_state_erroneous_channel_state_information
+        # self.get_state = get_state_aods
         self.get_state_args = {
-            'csi_format': 'rad_phase',
-            'norm_csi': True,
+            'csi_format': 'rad_phase',  # 'rad_phase', 'real_imag'
+            'norm_csi': True,  # !!HEURISTIC!!, this will break if you dramatically change the setup
         }
 
         self.percentage_mmse_samples_added_to_exp_buffer: float = 0.0  # [0.0, 1.0] chance for mmse action to be added
@@ -71,18 +73,23 @@ class ConfigSACLearner:
         self.train_policy_every_k_steps: int = 1  # train policy only every k steps to give value approx. time to settle
         self.train_policy_after_j_steps: int = 0  # start training policy only after value approx. starts being sensible
 
-        self._post_init(num_actions=num_actions, size_state=size_state)
+        self._post_init(sat_nr=sat_nr, sat_ant_nr=sat_ant_nr, user_nr=user_nr)
 
     def _post_init(
             self,
-            num_actions,
-            size_state,
+            sat_nr,
+            sat_ant_nr,
+            user_nr,
     ) -> None:
 
         self.training_args['training_minimum_experiences'] = max(self.training_args['training_minimum_experiences'],
                                                                  self.training_args['training_batch_size'])
-        self.network_args['size_state'] = size_state
-        self.network_args['num_actions'] = num_actions
+
+        if self.get_state == get_state_aods:
+            self.network_args['size_state'] = sat_nr * user_nr
+        elif self.get_state == get_state_erroneous_channel_state_information:
+            self.network_args['size_state'] = 2 * sat_nr * sat_ant_nr * user_nr
+        self.network_args['num_actions'] = 2 * sat_nr * sat_ant_nr * user_nr
 
         # Collected args
         self.algorithm_args = {
