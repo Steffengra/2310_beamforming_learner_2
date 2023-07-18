@@ -54,6 +54,9 @@ from src.utils.profiling import (
 from src.utils.progress_printer import (
     progress_printer,
 )
+from src.utils.update_sim import (
+    update_sim,
+)
 
 
 def test_sac_precoder_error_sweep(
@@ -83,16 +86,6 @@ def test_sac_precoder_error_sweep(
 
         else:
             raise ValueError('Unknown error model name')
-
-    def sim_update():
-        user_manager.update_positions(config=config)
-        satellite_manager.update_positions(config=config)
-
-        satellite_manager.calculate_satellite_distances_to_users(users=user_manager.users)
-        satellite_manager.calculate_satellite_aods_to_users(users=user_manager.users)
-        satellite_manager.calculate_steering_vectors_to_users(users=user_manager.users)
-        satellite_manager.update_channel_state_information(channel_model=config.channel_model, users=user_manager.users)
-        satellite_manager.update_erroneous_channel_state_information(error_model_config=config.error_model, users=user_manager.users)
 
     def get_learned_precoder():
         state = config.config_learner.get_state(satellites=satellite_manager, **config.config_learner.get_state_args)
@@ -152,7 +145,7 @@ def test_sac_precoder_error_sweep(
 
         for iter_idx in range(monte_carlo_iterations):
 
-            sim_update()
+            update_sim(config, satellite_manager, user_manager)
 
             precoder_learned = get_learned_precoder()
 

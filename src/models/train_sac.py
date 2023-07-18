@@ -62,6 +62,9 @@ from src.utils.profiling import (
 from src.utils.progress_printer import (
     progress_printer,
 )
+from src.utils.update_sim import (
+    update_sim,
+)
 
 
 def train_sac_single_error(config) -> Path:
@@ -82,16 +85,6 @@ def train_sac_single_error(config) -> Path:
         ):
             return True
         return False
-
-    def sim_update():
-        user_manager.update_positions(config=config)
-        satellite_manager.update_positions(config=config)
-
-        satellite_manager.calculate_satellite_distances_to_users(users=user_manager.users)
-        satellite_manager.calculate_satellite_aods_to_users(users=user_manager.users)
-        satellite_manager.calculate_steering_vectors_to_users(users=user_manager.users)
-        satellite_manager.update_channel_state_information(channel_model=config.channel_model, users=user_manager.users)
-        satellite_manager.update_erroneous_channel_state_information(error_model_config=config.error_model, users=user_manager.users)
 
     def add_mmse_experience():
 
@@ -201,7 +194,7 @@ def train_sac_single_error(config) -> Path:
             'value_loss': -infty * ones(config.config_learner.training_steps_per_episode),
         }
 
-        sim_update()
+        update_sim(config, satellite_manager, user_manager)  # todo: we update_sim twice in this script, correct?
 
         state_next = config.config_learner.get_state(satellites=satellite_manager, **config.config_learner.get_state_args)
 
@@ -236,7 +229,7 @@ def train_sac_single_error(config) -> Path:
                 add_mmse_experience()  # todo note: currently state_next saved in the mmse experience is not correct
 
             # update simulation state
-            sim_update()
+            update_sim(config, satellite_manager, user_manager)
 
             # get new state
             state_next = config.config_learner.get_state(satellites=satellite_manager, **config.config_learner.get_state_args)

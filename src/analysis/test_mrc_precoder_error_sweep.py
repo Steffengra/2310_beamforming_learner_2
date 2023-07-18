@@ -46,6 +46,9 @@ from src.utils.profiling import (
 from src.utils.progress_printer import (
     progress_printer,
 )
+from src.utils.update_sim import (
+    update_sim,
+)
 
 
 def test_mrc_precoder_error_sweep(
@@ -66,16 +69,6 @@ def test_mrc_precoder_error_sweep(
             config.error_model.distance_error_std = error_sweep_value
         else:
             raise ValueError('Unknown error model name')
-
-    def sim_update():
-        user_manager.update_positions(config=config)
-        satellite_manager.update_positions(config=config)
-
-        satellite_manager.calculate_satellite_distances_to_users(users=user_manager.users)
-        satellite_manager.calculate_satellite_aods_to_users(users=user_manager.users)
-        satellite_manager.calculate_steering_vectors_to_users(users=user_manager.users)
-        satellite_manager.update_channel_state_information(channel_model=config.channel_model, users=user_manager.users)
-        satellite_manager.update_erroneous_channel_state_information(error_model_config=config.error_model, users=user_manager.users)
 
     def save_results():
         name = f'testing_mrc_sweep_{csit_error_sweep_range[0]}_{csit_error_sweep_range[-1]}_userwiggle_{config.user_dist_bound}.gzip'
@@ -115,7 +108,7 @@ def test_mrc_precoder_error_sweep(
 
         for iter_idx in range(monte_carlo_iterations):
 
-            sim_update()
+            update_sim(config, satellite_manager, user_manager)
 
             w_mrc = mrc_precoder_normalized(
                 channel_matrix=satellite_manager.erroneous_channel_state_information,

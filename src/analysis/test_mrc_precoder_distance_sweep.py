@@ -47,6 +47,9 @@ from src.utils.profiling import (
 from src.utils.progress_printer import (
     progress_printer,
 )
+from src.utils.update_sim import (
+    update_sim,
+)
 
 
 def test_mrc_precoder_distance_sweep(
@@ -57,16 +60,6 @@ def test_mrc_precoder_distance_sweep(
     def progress_print() -> None:
         progress = (distance_sweep_idx + 1) / (len(distance_sweep_range))
         progress_printer(progress=progress, real_time_start=real_time_start)
-
-    def sim_update():
-        user_manager.update_positions(config=config)
-        satellite_manager.update_positions(config=config)
-
-        satellite_manager.calculate_satellite_distances_to_users(users=user_manager.users)
-        satellite_manager.calculate_satellite_aods_to_users(users=user_manager.users)
-        satellite_manager.calculate_steering_vectors_to_users(users=user_manager.users)
-        satellite_manager.update_channel_state_information(channel_model=config.channel_model, users=user_manager.users)
-        satellite_manager.update_erroneous_channel_state_information(error_model_config=config.error_model, users=user_manager.users)
 
     def save_results():
         name = f'testing_mrc_sweep_{distance_sweep_range[0]}_{distance_sweep_range[-1]}.gzip'
@@ -100,7 +93,7 @@ def test_mrc_precoder_distance_sweep(
         config.error_model.error_model = los_channel_error_model_no_error
         config.error_model.update()
 
-        sim_update()
+        update_sim(config, satellite_manager, user_manager)
 
         w_mrc = mrc_precoder_normalized(
             channel_matrix=satellite_manager.erroneous_channel_state_information,
