@@ -22,8 +22,8 @@ from src.data.channel.los_channel_error_model_in_sat_and_user_pos import (
 from src.analysis.test_sac_precoder_error_sweep import (
     test_sac_precoder_error_sweep,
 )
-from src.analysis.test_sac_precoder_distance_sweep import (
-    test_sac_precoder_distance_sweep,
+from src.analysis.test_sac_precoder_user_distance_sweep import (
+    test_sac_precoder_user_distance_sweep,
 )
 
 

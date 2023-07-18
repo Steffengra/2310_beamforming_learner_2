@@ -13,8 +13,8 @@ from pathlib import (
 from src.config.config import (
     Config,
 )
-from src.analysis.helpers.test_precoder_distance_sweep import (
-    test_precoder_distance_sweep,
+from src.analysis.helpers.test_precoder_user_distance_sweep import (
+    test_precoder_user_distance_sweep,
 )
 from src.utils.real_complex_vector_reshaping import (
     real_vector_to_half_complex_vector,
@@ -26,7 +26,8 @@ from src.data.calc_sum_rate import (
     calc_sum_rate,
 )
 
-def test_sac_precoder_distance_sweep(
+
+def test_sac_precoder_user_distance_sweep(
     config,
     distance_sweep_range,
     model_path,
@@ -53,7 +54,7 @@ def test_sac_precoder_distance_sweep(
 
     precoder_network = load_model(model_path)
 
-    test_precoder_distance_sweep(
+    test_precoder_user_distance_sweep(
         config=config,
         distance_sweep_range=distance_sweep_range,
         precoder_name='learned',
@@ -79,4 +80,4 @@ if __name__ == '__main__':
         'model'
     )
 
-    test_sac_precoder_distance_sweep(config=cfg, distance_sweep_range=sweep_range, model_path=network_path)
+    test_sac_precoder_user_distance_sweep(config=cfg, distance_sweep_range=sweep_range, model_path=network_path)

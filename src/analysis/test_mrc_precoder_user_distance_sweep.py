@@ -6,8 +6,8 @@ from numpy import (
 from src.config.config import (
     Config,
 )
-from src.analysis.helpers.test_precoder_distance_sweep import (
-    test_precoder_distance_sweep,
+from src.analysis.helpers.test_precoder_user_distance_sweep import (
+    test_precoder_user_distance_sweep,
 )
 from src.data.precoder.mrc_precoder import (
     mrc_precoder_normalized,
@@ -17,7 +17,7 @@ from src.data.calc_sum_rate_no_iui import (
 )
 
 
-def test_mrc_precoder_distance_sweep(
+def test_mrc_precoder_user_distance_sweep(
     config,
     distance_sweep_range,
 ) -> None:
@@ -33,7 +33,7 @@ def test_mrc_precoder_distance_sweep(
 
         return w_mrc
 
-    test_precoder_distance_sweep(
+    test_precoder_user_distance_sweep(
         config=config,
         distance_sweep_range=distance_sweep_range,
         precoder_name='mrc',
@@ -50,4 +50,4 @@ if __name__ == '__main__':
     # NOTE: distances are rounded to integers for file naming
     sweep_range = arange(50_000-30, 50_000+30, 0.01)
 
-    test_mrc_precoder_distance_sweep(config=cfg, distance_sweep_range=sweep_range)
+    test_mrc_precoder_user_distance_sweep(config=cfg, distance_sweep_range=sweep_range)

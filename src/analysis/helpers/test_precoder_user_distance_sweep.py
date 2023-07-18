@@ -45,13 +45,17 @@ from src.utils.update_sim import (
 )
 
 
-def test_precoder_distance_sweep(
+def test_precoder_user_distance_sweep(
     config: Config,
     distance_sweep_range,
     precoder_name: str,
     get_precoder_func,
     calc_sum_rate_func,
 ) -> None:
+    """
+    Calculate the sum rates that a given precoder achieves for a given config
+    over a given range of inter-user-distances with no channel error
+    """
 
     def progress_print() -> None:
         progress = (distance_sweep_idx + 1) / (len(distance_sweep_range))

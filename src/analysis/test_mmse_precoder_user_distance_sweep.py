@@ -6,8 +6,8 @@ from numpy import (
 from src.config.config import (
     Config,
 )
-from src.analysis.helpers.test_precoder_distance_sweep import (
-    test_precoder_distance_sweep,
+from src.analysis.helpers.test_precoder_user_distance_sweep import (
+    test_precoder_user_distance_sweep,
 )
 from src.data.precoder.mmse_precoder import (
     mmse_precoder_normalized,
@@ -17,7 +17,7 @@ from src.data.calc_sum_rate import (
 )
 
 
-def test_mmse_precoder_distance_sweep(
+def test_mmse_precoder_user_distance_sweep(
     config,
     distance_sweep_range,
 ) -> None:
@@ -34,7 +34,7 @@ def test_mmse_precoder_distance_sweep(
 
         return w_mmse
 
-    test_precoder_distance_sweep(
+    test_precoder_user_distance_sweep(
         config=config,
         distance_sweep_range=distance_sweep_range,
         precoder_name='mmse',
@@ -51,4 +51,4 @@ if __name__ == '__main__':
     # NOTE: distances are rounded to integers for file naming
     sweep_range = arange(50_000-30, 50_000+30, 0.01)
 
-    test_mmse_precoder_distance_sweep(config=cfg, distance_sweep_range=sweep_range)
+    test_mmse_precoder_user_distance_sweep(config=cfg, distance_sweep_range=sweep_range)
