@@ -8,11 +8,11 @@ from numpy import (
 
 
 def norm_precoder(
-        precoding_matrix,
-        power_constraint_watt,
-        per_satellite,
-        sat_nr=1,
-        sat_ant_nr=1,
+        precoding_matrix: ndarray,
+        power_constraint_watt: float or int,
+        per_satellite: bool,
+        sat_nr: int = 1,
+        sat_ant_nr: int = 1,
 ) -> ndarray:
     """
     normalizes precoding matrix of dimension (sat_nr * ant_nr, user_nr)
@@ -24,18 +24,24 @@ def norm_precoder(
 
     if per_satellite:
 
+        # normalize to (power_constraint_watt / sat_nr) for each satellite
         for satellite_id in range(sat_nr):
-            w_precoder_slice = precoding_matrix[satellite_id * sat_ant_nr: satellite_id * sat_ant_nr + sat_ant_nr, :]
+
+            satellite_index_start = satellite_id * sat_ant_nr
+            w_precoder_slice = precoding_matrix[satellite_index_start:satellite_index_start + sat_ant_nr, :]
+
             norm_factor_slice = sqrt(
                 power_constraint_watt / sat_nr / trace(matmul(w_precoder_slice.conj().T, w_precoder_slice))
             )
             w_precoder_slice_normed = norm_factor_slice * w_precoder_slice
-            precoding_matrix[satellite_id * sat_ant_nr: satellite_id * sat_ant_nr + sat_ant_nr, :] = w_precoder_slice_normed
+
+            precoding_matrix[satellite_index_start:satellite_index_start + sat_ant_nr, :] = w_precoder_slice_normed
 
         normalized_precoder = precoding_matrix
 
     else:
 
+        # normalize to power constraint
         norm_factor = sqrt(power_constraint_watt / trace(matmul(precoding_matrix.conj().T, precoding_matrix)))
         normalized_precoder = norm_factor * precoding_matrix
 
