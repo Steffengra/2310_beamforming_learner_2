@@ -40,4 +40,3 @@ def los_channel_model(
         )
 
     return channel_state_information
-
