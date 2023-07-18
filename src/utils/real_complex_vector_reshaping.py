@@ -35,6 +35,7 @@ def complex_vector_to_rad_and_phase(
 ) -> ndarray:
     """
     Angle is [-pi, pi]
+    output: [radius1, radius2, ..., angle1, angle2, ...]
     """
 
     radius = sqrt(real(input_vector)**2 + imag(input_vector)**2)
