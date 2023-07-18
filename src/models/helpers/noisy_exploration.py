@@ -13,12 +13,18 @@ from src.utils.real_complex_vector_reshaping import (
 )
 
 
-# TODO: Remember that the output of this function must
-#  be a valid output from the policy network, e.g., be normalized in the same way
+"""
+These functions can be used to create "noisy actions", thereby forcing exploration.
+TODO: Remember that the output of this function must
+    be a valid output from the policy network, e.g., be normalized in the same way
+"""
+
+
 def add_random_distribution(
         rng,
         action: ndarray,
         tau_momentum: float,
+        normalize: bool = False,
 ) -> ndarray:
     """
     Mix an action vector with a random_uniform vector of same length
@@ -29,19 +35,16 @@ def add_random_distribution(
         return action
 
     # create random action
-    # random_distribution = rng.random(size=len(action), dtype='float32')
-    # random_distribution = random_distribution / sum(random_distribution)
-    # TODO: These values are taken from the mmse precoder, but probably shouldnt be hardcoded
-    # random_distribution = rng.normal(loc=0.03353971, scale=0.5, size=len(action))
     random_distribution = rng.normal(loc=mean(action), scale=std(action))
 
     # combine
     noisy_action = tau_momentum * random_distribution + (1 - tau_momentum) * action
 
     # normalize
-    # sum_noisy_action = sum(noisy_action)
-    # if sum_noisy_action != 0:
-    #     noisy_action = noisy_action / sum_noisy_action
+    if normalize:
+        sum_noisy_action = sum(noisy_action)
+        if sum_noisy_action != 0:
+            noisy_action = noisy_action / sum_noisy_action
 
     return noisy_action
 
