@@ -48,6 +48,7 @@ if __name__ == '__main__':
     cfg = Config()
     cfg.config_learner.training_name = f'sat_{cfg.sat_nr}_ant_{cfg.sat_tot_ant_nr}_usr_{cfg.user_nr}_satdist_{cfg.sat_dist_average}_usrdist_{cfg.user_dist_average}'
 
+    # NOTE: distances are rounded to integers for file naming
     sweep_range = arange(50_000-30, 50_000+30, 0.01)
 
     test_mmse_precoder_distance_sweep(config=cfg, distance_sweep_range=sweep_range)
