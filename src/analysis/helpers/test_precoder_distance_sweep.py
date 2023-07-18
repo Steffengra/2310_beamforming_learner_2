@@ -58,7 +58,7 @@ def test_precoder_distance_sweep(
         progress_printer(progress=progress, real_time_start=real_time_start)
 
     def save_results():
-        name = f'testing_{precoder_name}_sweep_{distance_sweep_range[0]}_{distance_sweep_range[-1]}.gzip'
+        name = f'testing_{precoder_name}_sweep_{round(distance_sweep_range[0])}_{round(distance_sweep_range[-1])}.gzip'
         results_path = Path(config.output_metrics_path, config.config_learner.training_name, 'distance_sweep')
         results_path.mkdir(parents=True, exist_ok=True)
         with gzip_open(Path(results_path, name), 'wb') as file:
