@@ -85,11 +85,7 @@ class ConfigSACLearner:
         self.training_args['training_minimum_experiences'] = max(self.training_args['training_minimum_experiences'],
                                                                  self.training_args['training_batch_size'])
 
-        if self.get_state == get_state_aods:
-            self.network_args['size_state'] = sat_nr * user_nr
-        elif self.get_state == get_state_erroneous_channel_state_information:
-            self.network_args['size_state'] = 2 * sat_nr * sat_ant_nr * user_nr
-        self.network_args['num_actions'] = 2 * sat_nr * sat_ant_nr * user_nr
+        self.update(sat_nr=sat_nr, sat_ant_nr=sat_ant_nr, user_nr=user_nr)
 
         # Collected args
         self.algorithm_args = {
@@ -97,3 +93,18 @@ class ConfigSACLearner:
             'network_args': self.network_args,
             'experience_buffer_args': self.experience_buffer_args,
         }
+
+    def update(
+            self,
+            sat_nr,
+            sat_ant_nr,
+            user_nr,
+    ) -> None:
+
+        if self.get_state == get_state_aods:
+            self.network_args['size_state'] = sat_nr * user_nr
+        elif self.get_state == get_state_erroneous_channel_state_information:
+            self.network_args['size_state'] = 2 * sat_nr * sat_ant_nr * user_nr
+        self.network_args['num_actions'] = 2 * sat_nr * sat_ant_nr * user_nr
+
+
