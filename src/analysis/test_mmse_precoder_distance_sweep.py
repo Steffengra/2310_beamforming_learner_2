@@ -44,6 +44,9 @@ from src.utils.profiling import (
     start_profiling,
     end_profiling,
 )
+from src.utils.progress_printer import (
+    progress_printer,
+)
 
 
 def test_mmse_precoder_distance_sweep(
@@ -53,11 +56,7 @@ def test_mmse_precoder_distance_sweep(
 
     def progress_print() -> None:
         progress = (distance_sweep_idx + 1) / (len(distance_sweep_range))
-        timedelta = datetime.now() - real_time_start
-        finish_time = real_time_start + timedelta / progress
-
-        print(f'\rSimulation completed: {progress:.2%}, '
-              f'est. finish {finish_time.hour:02d}:{finish_time.minute:02d}:{finish_time.second:02d}', end='')
+        progress_printer(progress=progress, real_time_start=real_time_start)
 
     def sim_update():
         user_manager.update_positions(config=config)

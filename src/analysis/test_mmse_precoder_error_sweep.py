@@ -43,7 +43,9 @@ from src.utils.profiling import (
     start_profiling,
     end_profiling,
 )
-
+from src.utils.progress_printer import (
+    progress_printer,
+)
 
 def test_mmse_precoder_error_sweep(
         config,
@@ -53,11 +55,7 @@ def test_mmse_precoder_error_sweep(
 
     def progress_print() -> None:
         progress = (error_sweep_idx * monte_carlo_iterations + iter_idx + 1) / (len(csit_error_sweep_range) * monte_carlo_iterations)
-        timedelta = datetime.now() - real_time_start
-        finish_time = real_time_start + timedelta / progress
-
-        print(f'\rSimulation completed: {progress:.2%}, '
-              f'est. finish {finish_time.hour:02d}:{finish_time.minute:02d}:{finish_time.second:02d}', end='')
+        progress_printer(progress=progress, real_time_start=real_time_start)
 
     def set_new_error_value() -> None:
         if config.error_model.error_model_name == 'err_mult_on_steering_cos':
