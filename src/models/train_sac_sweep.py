@@ -106,20 +106,18 @@ def test_precoder(
     monte_carlo_iterations = 10_000
 
     # distance within wiggle
-    test_sac_precoder_distance_sweep(
+    test_sac_precoder_user_distance_sweep(
         config=deepcopy(config),
-        model_parent_path=model_parent_path,
-        model_name=model_name,
+        model_path=model_path,
         distance_sweep_range=np.arange(config.user_dist_average - config.user_dist_bound,
                                        config.user_dist_average + config.user_dist_bound,
                                        0.01),
     )
 
     # distance outside wiggle
-    test_sac_precoder_distance_sweep(
+    test_sac_precoder_user_distance_sweep(
         config=deepcopy(config),
-        model_parent_path=model_parent_path,
-        model_name=model_name,
+        model_path=model_path,
         distance_sweep_range=np.arange(config.user_dist_average - 10 * config.user_dist_bound,
                                        config.user_dist_average + 10 * config.user_dist_bound,
                                        0.01),
