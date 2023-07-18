@@ -13,7 +13,7 @@ def los_channel_error_model_multiplicative_on_cos(
         users: list,
 ) -> ndarray:
     """
-    TODO: erklären
+    TODO: erklären - ref?
     NOTE: With this error model, satellites with ODD number of antennas will always
         have zero error on the middle antenna. Learning algorithms can exploit this to
         ignore the error.

@@ -151,7 +151,7 @@ class PolicyNetworkSoft(tf.keras.Model):
         means = self.output_layer_means(x)
         log_stds = self.output_layer_log_stds(x)
 
-        # TODO: log_stds are typically clipped in implementations. [-20, 2] seems to be the popular interval.
+        # NOTE: log_stds are typically clipped in implementations. [-20, 2] seems to be the popular interval.
         #  Clipping logs by such a wide range should not have much of an impact.
         log_stds = tf.clip_by_value(log_stds, -20, 2)
 

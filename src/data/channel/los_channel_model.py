@@ -19,10 +19,14 @@ def los_channel_model(
         users: list,
 ) -> ndarray:
     """
-    TODO: describe this
+    The los channel model calculates complex csi for one satellite to all users from
+        1) amplitude dampening based on sat gain, user gain, and freq-dependent distance gain
+        2) phase shift by freq-dependent distance
+        3) phase shift by satellite steering vectors
+    TODO: describe this - correct? reference?
     """
 
-    channel_state_information = zeros((len(users), satellite.antenna_nr), dtype='complex')
+    channel_state_information = zeros((len(users), satellite.antenna_nr), dtype='complex128')
     for user in users:
         power_ratio = (
                 satellite.antenna_gain_linear

@@ -8,7 +8,7 @@ def get_wavelength(
         freq: float,
 ) -> float:
     """
-    TODO: add description
+    Calculates the wavelength from frequency
     """
     wavelength = constants.value('speed of light in vacuum') / freq
 

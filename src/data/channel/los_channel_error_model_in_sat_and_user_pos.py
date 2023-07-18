@@ -20,7 +20,7 @@ def los_channel_error_model_in_sat_and_user_pos(
         users: list,
 ) -> ndarray:
     """
-    TODO: describe this
+    TODO: describe this - ref?
     """
 
     channel_state_information = zeros((len(users), satellite.antenna_nr), dtype='complex')
