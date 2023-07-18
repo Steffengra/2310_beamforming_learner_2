@@ -30,9 +30,6 @@ from src.data.satellite_manager import (
 from src.data.user_manager import (
     UserManager,
 )
-from src.data.channel.los_channel_model import (
-    los_channel_model,
-)
 from src.data.precoder.mmse_precoder import (
     mmse_precoder_normalized,
 )

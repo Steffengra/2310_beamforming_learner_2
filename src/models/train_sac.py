@@ -37,9 +37,6 @@ from src.data.user_manager import (
 from src.models.algorithms.soft_actor_critic import (
     SoftActorCritic,
 )
-from src.data.channel.los_channel_model import (
-    los_channel_model,
-)
 from src.data.calc_sum_rate import (
     calc_sum_rate,
 )

@@ -34,9 +34,6 @@ from src.data.satellite_manager import (
 from src.data.user_manager import (
     UserManager,
 )
-from src.data.channel.los_channel_model import (
-    los_channel_model,
-)
 from src.data.calc_sum_rate import (
     calc_sum_rate,
 )
