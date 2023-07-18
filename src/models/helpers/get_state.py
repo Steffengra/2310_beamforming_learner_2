@@ -32,8 +32,8 @@ def get_state_erroneous_channel_state_information(
         state_real = complex_vector_to_rad_and_phase(erroneous_csi)
         if norm_csi:
             half_length_idx = int(len(state_real) / 2)
-            state_real[:half_length_idx] = state_real[:half_length_idx] - 1.4057e-7  # due to high distance, these digits will be roughly the same for all csi
-            state_real[:half_length_idx] = state_real[:half_length_idx] * 1e11  # roughly [0, 1]
+            # state_real[:half_length_idx] = state_real[:half_length_idx] - mean_rad  # due to high distance, these digits will be roughly the same for all csi
+            state_real[:half_length_idx] = state_real[:half_length_idx] * 1e7  # roughly [0, 1]
 
             state_real[half_length_idx:] = state_real[half_length_idx:] / pi  # [-1, 1]
             state_real[half_length_idx:] = state_real[half_length_idx:] + 1  # [0, 2]
