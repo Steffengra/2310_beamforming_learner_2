@@ -1,34 +1,13 @@
 
 from numpy import (
     arange,
-    zeros,
-    mean,
-    std,
-)
-from datetime import (
-    datetime,
-)
-from pathlib import (
-    Path,
-)
-from gzip import (
-    open as gzip_open,
-)
-from pickle import (
-    dump as pickle_dump,
-)
-from matplotlib.pyplot import (
-    show as plt_show,
 )
 
 from src.config.config import (
     Config,
 )
-from src.data.satellite_manager import (
-    SatelliteManager,
-)
-from src.data.user_manager import (
-    UserManager,
+from src.analysis.helpers.test_precoder_error_sweep import (
+    test_precoder_error_sweep,
 )
 from src.data.precoder.mmse_precoder import (
     mmse_precoder_normalized,
@@ -36,121 +15,34 @@ from src.data.precoder.mmse_precoder import (
 from src.data.calc_sum_rate import (
     calc_sum_rate,
 )
-from src.utils.plot_sweep import (
-    plot_sweep,
-)
-from src.utils.profiling import (
-    start_profiling,
-    end_profiling,
-)
-from src.utils.progress_printer import (
-    progress_printer,
-)
-from src.utils.update_sim import (
-    update_sim,
-)
 
 
 def test_mmse_precoder_error_sweep(
-        config,
-        csit_error_sweep_range,
-        monte_carlo_iterations,
+    config,
+    csit_error_sweep_range,
+    monte_carlo_iterations,
 ) -> None:
 
-    def progress_print() -> None:
-        progress = (error_sweep_idx * monte_carlo_iterations + iter_idx + 1) / (len(csit_error_sweep_range) * monte_carlo_iterations)
-        progress_printer(progress=progress, real_time_start=real_time_start)
+    def get_precoder_mmse(
+        config,
+        satellite_manager,
+    ):
 
-    def set_new_error_value() -> None:
-        if config.error_model.error_model_name == 'err_mult_on_steering_cos':
-            config.error_model.uniform_error_interval['low'] = -1 * error_sweep_value
-            config.error_model.uniform_error_interval['high'] = error_sweep_value
-        elif config.error_model.error_model_name == 'err_sat2userdist':
-            config.error_model.distance_error_std = error_sweep_value
-        elif config.error_model.error_model_name == 'err_satpos_and_userpos':
-            # todo: this model has 2 params
-            # config.error_model.uniform_error_interval['low'] = -1 * error_sweep_value
-            # config.error_model.uniform_error_interval['high'] = error_sweep_value
-            config.error_model.phase_sat_error_std = error_sweep_value
+        w_mmse = mmse_precoder_normalized(
+            channel_matrix=satellite_manager.erroneous_channel_state_information,
+            **config.mmse_args,
+        )
 
-        else:
-            raise ValueError('Unknown error model name')
+        return w_mmse
 
-    def save_results():
-        name = f'testing_mmse_sweep_{csit_error_sweep_range[0]}_{csit_error_sweep_range[-1]}_userwiggle_{config.user_dist_bound}.gzip'
-        results_path = Path(config.output_metrics_path,
-                            config.config_learner.training_name,
-                            config.error_model.error_model_name,
-                            'error_sweep')
-        results_path.mkdir(parents=True, exist_ok=True)
-        with gzip_open(Path(results_path, name), 'wb') as file:
-            pickle_dump([csit_error_sweep_range, metrics], file=file)
-
-    satellite_manager = SatelliteManager(config=config)
-    user_manager = UserManager(config=config)
-
-    real_time_start = datetime.now()
-
-    profiler = None
-    if config.profile:
-        profiler = start_profiling()
-
-    metrics = {
-        'sum_rate': {
-            'mmse': {
-                'mean': zeros(len(csit_error_sweep_range)),
-                'std': zeros(len(csit_error_sweep_range)),
-            },
-        },
-    }
-
-    for error_sweep_idx, error_sweep_value in enumerate(csit_error_sweep_range):
-
-        # set new error value
-        set_new_error_value()
-
-        # set up per monte carlo metrics
-        sum_rate_per_monte_carlo = zeros(monte_carlo_iterations)
-
-        for iter_idx in range(monte_carlo_iterations):
-
-            update_sim(config, satellite_manager, user_manager)
-
-            w_mmse = mmse_precoder_normalized(
-                channel_matrix=satellite_manager.erroneous_channel_state_information,
-                **config.mmse_args,
-            )
-            sum_rate = calc_sum_rate(
-                channel_state=satellite_manager.channel_state_information,
-                w_precoder=w_mmse,
-                noise_power_watt=config.noise_power_watt
-            )
-
-            # log results
-            sum_rate_per_monte_carlo[iter_idx] = sum_rate
-
-            if iter_idx % 50 == 0:
-                progress_print()
-
-        metrics['sum_rate']['mmse']['mean'][error_sweep_idx] = mean(sum_rate_per_monte_carlo)
-        metrics['sum_rate']['mmse']['std'][error_sweep_idx] = std(sum_rate_per_monte_carlo)
-
-    if profiler is not None:
-        end_profiling(profiler)
-
-    save_results()
-
-    plot_sweep(
-        x=csit_error_sweep_range,
-        y=metrics['sum_rate']['mmse']['mean'],
-        yerr=metrics['sum_rate']['mmse']['std'],
-        xlabel='error value',
-        ylabel='sum rate',
-        title='mmse',
+    test_precoder_error_sweep(
+        config=config,
+        csit_error_sweep_range=csit_error_sweep_range,
+        precoder_name='mmse',
+        monte_carlo_iterations=monte_carlo_iterations,
+        get_precoder_func=get_precoder_mmse,
+        calc_sum_rate_func=calc_sum_rate,
     )
-
-    if config.show_plots:
-        plt_show()
 
 
 if __name__ == '__main__':
@@ -158,9 +50,9 @@ if __name__ == '__main__':
     cfg = Config()
     cfg.config_learner.training_name = f'sat_{cfg.sat_nr}_ant_{cfg.sat_tot_ant_nr}_usr_{cfg.user_nr}_satdist_{cfg.sat_dist_average}_usrdist_{cfg.user_dist_average}'
 
-    iterations: int = 10_000
-    # sweep_range = arange(0.0, 0.6, 0.1)
-    sweep_range = arange(0, 0.07, 0.005)
+    iterations: int = 5_000
+    sweep_range = arange(0.0, 0.6, 0.1)
+    # sweep_range = arange(0, 0.07, 0.005)
 
     test_mmse_precoder_error_sweep(
         config=cfg,
