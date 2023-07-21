@@ -165,7 +165,7 @@ class SatelliteManager:
 
         # build global channel state information
         channel_state_per_satellite = zeros((len(users), self.satellites[0].antenna_nr, len(self.satellites)),
-                                            dtype='complex')
+                                            dtype='complex128')
         for satellite in self.satellites:
             channel_state_per_satellite[:, :, satellite.idx] = satellite.channel_state_to_users
         self.channel_state_information = reshape(
@@ -187,7 +187,7 @@ class SatelliteManager:
         # gather global erroneous channel state information
         erroneous_channel_state_per_satellite = zeros(
             (len(users), self.satellites[0].antenna_nr, len(self.satellites)),
-            dtype='complex',
+            dtype='complex128',
         )
         for satellite in self.satellites:
             erroneous_channel_state_per_satellite[:, :, satellite.idx] = satellite.erroneous_channel_state_to_users

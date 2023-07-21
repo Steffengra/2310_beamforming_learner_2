@@ -25,8 +25,8 @@ class ExperienceBuffer:
 
         self.buffer_size = buffer_size
         self.buffer: list = [{}] * self.buffer_size
-        self.priorities: ndarray = zeros(self.buffer_size, dtype='float32')
-        self.probabilities: ndarray = zeros(self.buffer_size, dtype='float32')  # prob_i = prio_i / sum_i(prio_i)
+        self.priorities: ndarray = zeros(self.buffer_size)
+        self.probabilities: ndarray = zeros(self.buffer_size)  # prob_i = prio_i / sum_i(prio_i)
 
         self.priority_scale_alpha: float = priority_scale_alpha
         self.importance_sampling_correction_beta: float = importance_sampling_correction_beta
@@ -53,7 +53,7 @@ class ExperienceBuffer:
 
         # Update Probabilities
         priority_sum = np_sum(self.priorities)
-        self.probabilities = np_divide(self.priorities, priority_sum, dtype='float32')
+        self.probabilities = np_divide(self.priorities, priority_sum)
 
         # Sample
         sample_experience_ids = self.rng.choice(
@@ -67,9 +67,9 @@ class ExperienceBuffer:
         sample_probabilities = self.probabilities[sample_experience_ids]
 
         sample_importance_weights = np_power(sample_probabilities,
-                                             -self.importance_sampling_correction_beta, dtype='float32')
+                                             -self.importance_sampling_correction_beta)
         sample_importance_weights = np_divide(sample_importance_weights,
-                                              np_max(sample_importance_weights), dtype='float32')
+                                              np_max(sample_importance_weights))
 
         return (
             sample_experiences,
@@ -83,7 +83,7 @@ class ExperienceBuffer:
             new_priorities: ndarray,
     ) -> None:
 
-        new_priorities = np_power(new_priorities, self.priority_scale_alpha, dtype='float32')
+        new_priorities = np_power(new_priorities, self.priority_scale_alpha)
         self.priorities[experience_ids] = np_where(new_priorities > self.min_priority,
                                                    new_priorities, self.min_priority)
 
@@ -98,7 +98,7 @@ class ExperienceBuffer:
         self.write_pointer: int = 0
 
         self.buffer: list = [{}] * self.buffer_size
-        self.priorities: ndarray = zeros(self.buffer_size, dtype='float32')
-        self.probabilities: ndarray = zeros(self.buffer_size, dtype='float32')  # prob_i = prio_i / sum_i(prio_i)
+        self.priorities: ndarray = zeros(self.buffer_size)
+        self.probabilities: ndarray = zeros(self.buffer_size)  # prob_i = prio_i / sum_i(prio_i)
 
         self.max_priority: float = self.min_priority

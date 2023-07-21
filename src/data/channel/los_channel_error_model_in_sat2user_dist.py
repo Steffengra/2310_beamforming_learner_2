@@ -18,7 +18,7 @@ def los_channel_error_model_in_sat2user_dist(
     perturbed sat2user distance estimate.
     """
 
-    erroneous_channel_state_to_users = zeros((len(users), satellite.antenna_nr), dtype='complex')
+    erroneous_channel_state_to_users = zeros((len(users), satellite.antenna_nr), dtype='complex128')
 
     for user in users:
 

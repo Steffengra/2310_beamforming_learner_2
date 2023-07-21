@@ -15,8 +15,7 @@ def complex_vector_to_double_real_vector(
         input_vector: ndarray,
 ) -> ndarray:
 
-    return concatenate([real(input_vector), imag(input_vector)],
-                       dtype='float32')
+    return concatenate([real(input_vector), imag(input_vector)])
 
 
 def real_vector_to_half_complex_vector(

@@ -23,7 +23,7 @@ def los_channel_error_model_in_sat_and_user_pos(
     TODO: describe this - ref?
     """
 
-    channel_state_information = zeros((len(users), satellite.antenna_nr), dtype='complex')
+    channel_state_information = zeros((len(users), satellite.antenna_nr), dtype='complex128')
     for user in users:
 
         power_ratio = (

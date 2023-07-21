@@ -123,7 +123,7 @@ class Satellite:
         """
 
         if self.steering_vectors_to_users is None:
-            self.steering_vectors_to_users = zeros((len(users), self.antenna_nr), dtype='complex64')
+            self.steering_vectors_to_users = zeros((len(users), self.antenna_nr), dtype='complex128')
 
         steering_idx = arange(0, self.antenna_nr) - (self.antenna_nr - 1) / 2
 
