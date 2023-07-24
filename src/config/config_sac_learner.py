@@ -18,7 +18,6 @@ class ConfigSACLearner:
         self.training_name: str = 'test'
 
         self.get_state = get_state_erroneous_channel_state_information
-        # self.get_state = get_state_aods
         self.get_state_args = {
             'csi_format': 'rad_phase',  # 'rad_phase', 'real_imag'
             'norm_csi': True,  # !!HEURISTIC!!, this will break if you dramatically change the setup
@@ -106,5 +105,3 @@ class ConfigSACLearner:
         elif self.get_state == get_state_erroneous_channel_state_information:
             self.network_args['size_state'] = 2 * sat_nr * sat_ant_nr * user_nr
         self.network_args['num_actions'] = 2 * sat_nr * sat_ant_nr * user_nr
-
-

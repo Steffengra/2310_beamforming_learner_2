@@ -201,7 +201,6 @@ def train_sac_single_error(config) -> Path:
         }
 
         update_sim(config, satellite_manager, user_manager)  # todo: we update_sim twice in this script, correct?
-
         state_next = config.config_learner.get_state(satellites=satellite_manager, **config.config_learner.get_state_args)
 
         for training_step_id in range(config.config_learner.training_steps_per_episode):
@@ -274,7 +273,7 @@ def train_sac_single_error(config) -> Path:
 
         # save network snapshot
         if episode_mean_sum_rate > high_score:
-            high_score = mean(episode_metrics['sum_rate_per_step'])
+            high_score = episode_mean_sum_rate.copy()
             high_scores.append(high_score)
             best_model_path = save_model_checkpoint(extra=episode_mean_sum_rate)
 

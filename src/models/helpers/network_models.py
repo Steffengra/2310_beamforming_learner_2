@@ -113,6 +113,14 @@ class PolicyNetwork(tf.keras.Model):
 
 
 class PolicyNetworkSoft(tf.keras.Model):
+
+    """
+    Soft network has two output heads per output value.
+    One head outputs a mean, the other a (log) standard deviation.
+    Larger standard deviations lead to, __on average__, a lower (higher magnitude) log probability.
+    Optimizing for higher log probability therefore promotes higher log probabilities.
+    """
+
     def __init__(
             self,
             num_actions: int,
