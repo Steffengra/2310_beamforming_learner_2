@@ -10,6 +10,7 @@ from numpy.random import (
     Generator,
 )
 from tensorflow import (
+    print as tf_print,
     Tensor as tf_Tensor,
     Variable as tf_Variable,
     GradientTape as tf_GradientTape,
@@ -257,10 +258,10 @@ class SoftActorCritic:
                 # target or primary? primary -> faster updates, target -> stable but delayed
                 value_estimate_1 = self.networks['value'][0]['primary'].call(value_network_input_batch)
                 value_estimate_2 = self.networks['value'][1]['primary'].call(value_network_input_batch)
-                value_estimate_mean = tf_reduce_min([value_estimate_1, value_estimate_2], axis=0)
+                value_estimate_min = tf_reduce_min([value_estimate_1, value_estimate_2], axis=0)
                 policy_loss = tf_reduce_mean(
                     # pull towards high value:
-                    sample_importance_weights * -value_estimate_mean
+                    sample_importance_weights * -value_estimate_min
                     # pulls towards high variance - we want to minimize mean log probs -> more uncertainty:
                     + tf_exp(self.log_entropy_scale_alpha) * policy_action_log_prob_densities
                 )
