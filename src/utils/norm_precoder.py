@@ -23,7 +23,7 @@ def norm_precoder(
     after applying norm_factor, the trace of norm_factor * (A^H * A) will be == power_constraint_watt
     """
 
-    normalized_precoder = empty(shape=precoding_matrix.shape)
+    normalized_precoder = empty(shape=precoding_matrix.shape, dtype='complex128')
 
     if per_satellite:
 
