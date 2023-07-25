@@ -1,6 +1,7 @@
 
 from numpy import (
     ndarray,
+    empty,
     sqrt,
     matmul,
     trace,
@@ -22,6 +23,8 @@ def norm_precoder(
     after applying norm_factor, the trace of norm_factor * (A^H * A) will be == power_constraint_watt
     """
 
+    normalized_precoder = empty(shape=precoding_matrix.shape)
+
     if per_satellite:
 
         # normalize to (power_constraint_watt / sat_nr) for each satellite
@@ -35,9 +38,7 @@ def norm_precoder(
             )
             w_precoder_slice_normed = norm_factor_slice * w_precoder_slice
 
-            precoding_matrix[satellite_index_start:satellite_index_start + sat_ant_nr, :] = w_precoder_slice_normed
-
-        normalized_precoder = precoding_matrix
+            normalized_precoder[satellite_index_start:satellite_index_start + sat_ant_nr, :] = w_precoder_slice_normed
 
     else:
 
