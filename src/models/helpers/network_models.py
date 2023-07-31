@@ -152,6 +152,7 @@ class PolicyNetworkSoft(tf.keras.Model):
             inputs,
             training=None,
             masks=None,
+            print_stds=False,
     ) -> tuple[tf.Tensor, tf.Tensor]:
         x = inputs
         for layer in self.hidden_layers:
@@ -162,6 +163,9 @@ class PolicyNetworkSoft(tf.keras.Model):
         # NOTE: log_stds are typically clipped in implementations. [-20, 2] seems to be the popular interval.
         #  Clipping logs by such a wide range should not have much of an impact.
         log_stds = tf.clip_by_value(log_stds, -20, 2)
+
+        if print_stds:
+            tf.print(tf.exp(log_stds))
 
         return (
             means,
