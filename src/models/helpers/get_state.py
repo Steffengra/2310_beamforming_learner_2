@@ -29,22 +29,25 @@ def get_state_erroneous_channel_state_information(
     erroneous_csi = satellites.erroneous_channel_state_information.flatten()
 
     if csi_format == 'rad_phase':
+        # TODO: Heuristic standardization for this falls apart when inter user distances or inter satellite
+        #  distances are changed significantly
         state_real = complex_vector_to_rad_and_phase(erroneous_csi)
         if norm_csi:
             half_length_idx = int(len(state_real) / 2)
-            # state_real[:half_length_idx] = state_real[:half_length_idx] - mean_rad  # due to high distance, these digits will be roughly the same for all csi
-            state_real[:half_length_idx] = state_real[:half_length_idx] * 1e7  # roughly [0, 1]
+            # state_real[:half_length_idx] = state_real[:half_length_idx] * 1e7  # roughly [0, 1]
+            state_real[:half_length_idx] -= 9.939976886796873e-08  # VERY heuristic standardization
+            state_real[:half_length_idx] /= 1.1296214238672676e-12
 
-            state_real[half_length_idx:] = state_real[half_length_idx:] / pi  # [-1, 1]
-            state_real[half_length_idx:] = state_real[half_length_idx:] + 1  # [0, 2]
-            state_real[half_length_idx:] = state_real[half_length_idx:] / 2  # [0, 1]
+            # state_real[half_length_idx:] = state_real[half_length_idx:] / pi  # [-1, 1]
+            state_real[half_length_idx:] -= -0.12738714345740954  # VERY heuristic standardization
+            state_real[half_length_idx:] /= 1.839204723266767
 
     elif csi_format == 'real_imag':
         state_real = complex_vector_to_double_real_vector(erroneous_csi)
         if norm_csi:
-            state_real *= 1e7  # roughly range -1 ... 1
-            state_real += 1  # roughly range 0 ... 2
-            state_real /= 2  # roughly range 0 ... 1
+            # state_real *= 1e7  # roughly range [-1, 1]
+            state_real -= -4.308892163699242e-09  # VERY heuristic standardization
+            state_real /= 7.015404816259004e-08
 
     else:
         raise ValueError(f'Unknown CSI Format {csi_format}')
@@ -56,6 +59,8 @@ def get_state_aods(
         satellites,
         norm_aods,
 ) -> ndarray:
+    # TODO: Heuristic standardization for this falls apart when inter user distances or inter satellite
+    #  distances are changed significantly
 
     # FOR CONFIG:
     # self.get_state_args = {
@@ -64,7 +69,9 @@ def get_state_aods(
 
     state = satellites.get_aods_to_users().flatten()
     if norm_aods:
-        state -= pi/2
-        state *= 1e2  # very roughly [-2, 2]
+        # state -= pi/2
+        # state *= 1e2  # very roughly [-2, 2]
+        state -= 1.5733352059073948  # VERY heuristic standardization
+        state /= 0.007308867872704654
 
     return state.flatten()
