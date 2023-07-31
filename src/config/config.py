@@ -66,7 +66,7 @@ class Config:
         # User
         self.user_nr: int = 3  # Number of users
         self.user_gain_dBi: float = 0  # User gain in dBi
-        self.user_dist_average: float = 1_000  # Average user distance in m
+        self.user_dist_average: float = 1_000  # Average user distance in m  # todo: remember that get_state standardization currently is very sensitive to changing this
         self.user_dist_bound: float = 30  # Variance of user distance, uniform distribution [avg-bound, avg+bound]
         self.user_center_aod_earth_deg: float = 90  # Average center of users
 
@@ -76,7 +76,7 @@ class Config:
         self.sat_nr: int = 2  # Number of satellites
         self.sat_tot_ant_nr: int = 4  # Total number of  Tx antennas, should be a number larger than sat nr
         self.sat_gain_dBi: float = 20  # Total sat TODO: Wert nochmal checken
-        self.sat_dist_average: float = 10_000  # Average satellite distance in meter
+        self.sat_dist_average: float = 10_000  # Average satellite distance in meter  # todo: remember that get_state standardization currently is very sensitive to changing this
         self.sat_dist_bound: float = 0  # Variance of sat distance, uniform distribution [avg-bound, avg+bound]
         self.sat_center_aod_earth_deg: float = 90  # Average center of satellites
 
@@ -93,6 +93,7 @@ class Config:
     def _pre_init(
             self,
     ) -> None:
+
         self.rng = default_rng()
         self.logger = logging.getLogger()
 
@@ -151,6 +152,7 @@ class Config:
     def __logging_setup(
             self,
     ) -> None:
+
         logging_formatter = logging.Formatter(
             '{asctime} : {levelname:8s} : {name:30} : {funcName:20s} :: {message}',
             datefmt='%Y-%m-%d %H:%M:%S',
