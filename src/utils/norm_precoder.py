@@ -38,7 +38,7 @@ def norm_precoder(
             )
             w_precoder_slice_normed = norm_factor_slice * w_precoder_slice
 
-            normalized_precoder[satellite_index_start:satellite_index_start + sat_ant_nr, :] = w_precoder_slice_normed
+            normalized_precoder[satellite_index_start:satellite_index_start + sat_ant_nr, :] = w_precoder_slice_normed.copy()  # todo: is copy required here?
 
     else:
 
