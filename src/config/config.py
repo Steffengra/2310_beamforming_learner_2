@@ -122,6 +122,7 @@ class Config:
 
         # Logging
         self.logfile_path = Path(self.project_root_path, 'outputs', 'logs', 'log.txt')
+        self.logfile_path.parent.mkdir(parents=True, exist_ok=True)
         self.__logging_setup()
 
         # Collected args
