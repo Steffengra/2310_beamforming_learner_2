@@ -39,7 +39,7 @@ def get_state_erroneous_channel_state_information(
             state_real[:half_length_idx] /= 1.1296214238672676e-12
 
             # state_real[half_length_idx:] = state_real[half_length_idx:] / pi  # [-1, 1]
-            state_real[half_length_idx:] -= -0.12738714345740954  # VERY heuristic standardization
+            # state_real[half_length_idx:] -= -0.12738714345740954  # VERY heuristic standardization
             state_real[half_length_idx:] /= 1.839204723266767
 
     elif csi_format == 'real_imag':
