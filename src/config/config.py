@@ -1,13 +1,11 @@
 
 import logging
+import numpy as np
 from pathlib import (
     Path,
 )
 from sys import (
     stdout,
-)
-from numpy.random import (
-    default_rng,
 )
 from scipy import (
     constants,
@@ -94,7 +92,7 @@ class Config:
             self,
     ) -> None:
 
-        self.rng = default_rng()
+        self.rng = np.random.default_rng()
         self.logger = logging.getLogger()
 
         self.project_root_path = Path(__file__).parent.parent.parent

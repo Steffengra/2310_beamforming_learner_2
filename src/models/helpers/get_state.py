@@ -1,8 +1,5 @@
 
-from numpy import (
-    ndarray,
-    pi,
-)
+import numpy as np
 
 from src.utils.real_complex_vector_reshaping import (
     real_vector_to_half_complex_vector,
@@ -18,7 +15,7 @@ def get_state_erroneous_channel_state_information(
         satellites,
         csi_format: str,
         norm_csi: bool,
-) -> ndarray:
+) -> np.ndarray:
 
     # FOR CONFIG:
     # self.get_state_args = {
@@ -58,7 +55,7 @@ def get_state_erroneous_channel_state_information(
 def get_state_aods(
         satellites,
         norm_aods,
-) -> ndarray:
+) -> np.ndarray:
     # TODO: Heuristic standardization for this falls apart when inter user distances or inter satellite
     #  distances are changed significantly
 

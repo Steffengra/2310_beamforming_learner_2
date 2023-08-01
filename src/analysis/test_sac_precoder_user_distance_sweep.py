@@ -1,8 +1,5 @@
 
-from numpy import (
-    newaxis,
-    arange,
-)
+import numpy as np
 from keras.models import (
     load_model,
 )
@@ -38,7 +35,7 @@ def test_sac_precoder_user_distance_sweep(
         satellite_manager,
     ):
         state = config.config_learner.get_state(satellites=satellite_manager, **config.config_learner.get_state_args)
-        w_precoder, _ = precoder_network.call(state.astype('float32')[newaxis])
+        w_precoder, _ = precoder_network.call(state.astype('float32')[np.newaxis])
         w_precoder = w_precoder.numpy().flatten()
 
         # reshape to fit reward calculation
@@ -69,7 +66,7 @@ if __name__ == '__main__':
     cfg.config_learner.training_name = f'sat_{cfg.sat_nr}_ant_{cfg.sat_tot_ant_nr}_usr_{cfg.user_nr}_satdist_{cfg.sat_dist_average}_usrdist_{cfg.user_dist_average}'
 
     # NOTE: distances are rounded to integers for file naming
-    sweep_range = arange(1000-30, 1000+30, 0.01)
+    sweep_range = np.arange(1000-30, 1000+30, 0.01)
 
     network_path = Path(
         cfg.trained_models_path,

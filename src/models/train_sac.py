@@ -5,6 +5,7 @@ from sys import path as sys_path
 project_root_path = Path(Path(__file__).parent, '..', '..')
 sys_path.append(str(project_root_path.resolve()))
 
+import numpy as np
 from datetime import (
     datetime,
 )
@@ -20,12 +21,6 @@ from gzip import (
 )
 from pickle import (
     dump as pickle_dump,
-)
-from numpy import (
-    ones,
-    infty,
-    mean,
-    std,
 )
 from matplotlib.pyplot import (
     show as plt_show,
@@ -179,9 +174,9 @@ def train_sac_single_error(config) -> Path:
     sac = SoftActorCritic(rng=config.rng, **config.config_learner.algorithm_args)
 
     metrics: dict = {
-        'mean_sum_rate_per_episode': -infty * ones(config.config_learner.training_episodes)
+        'mean_sum_rate_per_episode': -np.infty * np.ones(config.config_learner.training_episodes)
     }
-    high_score = -infty
+    high_score = -np.infty
     high_scores = []
 
     real_time_start = datetime.now()
@@ -195,9 +190,9 @@ def train_sac_single_error(config) -> Path:
     for training_episode_id in range(config.config_learner.training_episodes):
 
         episode_metrics: dict = {
-            'sum_rate_per_step': -infty * ones(config.config_learner.training_steps_per_episode),
-            'mean_log_prob_density': infty * ones(config.config_learner.training_steps_per_episode),
-            'value_loss': -infty * ones(config.config_learner.training_steps_per_episode),
+            'sum_rate_per_step': -np.infty * np.ones(config.config_learner.training_steps_per_episode),
+            'mean_log_prob_density': np.infty * np.ones(config.config_learner.training_steps_per_episode),
+            'value_loss': -np.infty * np.ones(config.config_learner.training_steps_per_episode),
         }
 
         update_sim(config, satellite_manager, user_manager)  # todo: we update_sim twice in this script, correct?
@@ -262,13 +257,13 @@ def train_sac_single_error(config) -> Path:
                     progress_print()
 
         # log episode results
-        episode_mean_sum_rate = mean(episode_metrics['sum_rate_per_step'])
+        episode_mean_sum_rate = np.mean(episode_metrics['sum_rate_per_step'])
         metrics['mean_sum_rate_per_episode'][training_episode_id] = episode_mean_sum_rate
         if config.verbosity == 1:
             print(f' Episode mean reward: {episode_mean_sum_rate:.4f}'
-                  f' std {std(episode_metrics["sum_rate_per_step"]):.2f},'
-                  f' current exploration: {mean(episode_metrics["mean_log_prob_density"]):.2f},'
-                  f' value loss: {mean(episode_metrics["value_loss"]):.5f}'
+                  f' std {np.std(episode_metrics["sum_rate_per_step"]):.2f},'
+                  f' current exploration: {np.mean(episode_metrics["mean_log_prob_density"]):.2f},'
+                  f' value loss: {np.mean(episode_metrics["value_loss"]):.5f}'
                   )
 
         # save network snapshot

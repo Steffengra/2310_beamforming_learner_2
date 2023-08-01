@@ -1,7 +1,5 @@
 
-from numpy import (
-    zeros,
-)
+import numpy as np
 from datetime import (
     datetime,
 )
@@ -79,8 +77,8 @@ def test_precoder_user_distance_sweep(
 
     metrics = {
         'sum_rate': {
-            'mean': zeros(len(distance_sweep_range)),
-            'std': zeros(len(distance_sweep_range)),
+            'mean': np.zeros(len(distance_sweep_range)),
+            'std': np.zeros(len(distance_sweep_range)),
         },
     }
 
