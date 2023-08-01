@@ -1,20 +1,14 @@
 
-from numpy import (
-    ndarray,
-    empty,
-    sqrt,
-    matmul,
-    trace,
-)
+import numpy as np
 
 
 def norm_precoder(
-        precoding_matrix: ndarray,
+        precoding_matrix: np.ndarray,
         power_constraint_watt: float or int,
         per_satellite: bool,
         sat_nr: int = 1,
         sat_ant_nr: int = 1,
-) -> ndarray:
+) -> np.ndarray:
     """
     normalizes precoding matrix of dimension (sat_nr * ant_nr, user_nr)
     with sat 1 ant 1, sat1 ant 2, sat1 ant 3, sat 2 ant 1...
@@ -23,7 +17,7 @@ def norm_precoder(
     after applying norm_factor, the trace of norm_factor * (A^H * A) will be == power_constraint_watt
     """
 
-    normalized_precoder = empty(shape=precoding_matrix.shape, dtype='complex128')
+    normalized_precoder = np.empty(shape=precoding_matrix.shape, dtype='complex128')
 
     if per_satellite:
 
@@ -33,8 +27,8 @@ def norm_precoder(
             satellite_index_start = satellite_id * sat_ant_nr
             w_precoder_slice = precoding_matrix[satellite_index_start:satellite_index_start + sat_ant_nr, :]
 
-            norm_factor_slice = sqrt(
-                power_constraint_watt / sat_nr / trace(matmul(w_precoder_slice.conj().T, w_precoder_slice))
+            norm_factor_slice = np.sqrt(
+                power_constraint_watt / sat_nr / np.trace(np.matmul(w_precoder_slice.conj().T, w_precoder_slice))
             )
             w_precoder_slice_normed = norm_factor_slice * w_precoder_slice
 
@@ -43,7 +37,7 @@ def norm_precoder(
     else:
 
         # normalize to power constraint
-        norm_factor = sqrt(power_constraint_watt / trace(matmul(precoding_matrix.conj().T, precoding_matrix)))
+        norm_factor = np.sqrt(power_constraint_watt / np.trace(np.matmul(precoding_matrix.conj().T, precoding_matrix)))
         normalized_precoder = norm_factor * precoding_matrix
 
     return normalized_precoder

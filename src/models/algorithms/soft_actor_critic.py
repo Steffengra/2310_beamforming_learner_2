@@ -1,27 +1,6 @@
 
-from numpy import (
-    ndarray,
-    array,
-    newaxis,
-    concatenate,
-    log,
-)
-from numpy.random import (
-    Generator,
-)
-from tensorflow import (
-    print as tf_print,
-    Tensor as tf_Tensor,
-    Variable as tf_Variable,
-    GradientTape as tf_GradientTape,
-    float32 as tf_float32,
-    function as tf_function,
-    concat as tf_concat,
-    add as tf_add,
-    exp as tf_exp,
-    reduce_min as tf_reduce_min,
-    reduce_mean as tf_reduce_mean,
-)
+import numpy as np
+import tensorflow as tf
 
 from src.models.helpers.network_models import (
     ValueNetwork,
@@ -35,7 +14,7 @@ from src.models.helpers.experience_buffer import (
 class SoftActorCritic:
     def __init__(
             self,
-            rng: Generator,
+            rng: np.random.Generator,
             future_reward_discount_gamma: float,
             entropy_scale_alpha_initial: float,
             target_entropy: float,
@@ -53,8 +32,8 @@ class SoftActorCritic:
         self.future_reward_discount_gamma = future_reward_discount_gamma
 
         # Gradients are applied on the log value. This way, entropy_scale_alpha is restricted to positive range
-        self.log_entropy_scale_alpha = tf_Variable(log(entropy_scale_alpha_initial),
-                                                   trainable=True, dtype=tf_float32)
+        self.log_entropy_scale_alpha = tf.Variable(np.log(entropy_scale_alpha_initial),
+                                                   trainable=True, dtype=tf.float32)
         self.target_entropy = target_entropy
         self.entropy_scale_alpha_optimizer = entropy_scale_optimizer(**entropy_scale_optimizer_args)
 
@@ -110,12 +89,12 @@ class SoftActorCritic:
         for network_type, network_list in self.networks.items():
             # create dummy input
             if network_type == 'policy':
-                dummy_input = dummy_state[newaxis]
+                dummy_input = dummy_state[np.newaxis]
                 optimizer = policy_network_optimizer
                 optimizer_args = policy_network_optimizer_args
                 # loss = policy_network_loss
             elif network_type == 'value':
-                dummy_input = concatenate([dummy_state, dummy_action])[newaxis]
+                dummy_input = np.concatenate([dummy_state, dummy_action])[np.newaxis]
                 optimizer = value_network_optimizer
                 optimizer_args = value_network_optimizer_args
                 # loss = value_network_loss
@@ -130,7 +109,7 @@ class SoftActorCritic:
                 )
         self.update_target_networks(tau_target_update_momentum=1.0)
 
-    @tf_function
+    @tf.function
     def update_target_networks(
             self,
             tau_target_update_momentum: float,
@@ -149,7 +128,7 @@ class SoftActorCritic:
     def get_action(
             self,
             state,
-    ) -> ndarray:
+    ) -> np.ndarray:
         actions, _ = self.networks['policy'][0]['primary'].get_action_and_log_prob_density(state=state)
 
         return actions.numpy().flatten()
@@ -177,16 +156,16 @@ class SoftActorCritic:
         ) = self.experience_buffer.sample(batch_size=self.training_batch_size)
 
         mean_log_prob_density, value_loss = self.train_graph(
-            states=array(
+            states=np.array(
                 [experience['state'] for experience in sample_experiences], dtype='float32'),
-            actions=array(
+            actions=np.array(
                 [experience['action'] for experience in sample_experiences], dtype='float32'),
-            rewards=array(
-                [experience['reward'] for experience in sample_experiences], dtype='float32')[newaxis].transpose(),
-            next_states=array(
+            rewards=np.array(
+                [experience['reward'] for experience in sample_experiences], dtype='float32')[np.newaxis].transpose(),
+            next_states=np.array(
                 [experience['next_state'] for experience in sample_experiences], dtype='float32'),
-            sample_importance_weights=array(
-                sample_importance_weights, dtype='float32')[newaxis].transpose(),
+            sample_importance_weights=np.array(
+                sample_importance_weights, dtype='float32')[np.newaxis].transpose(),
             toggle_train_value_networks=toggle_train_value_networks,
             toggle_train_policy_network=toggle_train_policy_network,
             toggle_train_entropy_scale_alpha=toggle_train_entropy_scale_alpha,
@@ -194,7 +173,7 @@ class SoftActorCritic:
 
         return mean_log_prob_density, value_loss
 
-    @tf_function
+    @tf.function
     def train_graph(
             self,
             states,
@@ -205,7 +184,7 @@ class SoftActorCritic:
             toggle_train_value_networks,
             toggle_train_policy_network,
             toggle_train_entropy_scale_alpha,
-    ) -> tuple[tf_Tensor, tf_Tensor]:
+    ) -> tuple[tf.Tensor, tf.Tensor]:
 
         if toggle_train_value_networks:
             # Construct target: r(s, a) + \gamma * (Q_hat(s', a') - \alpha * log prob(a'|s'))
@@ -217,30 +196,30 @@ class SoftActorCritic:
                     next_actions,
                     next_action_log_prob_densities,
                 ) = self.networks['policy'][0]['primary'].get_action_and_log_prob_density(state=next_states)
-                value_network_input = tf_concat([next_states, next_actions], axis=1)
+                value_network_input = tf.concat([next_states, next_actions], axis=1)
                 next_states_value_estimates_1 = self.networks['value'][0]['target'].call(value_network_input)
                 next_states_value_estimates_2 = self.networks['value'][1]['target'].call(value_network_input)
-                next_states_conservative_value_estimates = tf_reduce_min(
+                next_states_conservative_value_estimates = tf.reduce_min(
                     [next_states_value_estimates_1, next_states_value_estimates_2], axis=0)
                 target_q = target_q + self.future_reward_discount_gamma * (
                     next_states_conservative_value_estimates
-                    - tf_exp(self.log_entropy_scale_alpha) * next_action_log_prob_densities
+                    - tf.exp(self.log_entropy_scale_alpha) * next_action_log_prob_densities
                 )
 
-            value_network_input_batch = tf_concat([states, actions], axis=1)
+            value_network_input_batch = tf.concat([states, actions], axis=1)
             network = self.networks['value'][0]['primary']
-            with tf_GradientTape() as tape:  # Autograd
+            with tf.GradientTape() as tape:  # Autograd
                 estimated_q = network.call(value_network_input_batch)
                 td_error = estimated_q - target_q
-                value_loss = tf_reduce_mean(sample_importance_weights * td_error ** 2)
+                value_loss = tf.reduce_mean(sample_importance_weights * td_error ** 2)
             gradients = tape.gradient(target=value_loss, sources=network.trainable_variables)
             network.optimizer.apply_gradients(zip(gradients, network.trainable_variables))
 
             network = self.networks['value'][1]['primary']
-            with tf_GradientTape() as tape:  # Autograd
+            with tf.GradientTape() as tape:  # Autograd
                 estimated_q = network.call(value_network_input_batch)
                 td_error = estimated_q - target_q
-                value_loss = tf_reduce_mean(sample_importance_weights * td_error ** 2)
+                value_loss = tf.reduce_mean(sample_importance_weights * td_error ** 2)
             gradients = tape.gradient(target=value_loss, sources=network.trainable_variables)
             network.optimizer.apply_gradients(zip(gradients, network.trainable_variables))
 
@@ -249,32 +228,32 @@ class SoftActorCritic:
         if toggle_train_policy_network:
             policy_network_input_batch = states
             network = self.networks['policy'][0]['primary']
-            with tf_GradientTape() as tape:
+            with tf.GradientTape() as tape:
                 (
                     policy_actions,
                     policy_action_log_prob_densities,
                 ) = network.get_action_and_log_prob_density(state=policy_network_input_batch)
-                value_network_input_batch = tf_concat([states, policy_actions], axis=1)
+                value_network_input_batch = tf.concat([states, policy_actions], axis=1)
                 # target or primary? primary -> faster updates, target -> stable but delayed
                 value_estimate_1 = self.networks['value'][0]['primary'].call(value_network_input_batch)
                 value_estimate_2 = self.networks['value'][1]['primary'].call(value_network_input_batch)
-                value_estimate_min = tf_reduce_min([value_estimate_1, value_estimate_2], axis=0)
-                policy_loss = tf_reduce_mean(
+                value_estimate_min = tf.reduce_min([value_estimate_1, value_estimate_2], axis=0)
+                policy_loss = tf.reduce_mean(
                     # pull towards high value:
                     sample_importance_weights * -value_estimate_min
                     # pulls towards high variance - we want to minimize mean log probs -> more uncertainty:
-                    + tf_exp(self.log_entropy_scale_alpha) * policy_action_log_prob_densities
+                    + tf.exp(self.log_entropy_scale_alpha) * policy_action_log_prob_densities
                 )
             gradients = tape.gradient(target=policy_loss, sources=network.trainable_variables)
             network.optimizer.apply_gradients(zip(gradients, network.trainable_variables))
 
         if toggle_train_entropy_scale_alpha:
-            with tf_GradientTape() as tape:
+            with tf.GradientTape() as tape:
                 # if (logprobs (negative) + target entropy) > 0, increase weight of variance
                 #  to encourage higher variance, thus bringing logprobs + target entropy closer to zero
-                alpha_loss = -self.log_entropy_scale_alpha * tf_reduce_mean(
-                    tf_add(policy_action_log_prob_densities, self.target_entropy))
+                alpha_loss = -self.log_entropy_scale_alpha * tf.reduce_mean(
+                    tf.add(policy_action_log_prob_densities, self.target_entropy))
             alpha_gradients = tape.gradient(target=alpha_loss, sources=[self.log_entropy_scale_alpha])
             self.entropy_scale_alpha_optimizer.apply_gradients(zip(alpha_gradients, [self.log_entropy_scale_alpha]))
 
-        return tf_reduce_mean(policy_action_log_prob_densities), value_loss
+        return tf.reduce_mean(policy_action_log_prob_densities), value_loss

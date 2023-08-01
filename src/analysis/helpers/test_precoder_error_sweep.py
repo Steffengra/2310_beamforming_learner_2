@@ -1,9 +1,5 @@
 
-from numpy import (
-    zeros,
-    mean,
-    std,
-)
+import numpy as np
 from datetime import (
     datetime,
 )
@@ -90,8 +86,8 @@ def test_precoder_error_sweep(
 
     metrics = {
         'sum_rate': {
-            'mean': zeros(len(csit_error_sweep_range)),
-            'std': zeros(len(csit_error_sweep_range)),
+            'mean': np.zeros(len(csit_error_sweep_range)),
+            'std': np.zeros(len(csit_error_sweep_range)),
         },
     }
 
@@ -101,7 +97,7 @@ def test_precoder_error_sweep(
         set_new_error_value()
 
         # set up per monte carlo metrics
-        sum_rate_per_monte_carlo = zeros(monte_carlo_iterations)
+        sum_rate_per_monte_carlo = np.zeros(monte_carlo_iterations)
 
         for iter_idx in range(monte_carlo_iterations):
 
@@ -124,8 +120,8 @@ def test_precoder_error_sweep(
             if iter_idx % 50 == 0:
                 progress_print()
 
-        metrics['sum_rate']['mean'][error_sweep_idx] = mean(sum_rate_per_monte_carlo)
-        metrics['sum_rate']['std'][error_sweep_idx] = std(sum_rate_per_monte_carlo)
+        metrics['sum_rate']['mean'][error_sweep_idx] = np.mean(sum_rate_per_monte_carlo)
+        metrics['sum_rate']['std'][error_sweep_idx] = np.std(sum_rate_per_monte_carlo)
 
     if profiler is not None:
         end_profiling(profiler)

@@ -1,32 +1,22 @@
 
-from numpy import (
-    ndarray,
-    zeros,
-    sum as np_sum,
-    divide as np_divide,
-    power as np_power,
-    max as np_max,
-    where as np_where,
-    count_nonzero as np_count_nonzero,
-)
-from numpy.random import default_rng
+import numpy as np
 
 
 class ExperienceBuffer:
     def __init__(
             self,
-            rng: default_rng,
+            rng: np.random.Generator,
             buffer_size: int,
             priority_scale_alpha: float,  # alpha=0 is uniform sampling, alpha=1 is fully prioritized sampling
             importance_sampling_correction_beta: float,  # beta=1 is full correction, beta=0 is no correction
     ) -> None:
-        self.rng: default_rng = rng
+        self.rng: np.random.Generator = rng
         self.write_pointer: int = 0
 
         self.buffer_size = buffer_size
         self.buffer: list = [{}] * self.buffer_size
-        self.priorities: ndarray = zeros(self.buffer_size)
-        self.probabilities: ndarray = zeros(self.buffer_size)  # prob_i = prio_i / sum_i(prio_i)
+        self.priorities: np.ndarray = np.zeros(self.buffer_size)
+        self.probabilities: np.ndarray = np.zeros(self.buffer_size)  # prob_i = prio_i / sum_i(prio_i)
 
         self.priority_scale_alpha: float = priority_scale_alpha
         self.importance_sampling_correction_beta: float = importance_sampling_correction_beta
@@ -34,7 +24,7 @@ class ExperienceBuffer:
         self.max_priority: float = self.min_priority
 
     def get_len(self) -> int:
-        return np_count_nonzero(self.priorities)
+        return np.count_nonzero(self.priorities)
 
     def add_experience(
             self,
@@ -49,11 +39,11 @@ class ExperienceBuffer:
     def sample(
             self,
             batch_size: int,
-    ) -> tuple[list, ndarray, ndarray]:
+    ) -> tuple[list, np.ndarray, np.ndarray]:
 
         # Update Probabilities
-        priority_sum = np_sum(self.priorities)
-        self.probabilities = np_divide(self.priorities, priority_sum)
+        priority_sum = np.sum(self.priorities)
+        self.probabilities = np.divide(self.priorities, priority_sum)
 
         # Sample
         sample_experience_ids = self.rng.choice(
@@ -66,10 +56,10 @@ class ExperienceBuffer:
         sample_experiences = [self.buffer[ii] for ii in sample_experience_ids]
         sample_probabilities = self.probabilities[sample_experience_ids]
 
-        sample_importance_weights = np_power(sample_probabilities,
+        sample_importance_weights = np.power(sample_probabilities,
                                              -self.importance_sampling_correction_beta)
-        sample_importance_weights = np_divide(sample_importance_weights,
-                                              np_max(sample_importance_weights))
+        sample_importance_weights = np.divide(sample_importance_weights,
+                                              np.max(sample_importance_weights))
 
         return (
             sample_experiences,
@@ -79,15 +69,15 @@ class ExperienceBuffer:
 
     def adjust_priorities(
             self,
-            experience_ids: ndarray,
-            new_priorities: ndarray,
+            experience_ids: np.ndarray,
+            new_priorities: np.ndarray,
     ) -> None:
 
-        new_priorities = np_power(new_priorities, self.priority_scale_alpha)
-        self.priorities[experience_ids] = np_where(new_priorities > self.min_priority,
+        new_priorities = np.power(new_priorities, self.priority_scale_alpha)
+        self.priorities[experience_ids] = np.where(new_priorities > self.min_priority,
                                                    new_priorities, self.min_priority)
 
-        sample_max_priority = np_max(new_priorities)
+        sample_max_priority = np.max(new_priorities)
         if sample_max_priority > self.max_priority:
             self.max_priority = sample_max_priority
 
@@ -98,7 +88,7 @@ class ExperienceBuffer:
         self.write_pointer: int = 0
 
         self.buffer: list = [{}] * self.buffer_size
-        self.priorities: ndarray = zeros(self.buffer_size)
-        self.probabilities: ndarray = zeros(self.buffer_size)  # prob_i = prio_i / sum_i(prio_i)
+        self.priorities: np.ndarray = np.zeros(self.buffer_size)
+        self.probabilities: np.ndarray = np.zeros(self.buffer_size)  # prob_i = prio_i / sum_i(prio_i)
 
         self.max_priority: float = self.min_priority

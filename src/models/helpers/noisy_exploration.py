@@ -1,9 +1,5 @@
 
-from numpy import (
-    ndarray,
-    mean,
-    std,
-)
+import numpy as np
 
 from src.data.precoder.mmse_precoder import (
     mmse_precoder_no_norm,
@@ -22,10 +18,10 @@ TODO: Remember that the output of this function must
 
 def add_random_distribution(
         rng,
-        action: ndarray,
+        action: np.ndarray,
         tau_momentum: float,
         normalize: bool = False,
-) -> ndarray:
+) -> np.ndarray:
     """
     Mix an action vector with a random_uniform vector of same length
     by tau * random_distribution + (1 - tau) * action
@@ -35,7 +31,7 @@ def add_random_distribution(
         return action
 
     # create random action
-    random_distribution = rng.normal(loc=mean(action), scale=std(action))
+    random_distribution = rng.normal(loc=np.mean(action), scale=np.std(action))
 
     # combine
     noisy_action = tau_momentum * random_distribution + (1 - tau_momentum) * action
@@ -50,12 +46,12 @@ def add_random_distribution(
 
 
 def add_mmse_precoder(
-        action: ndarray,
+        action: np.ndarray,
         tau_momentum: float,
         channel_matrix,
         noise_power_watt,
         power_constraint_watt,
-) -> ndarray:
+) -> np.ndarray:
 
     if tau_momentum == 0.0:
         return action

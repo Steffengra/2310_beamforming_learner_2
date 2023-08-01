@@ -1,7 +1,5 @@
 
-from numpy import (
-    arange,
-)
+import numpy as np
 
 from src.config.config import (
     Config,
@@ -50,8 +48,8 @@ if __name__ == '__main__':
     cfg.config_learner.training_name = f'sat_{cfg.sat_nr}_ant_{cfg.sat_tot_ant_nr}_usr_{cfg.user_nr}_satdist_{cfg.sat_dist_average}_usrdist_{cfg.user_dist_average}'
 
     iterations: int = 10_000
-    sweep_range = arange(0.0, 0.6, 0.1)
-    # sweep_range = arange(0.0, 1/10_000_000, 1/100_000_000)
+    sweep_range = np.arange(0.0, 0.6, 0.1)
+    # sweep_range = np.arange(0.0, 1/10_000_000, 1/100_000_000)
 
     test_mrc_precoder_error_sweep(
         config=cfg,

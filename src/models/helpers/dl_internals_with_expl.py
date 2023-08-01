@@ -1,18 +1,5 @@
 
-from keras.optimizers import (
-    Adam,
-    Nadam,
-)
-
-from tensorflow import (
-    Tensor,
-    where,
-    abs as tf_abs,
-    subtract as tf_subtract,
-    multiply as tf_multiply,
-    square as tf_square,
-    reduce_mean as tf_reduce_mean
-)
+import tensorflow as tf
 
 
 def optimizer_adam(
@@ -60,7 +47,7 @@ def optimizer_adam(
         amsgrad: AMSgrad is a Variant of Adam
     """
 
-    optimizer = Adam(
+    optimizer = tf.keras.optimizers.Adam(
         learning_rate=learning_rate,  # default 1e-3
         beta_1=beta_1,  # default 0.9
         beta_2=beta_2,  # default 0.999
@@ -98,7 +85,7 @@ def optimizer_nadam(
         epsilon: epsilon helps with numerical stability
     """
 
-    optimizer = Nadam(
+    optimizer = tf.keras.optimizers.Nadam(
         learning_rate=learning_rate,
         beta_1=beta_1,
         beta_2=beta_2,
@@ -111,16 +98,16 @@ def optimizer_nadam(
 def mse_loss(
         td_error,
         importance_sampling_weights
-) -> Tensor:
-    squared_error = tf_multiply(importance_sampling_weights, tf_square(td_error))
+) -> tf.Tensor:
+    squared_error = tf.multiply(importance_sampling_weights, tf.square(td_error))
 
-    return tf_reduce_mean(squared_error)
+    return tf.reduce_mean(squared_error)
 
 
 def huber_loss(
         td_error,
         importance_sampling_weights
-) -> Tensor:
+) -> tf.Tensor:
     """
     Huber loss fixes the grad magnitude to at most 1 by linearizing the loss curve after f'(x)=1.
 
@@ -129,20 +116,20 @@ def huber_loss(
     delta = 1  # Where to clip
 
     # delta * (abs(td) - .5 * delta)
-    absolute_error = tf_multiply(
+    absolute_error = tf.multiply(
         delta,
-        tf_subtract(
-            tf_abs(td_error),
-            tf_multiply(.5, delta)
+        tf.subtract(
+            tf.abs(td_error),
+            tf.multiply(.5, delta)
         )
     )
 
-    squared_error = tf_multiply(
+    squared_error = tf.multiply(
         .5,
-        tf_square(td_error)
+        tf.square(td_error)
     )
 
     indicator = absolute_error < delta
-    loss = where(indicator, squared_error, absolute_error)
+    loss = tf.where(indicator, squared_error, absolute_error)
 
-    return tf_reduce_mean(importance_sampling_weights * loss)
+    return tf.reduce_mean(importance_sampling_weights * loss)

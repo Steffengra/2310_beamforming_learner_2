@@ -1,14 +1,5 @@
 
-from numpy import (
-    ndarray,
-    array,
-    zeros,
-    arange,
-    pi,
-    exp,
-    cos,
-    arcsin,
-)
+import numpy as np
 
 from src.utils.spherical_to_cartesian_coordinates import (
     spherical_to_cartesian_coordinates,
@@ -27,7 +18,7 @@ class Satellite:
             self,
             rng,
             idx,
-            spherical_coordinates: ndarray,
+            spherical_coordinates: np.ndarray,
             antenna_nr: int,
             antenna_distance: float,
             antenna_gain_linear: float,
@@ -38,8 +29,8 @@ class Satellite:
         self.rng = rng
 
         self.idx: int = idx
-        self.spherical_coordinates: ndarray = spherical_coordinates
-        self.cartesian_coordinates: ndarray = spherical_to_cartesian_coordinates(spherical_coordinates)
+        self.spherical_coordinates: np.ndarray = spherical_coordinates
+        self.cartesian_coordinates: np.ndarray = spherical_to_cartesian_coordinates(spherical_coordinates)
 
         self.antenna_nr: int = antenna_nr
         self.antenna_distance: float = antenna_distance  # antenna distance in meters
@@ -54,8 +45,8 @@ class Satellite:
         self.aods_to_users = None  # user_idx[int]: aod[float] in rad, [0, 2pi], most commonly ~pi/2, aod looks from sat towards users
         self.steering_vectors_to_users = None  # user_idx[int]: steering_vector[ndarray] \in 1 x antenna_nr
 
-        self.channel_state_to_users: ndarray = array([])  # depends on channel model
-        self.erroneous_channel_state_to_users: ndarray = array([])  # depends on channel & error model
+        self.channel_state_to_users: np.ndarray = np.array([])  # depends on channel model
+        self.erroneous_channel_state_to_users: np.ndarray = np.array([])  # depends on channel & error model
 
     def update_position(
             self,
@@ -72,7 +63,7 @@ class Satellite:
         # TODO: This doesn't change values of users that might have disappeared
 
         if self.distance_to_users is None:
-            self.distance_to_users = zeros(len(users))
+            self.distance_to_users = np.zeros(len(users))
 
         for user in users:
             self.distance_to_users[user.idx] = euclidian_distance(self.cartesian_coordinates,
@@ -93,13 +84,13 @@ class Satellite:
         # TODO: This doesn't change values of users that might have disappeared
 
         if self.aods_to_users is None:
-            self.aods_to_users = zeros(len(users))
+            self.aods_to_users = np.zeros(len(users))
 
-        user_pos_idx = arange(0, len(users)) - (len(users) - 1) / 2
+        user_pos_idx = np.arange(0, len(users)) - (len(users) - 1) / 2
 
         for user in users:
 
-            self.aods_to_users[user.idx] = arcsin(
+            self.aods_to_users[user.idx] = np.arcsin(
                 (
                         + self.spherical_coordinates[0] ** 2
                         + self.distance_to_users[user.idx] ** 2
@@ -112,7 +103,7 @@ class Satellite:
             )
 
             if user_pos_idx[user.idx] >= 0:
-                self.aods_to_users[user.idx] = 2 * (self.center_aod_earth_deg * pi/180) - self.aods_to_users[user.idx]
+                self.aods_to_users[user.idx] = 2 * (self.center_aod_earth_deg * np.pi/180) - self.aods_to_users[user.idx]
 
     def calculate_steering_vectors(
             self,
@@ -123,16 +114,16 @@ class Satellite:
         """
 
         if self.steering_vectors_to_users is None:
-            self.steering_vectors_to_users = zeros((len(users), self.antenna_nr), dtype='complex128')
+            self.steering_vectors_to_users = np.zeros((len(users), self.antenna_nr), dtype='complex128')
 
-        steering_idx = arange(0, self.antenna_nr) - (self.antenna_nr - 1) / 2
+        steering_idx = np.arange(0, self.antenna_nr) - (self.antenna_nr - 1) / 2
 
         for user in users:
-            self.steering_vectors_to_users[user.idx, :] = exp(
+            self.steering_vectors_to_users[user.idx, :] = np.exp(
                 steering_idx * (
-                    -1j * 2 * pi / self.wavelength
+                    -1j * 2 * np.pi / self.wavelength
                     * self.antenna_distance
-                    * cos(self.aods_to_users[user.idx])
+                    * np.cos(self.aods_to_users[user.idx])
                 )
             )
 

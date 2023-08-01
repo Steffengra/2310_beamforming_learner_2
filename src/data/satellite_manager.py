@@ -1,14 +1,5 @@
 
-from numpy import (
-    ndarray,
-    array,
-    reshape,
-    arange,
-    zeros,
-    ones,
-    arccos,
-    pi,
-)
+import numpy as np
 
 from src.config.config import (
     Config,
@@ -34,19 +25,19 @@ class SatelliteManager:
         self.satellites: list[Satellite] = []
         self._initialize_satellites(config=config)
 
-        self.channel_state_information: ndarray = array([])  # ndarray \in dim_user x (nr_antennas * nr_satellites)
+        self.channel_state_information: np.ndarray = np.array([])  # ndarray \in dim_user x (nr_antennas * nr_satellites)
                                                              #  per user: sat 1 ant1, sat 1 ant 2, sat 1 ant 3, sat 2 ant 1, ...
-        self.erroneous_channel_state_information: ndarray = array([])  # ndarray \in dim_user x (nr_antennas * nr_satellites)
+        self.erroneous_channel_state_information: np.ndarray = np.array([])  # ndarray \in dim_user x (nr_antennas * nr_satellites)
 
         self.logger.info('satellites setup complete')
 
     def calc_spherical_coordinates(
             self,
             config,
-    ) -> ndarray:
+    ) -> np.ndarray:
 
         # calculate average satellite positions
-        sat_pos_average = (arange(0, config.sat_nr) - (config.sat_nr - 1) / 2) * config.sat_dist_average
+        sat_pos_average = (np.arange(0, config.sat_nr) - (config.sat_nr - 1) / 2) * config.sat_dist_average
 
         # add random value on satellite distances
         random_factor = self.rng.uniform(low=-config.sat_dist_bound,
@@ -55,17 +46,17 @@ class SatelliteManager:
         sat_dist = sat_pos_average + random_factor
 
         # calculate sat_aods_diff_earth_rad
-        sat_aods_diff_earth_rad = zeros(config.sat_nr)
+        sat_aods_diff_earth_rad = np.zeros(config.sat_nr)
 
         for sat_idx in range(config.sat_nr):
 
             if sat_dist[sat_idx] < 0:
-                sat_aods_diff_earth_rad[sat_idx] = -1 * arccos(1 - 0.5 * (sat_dist[sat_idx] / config.radius_orbit)**2)
+                sat_aods_diff_earth_rad[sat_idx] = -1 * np.arccos(1 - 0.5 * (sat_dist[sat_idx] / config.radius_orbit)**2)
             elif sat_dist[sat_idx] >= 0:
-                sat_aods_diff_earth_rad[sat_idx] = arccos(1 - 0.5 * (sat_dist[sat_idx] / config.radius_orbit)**2)
+                sat_aods_diff_earth_rad[sat_idx] = np.arccos(1 - 0.5 * (sat_dist[sat_idx] / config.radius_orbit)**2)
 
         # calculate sat_center_aod_earth_rad
-        sat_center_aod_earth_rad = config.sat_center_aod_earth_deg * pi / 180
+        sat_center_aod_earth_rad = config.sat_center_aod_earth_deg * np.pi / 180
 
         # TODO: if any(sat_pos_average == 0) == 1, vllt Fallunterscheidung für gerade und ungerade
 
@@ -73,10 +64,10 @@ class SatelliteManager:
         sat_aods_earth_rad = sat_center_aod_earth_rad + sat_aods_diff_earth_rad
 
         # create satellite objects
-        sat_radii = config.radius_orbit * ones(config.sat_nr)
-        sat_inclinations = pi / 2 * ones(config.sat_nr)
+        sat_radii = config.radius_orbit * np.ones(config.sat_nr)
+        sat_inclinations = np.pi / 2 * np.ones(config.sat_nr)
 
-        sat_spherical_coordinates = array([sat_radii, sat_inclinations, sat_aods_earth_rad])
+        sat_spherical_coordinates = np.array([sat_radii, sat_inclinations, sat_aods_earth_rad])
 
         return sat_spherical_coordinates
 
@@ -164,11 +155,11 @@ class SatelliteManager:
             satellite.update_channel_state_information(channel_model=channel_model, users=users)
 
         # build global channel state information
-        channel_state_per_satellite = zeros((len(users), self.satellites[0].antenna_nr, len(self.satellites)),
-                                            dtype='complex128')
+        channel_state_per_satellite = np.zeros((len(users), self.satellites[0].antenna_nr, len(self.satellites)),
+                                               dtype='complex128')
         for satellite in self.satellites:
             channel_state_per_satellite[:, :, satellite.idx] = satellite.channel_state_to_users
-        self.channel_state_information = reshape(
+        self.channel_state_information = np.reshape(
             channel_state_per_satellite, (len(users), self.satellites[0].antenna_nr * len(self.satellites)))
 
     def update_erroneous_channel_state_information(
@@ -185,20 +176,20 @@ class SatelliteManager:
             satellite.update_erroneous_channel_state_information(error_model_config=error_model_config, users=users)
 
         # gather global erroneous channel state information
-        erroneous_channel_state_per_satellite = zeros(
+        erroneous_channel_state_per_satellite = np.zeros(
             (len(users), self.satellites[0].antenna_nr, len(self.satellites)),
             dtype='complex128',
         )
         for satellite in self.satellites:
             erroneous_channel_state_per_satellite[:, :, satellite.idx] = satellite.erroneous_channel_state_to_users
-        self.erroneous_channel_state_information = reshape(
+        self.erroneous_channel_state_information = np.reshape(
             erroneous_channel_state_per_satellite, (len(users), self.satellites[0].antenna_nr * len(self.satellites)))
 
     def get_aods_to_users(
             self,
-    ) -> ndarray:
+    ) -> np.ndarray:
 
-        aods_to_users = zeros((len(self.satellites), len(self.satellites[0].aods_to_users)))
+        aods_to_users = np.zeros((len(self.satellites), len(self.satellites[0].aods_to_users)))
         for satellite_id, satellite in enumerate(self.satellites):
             aods_to_users[satellite_id, :] = satellite.aods_to_users
 

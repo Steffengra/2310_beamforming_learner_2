@@ -1,13 +1,5 @@
 
-from numpy import (
-    ndarray,
-    array,
-    arange,
-    zeros,
-    ones,
-    arccos,
-    pi,
-)
+import numpy as np
 
 from src.config.config import (
     Config,
@@ -38,10 +30,10 @@ class UserManager:
     def calc_spherical_coordinates(
             self,
             config,
-    ) -> (ndarray, list):
+    ) -> (np.ndarray, list):
 
         # calculate average user positions
-        user_pos_average = (arange(0, config.user_nr) - (config.user_nr - 1) / 2) * config.user_dist_average
+        user_pos_average = (np.arange(0, config.user_nr) - (config.user_nr - 1) / 2) * config.user_dist_average
 
         # add random value on user distances
         random_factor = self.rng.uniform(low=-config.user_dist_bound,
@@ -50,16 +42,16 @@ class UserManager:
         user_dist = user_pos_average + random_factor
 
         # calculate user_aods_diff_earth_rad
-        user_aods_diff_earth_rad = zeros(config.user_nr)
+        user_aods_diff_earth_rad = np.zeros(config.user_nr)
 
         for user_idx in range(config.user_nr):
 
             if user_dist[user_idx] < 0:
-                user_aods_diff_earth_rad[user_idx] = -1 * arccos(1 - 0.5 * (user_dist[user_idx] / config.radius_earth)**2)
+                user_aods_diff_earth_rad[user_idx] = -1 * np.arccos(1 - 0.5 * (user_dist[user_idx] / config.radius_earth)**2)
             elif user_dist[user_idx] >= 0:
-                user_aods_diff_earth_rad[user_idx] = arccos(1 - 0.5 * (user_dist[user_idx] / config.radius_earth)**2)
+                user_aods_diff_earth_rad[user_idx] = np.arccos(1 - 0.5 * (user_dist[user_idx] / config.radius_earth)**2)
 
-        user_center_aod_earth_rad = config.user_center_aod_earth_deg * pi / 180
+        user_center_aod_earth_rad = config.user_center_aod_earth_deg * np.pi / 180
 
         # TODO: if any(user_pos_average == 0) == 1, vllt Fallunterscheidung für gerade und ungerade
 
@@ -67,10 +59,10 @@ class UserManager:
         user_aods_earth_rad = user_center_aod_earth_rad + user_aods_diff_earth_rad
 
         # create user objects
-        user_radii = config.radius_earth * ones(config.user_nr)
-        user_inclinations = pi / 2 * ones(config.user_nr)
+        user_radii = config.radius_earth * np.ones(config.user_nr)
+        user_inclinations = np.pi / 2 * np.ones(config.user_nr)
 
-        user_spherical_coordinates = array([user_radii, user_inclinations, user_aods_earth_rad])
+        user_spherical_coordinates = np.array([user_radii, user_inclinations, user_aods_earth_rad])
 
         return user_spherical_coordinates
 

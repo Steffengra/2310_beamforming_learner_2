@@ -1,15 +1,5 @@
 
-from numpy import (
-    ndarray,
-    finfo,
-    eye,
-    matmul,
-    trace,
-    sqrt,
-)
-from numpy.linalg import (
-    inv,
-)
+import numpy as np
 
 from src.utils.norm_precoder import (
     norm_precoder,
@@ -22,7 +12,7 @@ def mmse_precoder_normalized(
         power_constraint_watt: float,
         sat_nr,
         sat_ant_nr,
-) -> ndarray:
+) -> np.ndarray:
 
     precoding_matrix = mmse_precoder_no_norm(
         channel_matrix=channel_matrix,
@@ -45,7 +35,7 @@ def mmse_precoder_no_norm(
         channel_matrix,
         noise_power_watt: float,
         power_constraint_watt: float,
-) -> ndarray:
+) -> np.ndarray:
 
     # inversion_constant_lambda = finfo('float32').tiny
     inversion_constant_lambda = 0
@@ -54,9 +44,9 @@ def mmse_precoder_no_norm(
     sat_tot_ant_nr = channel_matrix.shape[1]
 
     precoding_matrix = (
-        matmul(
-            inv(
-                matmul(channel_matrix.conj().T, channel_matrix)
+        np.matmul(
+            np.linalg.inv(
+                np.matmul(channel_matrix.conj().T, channel_matrix)
                 + (noise_power_watt * user_nr / power_constraint_watt + inversion_constant_lambda) * eye(sat_tot_ant_nr)
             ),
             channel_matrix.conj().T
