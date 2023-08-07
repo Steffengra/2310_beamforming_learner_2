@@ -19,12 +19,12 @@ def test_mrc_precoder_user_distance_sweep(
 ) -> None:
 
     def get_precoder_mrc(
-        cfg: 'src.config.config.Config',
+        config: 'src.config.config.Config',
         satellite_manager: src.data.satellite_manager.SatelliteManager,
     ):
         w_mrc = mrc_precoder_normalized(
             channel_matrix=satellite_manager.erroneous_channel_state_information,
-            **cfg.mrc_args,
+            **config.mrc_args,
         )
 
         return w_mrc

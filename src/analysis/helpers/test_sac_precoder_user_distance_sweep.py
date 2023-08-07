@@ -29,24 +29,24 @@ def test_sac_precoder_user_distance_sweep(
 ) -> None:
 
     def get_precoder_function_learned(
-        cfg: 'src.config.config.Config',
+        config: 'src.config.config.Config',
         satellite_manager: 'src.data.satellite_manager.SatelliteManager',
     ):
 
-        state = cfg.config_learner.get_state(satellite_manager=satellite_manager, **cfg.config_learner.get_state_args)
+        state = config.config_learner.get_state(satellite_manager=satellite_manager, **config.config_learner.get_state_args)
         w_precoder, _ = precoder_network.call(state.astype('float32')[np.newaxis])
         w_precoder = w_precoder.numpy().flatten()
 
         # reshape to fit reward calculation
         w_precoder = real_vector_to_half_complex_vector(w_precoder)
-        w_precoder = w_precoder.reshape((cfg.sat_nr * cfg.sat_ant_nr, cfg.user_nr))
+        w_precoder = w_precoder.reshape((config.sat_nr * config.sat_ant_nr, config.user_nr))
 
         return norm_precoder(
             precoding_matrix=w_precoder,
-            power_constraint_watt=cfg.power_constraint_watt,
+            power_constraint_watt=config.power_constraint_watt,
             per_satellite=True,
-            sat_nr=cfg.sat_nr,
-            sat_ant_nr=cfg.sat_ant_nr)
+            sat_nr=config.sat_nr,
+            sat_ant_nr=config.sat_ant_nr)
 
     precoder_network = load_model(model_path)
 
