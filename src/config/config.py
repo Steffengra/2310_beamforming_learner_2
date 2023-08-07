@@ -50,6 +50,7 @@ class Config:
         self._logging_level_stdio = logging.INFO  # DEBUG < INFO < WARNING < ERROR < CRITICAL < CRITICAL+1
         self._logging_level_file = logging.DEBUG
         self._logging_level_tensorflow = logging.WARNING
+        self._logging_level_matplotlib = logging.INFO
         self.logfile_max_bytes: int = 10_000_000  # log file max size, one backup file is kept
 
         # Basic Communication Parameters
@@ -172,6 +173,9 @@ class Config:
 
         tensorflow_logger = tf_get_logger()
         tensorflow_logger.setLevel(self._logging_level_tensorflow)
+
+        matplotlib_logger = logging.getLogger('matplotlib')
+        matplotlib_logger.setLevel(self._logging_level_matplotlib)
 
         self.logger.setLevel(logging.NOTSET)  # set primary logger level to lowest to catch all
 
