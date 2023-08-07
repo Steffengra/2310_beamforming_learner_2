@@ -16,9 +16,7 @@ from matplotlib.pyplot import (
     show as plt_show,
 )
 
-from src.config.config import (
-    Config,
-)
+import src
 from src.data.satellite_manager import (
     SatelliteManager,
 )
@@ -41,8 +39,8 @@ from src.utils.update_sim import (
 
 
 def test_precoder_error_sweep(
-    config: Config,
-    csit_error_sweep_range,
+    config: 'src.config.config.Config',
+    csit_error_sweep_range: np.ndarray,
     precoder_name: str,
     monte_carlo_iterations: int,
     get_precoder_func,

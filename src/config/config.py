@@ -1,5 +1,8 @@
 
 import logging
+from logging.handlers import (
+    RotatingFileHandler,
+)
 import numpy as np
 from pathlib import (
     Path,
@@ -44,9 +47,10 @@ class Config:
         self.show_plots: bool = True
 
         self.verbosity: int = 1  # 0 = no prints, 1 = prints
-        self._logging_level_stdio = logging.INFO  # DEBUG < INFO < WARNING < ERROR < CRITICAL
-        self._logging_level_file = logging.WARNING
+        self._logging_level_stdio = logging.INFO  # DEBUG < INFO < WARNING < ERROR < CRITICAL < CRITICAL+1
+        self._logging_level_file = logging.DEBUG
         self._logging_level_tensorflow = logging.WARNING
+        self.logfile_max_bytes: int = 10_000_000  # log file max size, one backup file is kept
 
         # Basic Communication Parameters
         self.freq: float = 2 * 10**9
@@ -153,13 +157,13 @@ class Config:
     ) -> None:
 
         logging_formatter = logging.Formatter(
-            '{asctime} : {levelname:8s} : {name:30} : {funcName:20s} :: {message}',
+            '{asctime} : {levelname:8s} : {name:30} : {funcName:25} :: {message}',
             datefmt='%Y-%m-%d %H:%M:%S',
             style='{',
         )
 
         # Create Handlers
-        logging_file_handler = logging.FileHandler(self.logfile_path)
+        logging_file_handler = RotatingFileHandler(self.logfile_path, maxBytes=self.logfile_max_bytes, backupCount=1)
         logging_stdio_handler = logging.StreamHandler(stdout)
 
         # Set Logging Level
@@ -178,8 +182,3 @@ class Config:
         # Add Handlers
         self.logger.addHandler(logging_file_handler)
         self.logger.addHandler(logging_stdio_handler)
-
-        # Check Log File Size
-        large_log_file_size = 30_000_000
-        if self.logfile_path.stat().st_size > large_log_file_size:
-            self.logger.warning(f'log file size >{large_log_file_size / 1_000_000} MB')

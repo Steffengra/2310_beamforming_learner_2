@@ -1,22 +1,21 @@
 
 import numpy as np
 
-from src.config.config import (
-    Config,
-)
+import src
 from src.data.satellite import (
     Satellite,
 )
 
 
 class SatelliteManager:
+
     """
     Satellites holds all satellite objects and helper functions
     """
 
     def __init__(
             self,
-            config: Config,
+            config: 'src.config.config.Config',
     ) -> None:
 
         self.rng = config.rng
@@ -33,7 +32,7 @@ class SatelliteManager:
 
     def calc_spherical_coordinates(
             self,
-            config,
+            config: 'src.config.config.Config',
     ) -> np.ndarray:
 
         # calculate average satellite positions
@@ -73,8 +72,9 @@ class SatelliteManager:
 
     def _initialize_satellites(
             self,
-            config: Config,
+            config: 'src.config.config.Config',
     ) -> None:
+
         """
         Initializes satellite object list for given configuration
         """
@@ -92,7 +92,7 @@ class SatelliteManager:
 
     def update_positions(
             self,
-            config,
+            config: 'src.config.config.Config',
     ) -> None:
 
         sat_spherical_coordinates = self.calc_spherical_coordinates(config=config)
@@ -117,6 +117,7 @@ class SatelliteManager:
             self,
             users: list,
     ) -> None:
+
         """
         This function calculates the AODs (angles of departure) from each satellite to
         each user (Earth and satellite orbits are assumed to be circular)
@@ -129,6 +130,7 @@ class SatelliteManager:
             self,
             users: list,
     ) -> None:
+
         """
         This function calculates the steering vectors (one value per antenna) for each satellite to
         each user
@@ -142,6 +144,7 @@ class SatelliteManager:
             channel_model,
             users: list,
     ) -> None:
+
         """
         This function builds channel state information between each satellite antenna and user, then
         accumulates all into a global channel state information matrix
@@ -164,7 +167,7 @@ class SatelliteManager:
 
     def update_erroneous_channel_state_information(
             self,
-            error_model_config,
+            error_model_config: 'src.config.config_error_model.ConfigErrorModel',
             users: list,
     ) -> None:
 

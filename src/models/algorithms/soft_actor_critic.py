@@ -59,8 +59,8 @@ class SoftActorCritic:
             policy_network_optimizer,
             policy_network_optimizer_args: dict,
             # policy_network_loss,
-            size_state,
-            num_actions,
+            size_state: int,
+            num_actions: int,
     ) -> None:
 
         # create networks
@@ -127,7 +127,7 @@ class SoftActorCritic:
 
     def get_action(
             self,
-            state,
+            state: np.ndarray,
     ) -> np.ndarray:
         actions, _ = self.networks['policy'][0]['primary'].get_action_and_log_prob_density(state=state)
 

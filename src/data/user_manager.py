@@ -1,9 +1,7 @@
 
 import numpy as np
 
-from src.config.config import (
-    Config,
-)
+import src
 from src.data.user import (
     User,
 )
@@ -16,7 +14,7 @@ class UserManager:
 
     def __init__(
             self,
-            config: Config,
+            config: 'src.config.config.Config',
     ) -> None:
 
         self.rng = config.rng
@@ -29,7 +27,7 @@ class UserManager:
 
     def calc_spherical_coordinates(
             self,
-            config,
+            config: 'src.config.config.Config',
     ) -> (np.ndarray, list):
 
         # calculate average user positions
@@ -68,7 +66,7 @@ class UserManager:
 
     def _initialize_users(
             self,
-            config: Config,
+            config: 'src.config.config.Config',
     ) -> None:
 
         user_spherical_coordinates = self.calc_spherical_coordinates(config=config)
@@ -84,7 +82,7 @@ class UserManager:
 
     def update_positions(
             self,
-            config,
+            config: 'src.config.config.Config',
     ) -> None:
 
         user_spherical_coordinates = self.calc_spherical_coordinates(config=config)

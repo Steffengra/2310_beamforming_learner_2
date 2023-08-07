@@ -1,16 +1,14 @@
 
 import numpy as np
-
-from src.data.satellite import (
-    Satellite,
-)
+import src
 
 
 def los_channel_error_model_in_sat_and_user_pos(
-        error_model_config,
-        satellite: Satellite,
+        error_model_config: 'src.config.config_error_model.ConfigErrorModel',
+        satellite: 'src.data.satellite.Satellite',
         users: list,
 ) -> np.ndarray:
+
     """
     TODO: describe this - ref?
     """
@@ -25,7 +23,7 @@ def los_channel_error_model_in_sat_and_user_pos(
         )
         amplitude_damping = np.sqrt(power_ratio)
 
-        phase_shift = satellite.distance_to_users[user.idx] % satellite.wavelength * 2 * pi / satellite.wavelength
+        phase_shift = satellite.distance_to_users[user.idx] % satellite.wavelength * 2 * np.pi / satellite.wavelength
         phase_shift_error = 2 * np.pi / satellite.wavelength * satellite.rng.normal(loc=0, scale=error_model_config.phase_sat_error_std)
 
         channel_state_information[user.idx, :] = (

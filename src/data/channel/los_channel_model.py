@@ -1,15 +1,13 @@
 
 import numpy as np
-
-from src.data.satellite import (
-    Satellite,
-)
+import src
 
 
 def los_channel_model(
-        satellite: Satellite,
+        satellite: 'src.data.satellite.Satellite',
         users: list,
 ) -> np.ndarray:
+
     """
     The los channel model calculates complex csi for one satellite to all users from
         1) amplitude dampening based on sat gain, user gain, and freq-dependent distance gain

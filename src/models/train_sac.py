@@ -1,5 +1,7 @@
 
-from pathlib import Path
+from pathlib import (
+    Path,
+)
 from sys import path as sys_path
 
 project_root_path = Path(Path(__file__).parent, '..', '..')
@@ -8,9 +10,6 @@ sys_path.append(str(project_root_path.resolve()))
 import numpy as np
 from datetime import (
     datetime,
-)
-from pathlib import (
-    Path,
 )
 from shutil import (
     copytree,
@@ -26,6 +25,7 @@ from matplotlib.pyplot import (
     show as plt_show,
 )
 
+import src
 from src.config.config import (
     Config,
 )
@@ -38,6 +38,9 @@ from src.data.user_manager import (
 from src.models.algorithms.soft_actor_critic import (
     SoftActorCritic,
 )
+from src.models.helpers.get_state_norm_factors import (
+    get_state_norm_factors,
+)
 from src.data.calc_sum_rate import (
     calc_sum_rate,
 )
@@ -46,9 +49,7 @@ from src.data.precoder.mmse_precoder import (
 )
 from src.utils.real_complex_vector_reshaping import (
     real_vector_to_half_complex_vector,
-    rad_and_phase_to_complex_vector,
     complex_vector_to_double_real_vector,
-    complex_vector_to_rad_and_phase,
 )
 from src.utils.norm_precoder import (
     norm_precoder,
@@ -68,14 +69,19 @@ from src.utils.update_sim import (
 )
 
 
-def train_sac_single_error(config) -> Path:
+def train_sac_single_error(
+        config: 'src.config.config.Config',
+) -> Path:
 
-    def progress_print() -> None:
+    def progress_print(to_log: bool = False) -> None:
         progress = (
                 (training_episode_id * config.config_learner.training_steps_per_episode + training_step_id + 1)
                 / (config.config_learner.training_episodes * config.config_learner.training_steps_per_episode)
         )
-        progress_printer(progress=progress, real_time_start=real_time_start)
+        if not to_log:
+            progress_printer(progress=progress, real_time_start=real_time_start)
+        else:
+            progress_printer(progress=progress, real_time_start=real_time_start, logger=logger)
 
     def policy_training_criterion() -> bool:
         """Train policy networks only every k steps and/or only after j total steps to ensure a good value function"""
@@ -136,6 +142,10 @@ def train_sac_single_error(config) -> Path:
                  Path(checkpoint_path, 'config'),
                  dirs_exist_ok=True)
 
+        # save norm dict
+        with gzip_open(Path(checkpoint_path, 'config', 'norm_dict.gzip'), 'wb') as file:
+            pickle_dump(norm_dict, file)
+
         # clean model checkpoints
         for high_score_prior_id, high_score_prior in enumerate(reversed(high_scores)):
             if high_score > 1.05 * high_score_prior or high_score_prior_id > 3:
@@ -169,9 +179,14 @@ def train_sac_single_error(config) -> Path:
         with gzip_open(Path(results_path, name), 'wb') as file:
             pickle_dump(metrics, file=file)
 
+    logger = config.logger.getChild(__name__)
+
     satellite_manager = SatelliteManager(config=config)
     user_manager = UserManager(config=config)
     sac = SoftActorCritic(rng=config.rng, **config.config_learner.algorithm_args)
+
+    norm_dict = get_state_norm_factors(config=config, satellite_manager=satellite_manager, user_manager=user_manager)
+    logger.info('State normalization factors found')
 
     metrics: dict = {
         'mean_sum_rate_per_episode': -np.infty * np.ones(config.config_learner.training_episodes)
@@ -196,7 +211,11 @@ def train_sac_single_error(config) -> Path:
         }
 
         update_sim(config, satellite_manager, user_manager)  # todo: we update_sim twice in this script, correct?
-        state_next = config.config_learner.get_state(satellites=satellite_manager, **config.config_learner.get_state_args)
+        state_next = config.config_learner.get_state(
+            satellite_manager=satellite_manager,
+            norm_factors=norm_dict['norm_factors'],
+            **config.config_learner.get_state_args
+        )
 
         for training_step_id in range(config.config_learner.training_steps_per_episode):
 
@@ -232,7 +251,11 @@ def train_sac_single_error(config) -> Path:
             update_sim(config, satellite_manager, user_manager)
 
             # get new state
-            state_next = config.config_learner.get_state(satellites=satellite_manager, **config.config_learner.get_state_args)
+            state_next = config.config_learner.get_state(
+                satellite_manager=satellite_manager,
+                norm_factors=norm_dict['norm_factors'],
+                **config.config_learner.get_state_args
+            )
             step_experience['next_state'] = state_next
 
             sac.add_experience(experience=step_experience)
@@ -259,12 +282,17 @@ def train_sac_single_error(config) -> Path:
         # log episode results
         episode_mean_sum_rate = np.mean(episode_metrics['sum_rate_per_step'])
         metrics['mean_sum_rate_per_episode'][training_episode_id] = episode_mean_sum_rate
-        if config.verbosity == 1:
-            print(f' Episode mean reward: {episode_mean_sum_rate:.4f}'
-                  f' std {np.std(episode_metrics["sum_rate_per_step"]):.2f},'
-                  f' current exploration: {np.mean(episode_metrics["mean_log_prob_density"]):.2f},'
-                  f' value loss: {np.mean(episode_metrics["value_loss"]):.5f}'
-                  )
+
+        if config.verbosity > 0:
+            print('\r', end='')  # clear console for logging results
+        progress_print(to_log=True)
+        logger.info(
+            f'Episode {training_episode_id}:'
+            f' Episode mean reward: {episode_mean_sum_rate:.4f}'
+            f' std {np.std(episode_metrics["sum_rate_per_step"]):.2f},'
+            f' current exploration: {np.mean(episode_metrics["mean_log_prob_density"]):.2f},'
+            f' value loss: {np.mean(episode_metrics["value_loss"]):.5f}'
+        )
 
         # save network snapshot
         if episode_mean_sum_rate > high_score:

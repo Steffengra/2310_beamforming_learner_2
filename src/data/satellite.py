@@ -1,6 +1,7 @@
 
 import numpy as np
 
+import src
 from src.utils.spherical_to_cartesian_coordinates import (
     spherical_to_cartesian_coordinates,
 )
@@ -16,8 +17,8 @@ class Satellite:
 
     def __init__(
             self,
-            rng,
-            idx,
+            rng: np.random.default_rng,
+            idx: int,
             spherical_coordinates: np.ndarray,
             antenna_nr: int,
             antenna_distance: float,
@@ -50,7 +51,7 @@ class Satellite:
 
     def update_position(
             self,
-            spherical_coordinates,
+            spherical_coordinates: np.ndarray,
     ):
 
         self.spherical_coordinates = spherical_coordinates
@@ -140,7 +141,7 @@ class Satellite:
 
     def update_erroneous_channel_state_information(
             self,
-            error_model_config,
+            error_model_config: 'src.config.config_error_model.ConfigErrorModel',
             users: list,
     ) -> None:
         """

@@ -1,19 +1,11 @@
 
-from src.config.config import (
-    Config,
-)
-from src.data.satellite_manager import (
-    SatelliteManager,
-)
-from src.data.user_manager import (
-    UserManager,
-)
+import src
 
 
 def update_sim(
-    config: Config,
-    satellite_manager: SatelliteManager,
-    user_manager: UserManager,
+    config: 'src.config.config.Config',
+    satellite_manager: 'src.data.satellite_manager.SatelliteManager',
+    user_manager: 'src.data.user_manager.UserManager',
 ) -> None:
 
     user_manager.update_positions(config=config)

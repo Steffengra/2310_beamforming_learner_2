@@ -1,4 +1,10 @@
 
+"""
+These functions can be used to create "noisy actions", thereby forcing exploration.
+TODO: Remember that the output of this function must
+    be a valid output from the policy network, e.g., be normalized in the same way
+"""
+
 import numpy as np
 
 from src.data.precoder.mmse_precoder import (
@@ -9,19 +15,13 @@ from src.utils.real_complex_vector_reshaping import (
 )
 
 
-"""
-These functions can be used to create "noisy actions", thereby forcing exploration.
-TODO: Remember that the output of this function must
-    be a valid output from the policy network, e.g., be normalized in the same way
-"""
-
-
 def add_random_distribution(
-        rng,
+        rng: np.random.default_rng,
         action: np.ndarray,
         tau_momentum: float,
         normalize: bool = False,
 ) -> np.ndarray:
+
     """
     Mix an action vector with a random_uniform vector of same length
     by tau * random_distribution + (1 - tau) * action
@@ -48,9 +48,9 @@ def add_random_distribution(
 def add_mmse_precoder(
         action: np.ndarray,
         tau_momentum: float,
-        channel_matrix,
-        noise_power_watt,
-        power_constraint_watt,
+        channel_matrix: np.ndarray,
+        noise_power_watt: float,
+        power_constraint_watt: float,
 ) -> np.ndarray:
 
     if tau_momentum == 0.0:

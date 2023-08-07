@@ -3,9 +3,9 @@ import numpy as np
 
 
 def mrc_precoder_normalized(
-        channel_matrix,
-        power_constraint_watt: float,
-):
+    channel_matrix: np.ndarray,
+    power_constraint_watt: float,
+) -> np.ndarray:
 
     user_nr = channel_matrix.shape[0]
     sat_tot_ant_nr = channel_matrix.shape[1]
