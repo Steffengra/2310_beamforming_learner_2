@@ -22,13 +22,13 @@ def test_mmse_precoder_user_distance_sweep(
 ) -> None:
 
     def get_precoder_mmse(
-        cfg: 'src.config.config.Config',
+        config: 'src.config.config.Config',
         satellite_manager: 'src.data.satellite_manager.SatelliteManager',
     ):
 
         w_mmse = mmse_precoder_normalized(
             channel_matrix=satellite_manager.erroneous_channel_state_information,
-            **cfg.mmse_args,
+            **config.mmse_args,
         )
 
         return w_mmse

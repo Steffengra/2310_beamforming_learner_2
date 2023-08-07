@@ -187,6 +187,7 @@ def train_sac_single_error(
 
     norm_dict = get_state_norm_factors(config=config, satellite_manager=satellite_manager, user_manager=user_manager)
     logger.info('State normalization factors found')
+    logger.info(norm_dict)
 
     metrics: dict = {
         'mean_sum_rate_per_episode': -np.infty * np.ones(config.config_learner.training_episodes)
