@@ -139,6 +139,10 @@ def train_sac_single_error(config) -> Path:
                  Path(checkpoint_path, 'config'),
                  dirs_exist_ok=True)
 
+        # save norm dict
+        with gzip_open(Path(checkpoint_path, 'config', 'norm_dict.gzip'), 'wb') as file:
+            pickle_dump(norm_dict, file)
+
         # clean model checkpoints
         for high_score_prior_id, high_score_prior in enumerate(reversed(high_scores)):
             if high_score > 1.05 * high_score_prior or high_score_prior_id > 3:
