@@ -38,6 +38,9 @@ from src.data.user_manager import (
 from src.models.algorithms.soft_actor_critic import (
     SoftActorCritic,
 )
+from src.models.helpers.get_state_norm_factors import (
+    get_state_norm_factors,
+)
 from src.data.calc_sum_rate import (
     calc_sum_rate,
 )
@@ -173,6 +176,8 @@ def train_sac_single_error(config) -> Path:
     user_manager = UserManager(config=config)
     sac = SoftActorCritic(rng=config.rng, **config.config_learner.algorithm_args)
 
+    norm_dict = get_state_norm_factors(config=config, satellite_manager=satellite_manager, user_manager=user_manager)
+
     metrics: dict = {
         'mean_sum_rate_per_episode': -np.infty * np.ones(config.config_learner.training_episodes)
     }
@@ -196,7 +201,11 @@ def train_sac_single_error(config) -> Path:
         }
 
         update_sim(config, satellite_manager, user_manager)  # todo: we update_sim twice in this script, correct?
-        state_next = config.config_learner.get_state(satellites=satellite_manager, **config.config_learner.get_state_args)
+        state_next = config.config_learner.get_state(
+            satellite_manager=satellite_manager,
+            norm_factors=norm_dict['norm_factors'],
+            **config.config_learner.get_state_args
+        )
 
         for training_step_id in range(config.config_learner.training_steps_per_episode):
 
@@ -232,7 +241,11 @@ def train_sac_single_error(config) -> Path:
             update_sim(config, satellite_manager, user_manager)
 
             # get new state
-            state_next = config.config_learner.get_state(satellites=satellite_manager, **config.config_learner.get_state_args)
+            state_next = config.config_learner.get_state(
+                satellite_manager=satellite_manager,
+                norm_factors=norm_dict['norm_factors'],
+                **config.config_learner.get_state_args
+            )
             step_experience['next_state'] = state_next
 
             sac.add_experience(experience=step_experience)

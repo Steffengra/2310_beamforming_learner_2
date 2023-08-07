@@ -35,9 +35,9 @@ class TestSystemState(unittest.TestCase):
             self,
     ):
         csi = get_state_erroneous_channel_state_information(
-            satellites=self.satellite_manager,
+            satellite_manager=self.satellite_manager,
             csi_format='rad_phase',
-            norm_csi=True,
+            norm_state=True,
         )
         self.assertTrue(all(abs(csi) < 5))
 
@@ -45,9 +45,9 @@ class TestSystemState(unittest.TestCase):
             self,
     ):
         csi = get_state_erroneous_channel_state_information(
-            satellites=self.satellite_manager,
+            satellite_manager=self.satellite_manager,
             csi_format='real_imag',
-            norm_csi=True,
+            norm_state=True,
         )
         self.assertTrue(all(abs(csi) < 5))
 
@@ -55,8 +55,8 @@ class TestSystemState(unittest.TestCase):
             self,
     ):
         aods = get_state_aods(
-            satellites=self.satellite_manager,
-            norm_aods=True
+            satellite_manager=self.satellite_manager,
+            norm_state=True
         )
         self.assertTrue(all(abs(aods) < 5))
 

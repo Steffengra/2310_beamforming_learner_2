@@ -34,7 +34,7 @@ def test_sac_precoder_user_distance_sweep(
         config,
         satellite_manager,
     ):
-        state = config.config_learner.get_state(satellites=satellite_manager, **config.config_learner.get_state_args)
+        state = config.config_learner.get_state(satellite_manager=satellite_manager, **config.config_learner.get_state_args)
         w_precoder, _ = precoder_network.call(state.astype('float32')[np.newaxis])
         w_precoder = w_precoder.numpy().flatten()
 

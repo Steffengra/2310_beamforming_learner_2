@@ -20,8 +20,9 @@ class ConfigSACLearner:
         self.get_state = get_state_erroneous_channel_state_information
         self.get_state_args = {
             'csi_format': 'rad_phase',  # 'rad_phase', 'real_imag'
-            'norm_csi': True,  # !!HEURISTIC!!, this will break if you dramatically change the setup
+            'norm_state': True,  # !!HEURISTIC!!, this will break if you dramatically change the setup
         }
+        self.get_state_norm_factors_iterations: int = 100_000  # how many samples to calculate means and stds
 
         self.percentage_mmse_samples_added_to_exp_buffer: float = 0.0  # [0.0, 1.0] chance for mmse action to be added
 
