@@ -37,25 +37,29 @@ def get_state_erroneous_channel_state_information(
         if norm_state:
 
             half_length_idx = int(len(state_real) / 2)
-            # state_real[:half_length_idx] = state_real[:half_length_idx] * 1e7  # roughly [0, 1]
-            # state_real[:half_length_idx] -= 9.939976886796873e-08  # VERY heuristic standardization
-            # state_real[:half_length_idx] /= 1.1296214238672676e-12
-            state_real[:half_length_idx] -= norm_factors['radius_mean']  # VERY heuristic standardization
-            state_real[:half_length_idx] /= norm_factors['radius_std']
 
-            # state_real[half_length_idx:] = state_real[half_length_idx:] / pi  # [-1, 1]
-            # state_real[half_length_idx:] -= -0.12738714345740954  # VERY heuristic standardization
-            # state_real[half_length_idx:] /= 1.839204723266767
-            state_real[half_length_idx:] -= norm_factors['phase_mean']  # VERY heuristic standardization
-            state_real[half_length_idx:] /= norm_factors['phase_std']
+            # normalize radius
+            # heuristic standardization
+            state_real[:half_length_idx] -= norm_factors['radius_mean']  # needs a moderate amount of samples
+            state_real[:half_length_idx] /= norm_factors['radius_std']  # needs few samples
+
+            # normalize phase
+            # heuristic standardization
+            # state_real[half_length_idx:] -= norm_factors['phase_mean']  # needs A LOT of samples
+            state_real[half_length_idx:] /= norm_factors['phase_std']  # needs few samples
 
     elif csi_format == 'real_imag':
         state_real = complex_vector_to_double_real_vector(erroneous_csi)
         if norm_state:
+
             # state_real *= 1e7  # roughly range [-1, 1]
-            # state_real -= -4.308892163699242e-09  # VERY heuristic standardization
+
+            # VERY heuristic standardization
+            # state_real -= -4.308892163699242e-09
             # state_real /= 7.015404816259004e-08
-            state_real -= norm_factors['mean']  # VERY heuristic standardization
+
+            # heuristic standardization
+            state_real -= norm_factors['mean']
             state_real /= norm_factors['std']
 
     else:
@@ -83,11 +87,9 @@ def get_state_aods(
 
     state = satellite_manager.get_aods_to_users().flatten()
     if norm_state:
-        # state -= pi/2
-        # state *= 1e2  # very roughly [-2, 2]
-        # state -= 1.5733352059073948  # VERY heuristic standardization
-        # state /= 0.007308867872704654
-        state -= norm_factors['mean']  # VERY heuristic standardization
+
+        # heuristic standardization
+        state -= norm_factors['mean']
         state /= norm_factors['std']
 
     return state.flatten()
