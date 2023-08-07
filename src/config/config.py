@@ -169,10 +169,15 @@ class Config:
 
         # Set Logging Level
         logging_file_handler.setLevel(self._logging_level_file)
-        logging_stdio_handler.setLevel(self._logging_level_stdio)
+
+        if self.verbosity == 0:
+            logging_stdio_handler.setLevel(logging.CRITICAL + 1)
+        else:
+            logging_stdio_handler.setLevel(self._logging_level_stdio)
 
         tensorflow_logger = tf_get_logger()
         tensorflow_logger.setLevel(self._logging_level_tensorflow)
+        tensorflow_logger.handlers.pop(0)  # remove tf handler, we've got our own
 
         matplotlib_logger = logging.getLogger('matplotlib')
         matplotlib_logger.setLevel(self._logging_level_matplotlib)
