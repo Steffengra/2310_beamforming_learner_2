@@ -3,8 +3,8 @@ from datetime import datetime
 
 
 def progress_printer(
-        progress,
-        real_time_start,
+        progress: float,
+        real_time_start: datetime,
 ) -> None:
     timedelta = datetime.now() - real_time_start
     finish_time = real_time_start + timedelta / progress

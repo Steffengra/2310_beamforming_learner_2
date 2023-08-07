@@ -1,6 +1,7 @@
 
 import numpy as np
 
+import src
 from src.config.config import (
     Config,
 )
@@ -16,14 +17,14 @@ from src.data.calc_sum_rate_no_iui import (
 
 
 def test_mrc_precoder_error_sweep(
-        config,
-        csit_error_sweep_range,
-        monte_carlo_iterations,
+        config: 'src.config.config.Config',
+        csit_error_sweep_range: np.ndarray,
+        monte_carlo_iterations: int,
 ) -> None:
 
     def get_precoder_mrc(
-        config,
-        satellite_manager,
+        config: 'src.config.config.Config',
+        satellite_manager: 'src.data.satellite_manager.SatelliteManager',
     ):
         w_mrc = mrc_precoder_normalized(
             channel_matrix=satellite_manager.erroneous_channel_state_information,

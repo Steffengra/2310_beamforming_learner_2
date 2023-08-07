@@ -7,11 +7,11 @@ from src.utils.norm_precoder import (
 
 
 def mmse_precoder_normalized(
-        channel_matrix,
+        channel_matrix: np.ndarray,
         noise_power_watt: float,
         power_constraint_watt: float,
-        sat_nr,
-        sat_ant_nr,
+        sat_nr: int,
+        sat_ant_nr: int,
 ) -> np.ndarray:
 
     precoding_matrix = mmse_precoder_no_norm(
@@ -32,7 +32,7 @@ def mmse_precoder_normalized(
 
 
 def mmse_precoder_no_norm(
-        channel_matrix,
+        channel_matrix: np.ndarray,
         noise_power_watt: float,
         power_constraint_watt: float,
 ) -> np.ndarray:
@@ -47,7 +47,7 @@ def mmse_precoder_no_norm(
         np.matmul(
             np.linalg.inv(
                 np.matmul(channel_matrix.conj().T, channel_matrix)
-                + (noise_power_watt * user_nr / power_constraint_watt + inversion_constant_lambda) * eye(sat_tot_ant_nr)
+                + (noise_power_watt * user_nr / power_constraint_watt + inversion_constant_lambda) * np.eye(sat_tot_ant_nr)
             ),
             channel_matrix.conj().T
         )

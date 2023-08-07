@@ -7,6 +7,7 @@ from pathlib import (
     Path,
 )
 
+import src
 from src.config.config import (
     Config,
 )
@@ -25,15 +26,16 @@ from src.data.calc_sum_rate import (
 
 
 def test_sac_precoder_user_distance_sweep(
-    config,
-    distance_sweep_range,
-    model_path,
+    config: 'src.config.config.Config',
+    distance_sweep_range: np.ndarray,
+    model_path: Path,
 ) -> None:
 
     def get_precoder_function_learned(
-        config,
-        satellite_manager,
+        config: 'src.config.config.Config',
+        satellite_manager: 'src.data.satellite_manager.SatelliteManager',
     ):
+
         state = config.config_learner.get_state(satellite_manager=satellite_manager, **config.config_learner.get_state_args)
         w_precoder, _ = precoder_network.call(state.astype('float32')[np.newaxis])
         w_precoder = w_precoder.numpy().flatten()

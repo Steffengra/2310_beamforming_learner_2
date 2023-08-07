@@ -7,6 +7,7 @@ from pathlib import (
     Path,
 )
 
+import src
 from src.config.config import (
     Config,
 )
@@ -25,16 +26,17 @@ from src.utils.norm_precoder import (
 
 
 def test_sac_precoder_error_sweep(
-        config,
-        model_path,
-        csit_error_sweep_range,
-        monte_carlo_iterations,
+        config: 'src.config.config.Config',
+        model_path: Path,
+        csit_error_sweep_range: np.ndarray,
+        monte_carlo_iterations: int,
 ) -> None:
 
     def get_precoder_function_learned(
-        config,
-        satellite_manager,
+        config: 'src.config.config.Config',
+        satellite_manager: 'src.data.satellite_manager.SatelliteManager',
     ):
+
         state = config.config_learner.get_state(satellite_manager=satellite_manager, **config.config_learner.get_state_args)
         w_precoder, _ = precoder_network.call(state.astype('float32')[np.newaxis])
         w_precoder = w_precoder.numpy().flatten()

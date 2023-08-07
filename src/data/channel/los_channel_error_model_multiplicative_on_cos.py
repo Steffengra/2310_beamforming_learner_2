@@ -1,12 +1,14 @@
 
 import numpy as np
+import src
 
 
 def los_channel_error_model_multiplicative_on_cos(
-        error_model_config,
-        satellite,
+        error_model_config: 'src.config.config_error_model.ConfigErrorModel',
+        satellite: 'src.data.satellite.Satellite',
         users: list,
 ) -> np.ndarray:
+
     """
     TODO: erklären - ref?
     NOTE: With this error model, satellites with ODD number of antennas will always

@@ -1,7 +1,7 @@
 
 import numpy as np
 
-from src.data.satellite_manager import SatelliteManager
+import src
 from src.utils.real_complex_vector_reshaping import (
     real_vector_to_half_complex_vector,
     complex_vector_to_double_real_vector,
@@ -13,7 +13,7 @@ from src.utils.real_complex_vector_reshaping import (
 # TODO: Norm values hardcoded can cause problems with different applications
 
 def get_state_erroneous_channel_state_information(
-        satellite_manager: SatelliteManager,
+        satellite_manager: 'src.data.satellite_manager.SatelliteManager',
         csi_format: str,
         norm_state: bool,
         norm_factors: dict = None,
@@ -69,8 +69,8 @@ def get_state_erroneous_channel_state_information(
 
 
 def get_state_aods(
-        satellite_manager: SatelliteManager,
-        norm_state,
+        satellite_manager: 'src.data.satellite_manager.SatelliteManager',
+        norm_state: bool,
         norm_factors: dict = None,
 ) -> np.ndarray:
 

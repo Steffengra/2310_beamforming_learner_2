@@ -3,6 +3,7 @@ import numpy as np
 
 
 class ExperienceBuffer:
+
     def __init__(
             self,
             rng: np.random.Generator,
@@ -10,6 +11,7 @@ class ExperienceBuffer:
             priority_scale_alpha: float,  # alpha=0 is uniform sampling, alpha=1 is fully prioritized sampling
             importance_sampling_correction_beta: float,  # beta=1 is full correction, beta=0 is no correction
     ) -> None:
+
         self.rng: np.random.Generator = rng
         self.write_pointer: int = 0
 

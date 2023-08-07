@@ -38,7 +38,7 @@ class ValueNetwork(tf.keras.Model):
     @tf.function
     def call(
             self,
-            inputs
+            inputs,
     ) -> tf.Tensor:
         x = inputs
         for layer in self.hidden_layers:
@@ -49,7 +49,7 @@ class ValueNetwork(tf.keras.Model):
 
     def initialize_inputs(
             self,
-            inputs
+            inputs,
     ) -> None:
         """
         Ensure each method is traced once for saving
@@ -65,7 +65,7 @@ class PolicyNetwork(tf.keras.Model):
             hidden_layer_units: list,
             num_actions: int,
             activation_hidden: str,
-            kernel_initializer_hidden: str
+            kernel_initializer_hidden: str,
     ) -> None:
         super().__init__()
         # Activation----------------------------------------------------------------------------------------------------
@@ -103,7 +103,7 @@ class PolicyNetwork(tf.keras.Model):
 
     def initialize_inputs(
             self,
-            inputs
+            inputs,
     ) -> None:
         """
         Ensure each method is traced once for saving
@@ -169,7 +169,7 @@ class PolicyNetworkSoft(tf.keras.Model):
 
         return (
             means,
-            log_stds
+            log_stds,
         )
 
     @tf.function
@@ -193,7 +193,7 @@ class PolicyNetworkSoft(tf.keras.Model):
 
     def initialize_inputs(
             self,
-            inputs
+            inputs,
     ) -> None:
         """
         Ensure each method is traced once for saving

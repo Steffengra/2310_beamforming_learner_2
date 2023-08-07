@@ -97,7 +97,7 @@ def optimizer_nadam(
 
 def mse_loss(
         td_error,
-        importance_sampling_weights
+        importance_sampling_weights,
 ) -> tf.Tensor:
     squared_error = tf.multiply(importance_sampling_weights, tf.square(td_error))
 
@@ -106,7 +106,7 @@ def mse_loss(
 
 def huber_loss(
         td_error,
-        importance_sampling_weights
+        importance_sampling_weights,
 ) -> tf.Tensor:
     """
     Huber loss fixes the grad magnitude to at most 1 by linearizing the loss curve after f'(x)=1.

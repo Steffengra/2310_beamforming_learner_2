@@ -26,6 +26,7 @@ from matplotlib.pyplot import (
     show as plt_show,
 )
 
+import src
 from src.config.config import (
     Config,
 )
@@ -71,7 +72,9 @@ from src.utils.update_sim import (
 )
 
 
-def train_sac_single_error(config) -> Path:
+def train_sac_single_error(
+        config: 'src.config.config.Config',
+) -> Path:
 
     def progress_print() -> None:
         progress = (

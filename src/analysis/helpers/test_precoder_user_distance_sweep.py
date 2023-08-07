@@ -16,9 +16,7 @@ from matplotlib.pyplot import (
     show as plt_show,
 )
 
-from src.config.config import (
-    Config,
-)
+import src
 from src.data.satellite_manager import (
     SatelliteManager,
 )
@@ -44,12 +42,13 @@ from src.utils.update_sim import (
 
 
 def test_precoder_user_distance_sweep(
-    config: Config,
+    config: 'src.config.config.Config',
     distance_sweep_range,
     precoder_name: str,
     get_precoder_func,
     calc_sum_rate_func,
 ) -> None:
+
     """
     Calculate the sum rates that a given precoder achieves for a given config
     over a given range of inter-user-distances with no channel error

@@ -17,11 +17,12 @@ TODO: Remember that the output of this function must
 
 
 def add_random_distribution(
-        rng,
+        rng: np.random.default_rng,
         action: np.ndarray,
         tau_momentum: float,
         normalize: bool = False,
 ) -> np.ndarray:
+
     """
     Mix an action vector with a random_uniform vector of same length
     by tau * random_distribution + (1 - tau) * action
@@ -48,9 +49,9 @@ def add_random_distribution(
 def add_mmse_precoder(
         action: np.ndarray,
         tau_momentum: float,
-        channel_matrix,
-        noise_power_watt,
-        power_constraint_watt,
+        channel_matrix: np.ndarray,
+        noise_power_watt: float,
+        power_constraint_watt: float,
 ) -> np.ndarray:
 
     if tau_momentum == 0.0:

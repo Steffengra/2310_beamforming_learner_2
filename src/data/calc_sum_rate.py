@@ -3,10 +3,11 @@ import numpy as np
 
 
 def calc_sum_rate(
-        channel_state,
-        w_precoder,
-        noise_power_watt
+    channel_state: np.ndarray,
+    w_precoder: np.ndarray,
+    noise_power_watt: float
 ) -> float:
+
     """
     TODO: comment
     """
