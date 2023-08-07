@@ -76,12 +76,15 @@ def train_sac_single_error(
         config: 'src.config.config.Config',
 ) -> Path:
 
-    def progress_print() -> None:
+    def progress_print(to_log: bool = False) -> None:
         progress = (
                 (training_episode_id * config.config_learner.training_steps_per_episode + training_step_id + 1)
                 / (config.config_learner.training_episodes * config.config_learner.training_steps_per_episode)
         )
-        progress_printer(progress=progress, real_time_start=real_time_start)
+        if not to_log:
+            progress_printer(progress=progress, real_time_start=real_time_start)
+        else:
+            progress_printer(progress=progress, real_time_start=real_time_start, logger=logger)
 
     def policy_training_criterion() -> bool:
         """Train policy networks only every k steps and/or only after j total steps to ensure a good value function"""
@@ -282,12 +285,17 @@ def train_sac_single_error(
         # log episode results
         episode_mean_sum_rate = np.mean(episode_metrics['sum_rate_per_step'])
         metrics['mean_sum_rate_per_episode'][training_episode_id] = episode_mean_sum_rate
-        if config.verbosity == 1:
-            print(f' Episode mean reward: {episode_mean_sum_rate:.4f}'
-                  f' std {np.std(episode_metrics["sum_rate_per_step"]):.2f},'
-                  f' current exploration: {np.mean(episode_metrics["mean_log_prob_density"]):.2f},'
-                  f' value loss: {np.mean(episode_metrics["value_loss"]):.5f}'
-                  )
+
+        if config.verbosity > 0:
+            print('\r', end='')  # clear console for logging results
+        progress_print(to_log=True)
+        logger.info(
+            f'Episode {training_episode_id}:'
+            f' Episode mean reward: {episode_mean_sum_rate:.4f}'
+            f' std {np.std(episode_metrics["sum_rate_per_step"]):.2f},'
+            f' current exploration: {np.mean(episode_metrics["mean_log_prob_density"]):.2f},'
+            f' value loss: {np.mean(episode_metrics["value_loss"]):.5f}'
+        )
 
         # save network snapshot
         if episode_mean_sum_rate > high_score:
