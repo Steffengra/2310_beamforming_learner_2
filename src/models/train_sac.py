@@ -176,11 +176,14 @@ def train_sac_single_error(config) -> Path:
         with gzip_open(Path(results_path, name), 'wb') as file:
             pickle_dump(metrics, file=file)
 
+    logger = config.logger.getChild(__name__)
+
     satellite_manager = SatelliteManager(config=config)
     user_manager = UserManager(config=config)
     sac = SoftActorCritic(rng=config.rng, **config.config_learner.algorithm_args)
 
     norm_dict = get_state_norm_factors(config=config, satellite_manager=satellite_manager, user_manager=user_manager)
+    logger.info('State normalization factors found')
 
     metrics: dict = {
         'mean_sum_rate_per_episode': -np.infty * np.ones(config.config_learner.training_episodes)
