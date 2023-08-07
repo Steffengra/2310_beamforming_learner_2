@@ -1,5 +1,7 @@
 
-from pathlib import Path
+from pathlib import (
+    Path,
+)
 from sys import path as sys_path
 
 project_root_path = Path(Path(__file__).parent, '..', '..')
@@ -8,9 +10,6 @@ sys_path.append(str(project_root_path.resolve()))
 import numpy as np
 from datetime import (
     datetime,
-)
-from pathlib import (
-    Path,
 )
 from shutil import (
     copytree,
@@ -50,9 +49,7 @@ from src.data.precoder.mmse_precoder import (
 )
 from src.utils.real_complex_vector_reshaping import (
     real_vector_to_half_complex_vector,
-    rad_and_phase_to_complex_vector,
     complex_vector_to_double_real_vector,
-    complex_vector_to_rad_and_phase,
 )
 from src.utils.norm_precoder import (
     norm_precoder,

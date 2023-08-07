@@ -8,9 +8,6 @@ from pathlib import (
 )
 
 import src
-from src.config.config import (
-    Config,
-)
 from src.analysis.helpers.test_precoder_error_sweep import (
     test_precoder_error_sweep,
 )

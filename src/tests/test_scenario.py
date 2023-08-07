@@ -4,10 +4,6 @@ import unittest
 from src.config.config import Config
 from src.data.satellite_manager import SatelliteManager
 from src.data.user_manager import UserManager
-from src.models.helpers.get_state import (
-    get_state_erroneous_channel_state_information,
-    get_state_aods,
-)
 
 
 class TestSystemState(unittest.TestCase):

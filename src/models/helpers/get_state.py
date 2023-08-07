@@ -3,9 +3,7 @@ import numpy as np
 
 import src
 from src.utils.real_complex_vector_reshaping import (
-    real_vector_to_half_complex_vector,
     complex_vector_to_double_real_vector,
-    rad_and_phase_to_complex_vector,
     complex_vector_to_rad_and_phase,
 )
 

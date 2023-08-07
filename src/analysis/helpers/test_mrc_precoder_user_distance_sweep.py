@@ -2,9 +2,6 @@
 import numpy as np
 
 import src
-from src.config.config import (
-    Config,
-)
 from src.analysis.helpers.test_precoder_user_distance_sweep import (
     test_precoder_user_distance_sweep,
 )

@@ -164,8 +164,8 @@ def plot_color_palette(
     list_of_colors = list(color_palette.keys())
 
     plt.figure()
-    for ii in range(len(list_of_colors)):
-        plt.barh(ii, 10, color=color_palette[list_of_colors[ii]])
+    for color_id in range(len(list_of_colors)):
+        plt.barh(color_id, 10, color=color_palette[list_of_colors[color_id]])
 
     plt.yticks(range(len(list_of_colors)), list_of_colors)
     plt.grid(alpha=.25)

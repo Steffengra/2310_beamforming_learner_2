@@ -1,4 +1,10 @@
 
+"""
+These functions can be used to create "noisy actions", thereby forcing exploration.
+TODO: Remember that the output of this function must
+    be a valid output from the policy network, e.g., be normalized in the same way
+"""
+
 import numpy as np
 
 from src.data.precoder.mmse_precoder import (
@@ -7,13 +13,6 @@ from src.data.precoder.mmse_precoder import (
 from src.utils.real_complex_vector_reshaping import (
     complex_vector_to_double_real_vector,
 )
-
-
-"""
-These functions can be used to create "noisy actions", thereby forcing exploration.
-TODO: Remember that the output of this function must
-    be a valid output from the policy network, e.g., be normalized in the same way
-"""
 
 
 def add_random_distribution(
