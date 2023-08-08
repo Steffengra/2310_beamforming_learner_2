@@ -6,6 +6,12 @@ from keras.models import (
 from pathlib import (
     Path,
 )
+from gzip import (
+    open as gzip_open,
+)
+from pickle import (
+    load as pickle_load,
+)
 
 import src
 from src.analysis.helpers.test_precoder_error_sweep import (
@@ -34,7 +40,7 @@ def test_sac_precoder_error_sweep(
         satellite_manager: 'src.data.satellite_manager.SatelliteManager',
     ):
 
-        state = config.config_learner.get_state(satellite_manager=satellite_manager, **config.config_learner.get_state_args)
+        state = config.config_learner.get_state(satellite_manager=satellite_manager, norm_factors=norm_factors, **config.config_learner.get_state_args)
         w_precoder, _ = precoder_network.call(state.astype('float32')[np.newaxis])
         w_precoder = w_precoder.numpy().flatten()
 
@@ -50,6 +56,11 @@ def test_sac_precoder_error_sweep(
             sat_ant_nr=config.sat_ant_nr)
 
     precoder_network = load_model(model_path)
+
+    with gzip_open(Path(model_path, '..', 'config', 'norm_dict.gzip')) as file:
+        norm_dict = pickle_load(file)
+    norm_factors = norm_dict['norm_factors']
+
     test_precoder_error_sweep(
         config=config,
         csit_error_sweep_range=csit_error_sweep_range,
