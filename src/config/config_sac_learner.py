@@ -52,7 +52,7 @@ class ConfigSACLearner:
             },
             'value_network_optimizer': tf.keras.optimizers.Adam,
             'value_network_optimizer_args': {
-                'learning_rate': 1e-5,
+                'learning_rate': 1e-4,
                 'amsgrad': False,
             },
             'policy_network_args': {
@@ -62,7 +62,7 @@ class ConfigSACLearner:
             },
             'policy_network_optimizer': tf.keras.optimizers.Adam,
             'policy_network_optimizer_args': {
-                'learning_rate': 1e-6,
+                'learning_rate': 1e-5,
                 'amsgrad': True,
             },
         }
