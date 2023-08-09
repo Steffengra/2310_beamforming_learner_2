@@ -107,13 +107,14 @@ def train_sac_single_error(
             w_precoder=w_mmse,
             noise_power_watt=config.noise_power_watt,
         )
-        mmse_experience = {
-            'state': state_current,
-            'action': complex_vector_to_double_real_vector(w_mmse.flatten()),
-            'reward': reward_mmse,
-            'next_state': state_next,
-        }
-        sac.add_experience(mmse_experience)
+        if (reward_mmse > reward) or not config.config_learner.only_add_mmse_samples_with_greater_reward:
+            mmse_experience = {
+                'state': state_current,
+                'action': complex_vector_to_double_real_vector(w_mmse.flatten()),
+                'reward': reward_mmse,
+                'next_state': state_next,
+            }
+            sac.add_experience(mmse_experience)
 
     def save_model_checkpoint(extra=None):
 

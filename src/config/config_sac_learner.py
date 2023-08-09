@@ -25,6 +25,7 @@ class ConfigSACLearner:
         self.get_state_norm_factors_iterations: int = 100_000  # how many samples to calculate means and stds
 
         self.percentage_mmse_samples_added_to_exp_buffer: float = 0.0  # [0.0, 1.0] chance for mmse action to be added
+        self.only_add_mmse_samples_with_greater_reward: bool = True  # only add samples with reward_mmse > reward_sac
 
         self.training_args: dict = {
             'future_reward_discount_gamma': 0.0,  # Exponential future reward discount for stability
@@ -51,7 +52,7 @@ class ConfigSACLearner:
             },
             'value_network_optimizer': tf.keras.optimizers.Adam,
             'value_network_optimizer_args': {
-                'learning_rate': 1e-5,
+                'learning_rate': 1e-4,
                 'amsgrad': False,
             },
             'policy_network_args': {
@@ -61,7 +62,7 @@ class ConfigSACLearner:
             },
             'policy_network_optimizer': tf.keras.optimizers.Adam,
             'policy_network_optimizer_args': {
-                'learning_rate': 1e-6,
+                'learning_rate': 1e-5,
                 'amsgrad': True,
             },
         }
