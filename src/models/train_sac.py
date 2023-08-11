@@ -136,6 +136,8 @@ def train_sac_single_error(
             name,
         )
 
+        logger.info(f'Saved model checkpoint at mean reward {extra:.3f}')
+
         sac.networks['policy'][0]['primary'].save(Path(checkpoint_path, 'model'))
 
         # save config
