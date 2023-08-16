@@ -4,6 +4,7 @@ import tensorflow_probability as tf_p
 
 from src.models.helpers.activation_functions import (
     activation_penalized_tanh,
+    activation_shaped_tanh,
 )
 
 
@@ -19,6 +20,8 @@ class ValueNetwork(tf.keras.Model):
         # Activation----------------------------------------------------------------------------------------------------
         if activation_hidden == 'penalized_tanh':
             activation_hidden = activation_penalized_tanh
+        if activation_hidden == 'shaped_tanh':
+            activation_hidden = activation_shaped_tanh
         # --------------------------------------------------------------------------------------------------------------
 
         # Layers--------------------------------------------------------------------------------------------------------
@@ -71,6 +74,8 @@ class PolicyNetwork(tf.keras.Model):
         # Activation----------------------------------------------------------------------------------------------------
         if activation_hidden == 'penalized_tanh':
             activation_hidden = activation_penalized_tanh
+        if activation_hidden == 'shaped_tanh':
+            activation_hidden = activation_shaped_tanh
         # --------------------------------------------------------------------------------------------------------------
 
         # Layers--------------------------------------------------------------------------------------------------------
@@ -132,6 +137,8 @@ class PolicyNetworkSoft(tf.keras.Model):
 
         if activation_hidden == 'penalized_tanh':
             activation_hidden = activation_penalized_tanh
+        if activation_hidden == 'shaped_tanh':
+            activation_hidden = activation_shaped_tanh
 
         self.hidden_layers: list = []
         for units in hidden_layer_units:
