@@ -38,11 +38,14 @@ def get_state_erroneous_channel_state_information(
             # heuristic standardization
             state_real[:half_length_idx] -= norm_factors['means'][:half_length_idx]  # needs a moderate amount of samples
             state_real[:half_length_idx] /= norm_factors['stds'][:half_length_idx]  # needs few samples
+            # state_real[:half_length_idx] -= 9.939976884501506e-08  # needs a moderate amount of samples
+            # state_real[:half_length_idx] /= 1.1297506851802108e-12  # needs few samples
 
             # normalize phase
             # heuristic standardization
             # state_real[half_length_idx:] -= norm_factors['means'][half_length_idx:]  # needs A LOT of samples
             state_real[half_length_idx:] /= norm_factors['stds'][half_length_idx:]  # needs few samples
+            # state_real[half_length_idx:] /= 1.8363690554389926  # needs few samples
 
     elif csi_format == 'real_imag':
         state_real = complex_vector_to_double_real_vector(erroneous_csi)
