@@ -36,16 +36,13 @@ def get_state_erroneous_channel_state_information(
 
             # normalize radius
             # heuristic standardization
-            state_real[:half_length_idx] -= norm_factors['means'][:half_length_idx]  # needs a moderate amount of samples
-            state_real[:half_length_idx] /= norm_factors['stds'][:half_length_idx]  # needs few samples
-            # state_real[:half_length_idx] -= 9.939976884501506e-08  # needs a moderate amount of samples
-            # state_real[:half_length_idx] /= 1.1297506851802108e-12  # needs few samples
+            state_real[:half_length_idx] -= norm_factors['radius_mean']  # needs a moderate amount of samples
+            state_real[:half_length_idx] /= norm_factors['radius_std']  # needs few samples
 
             # normalize phase
             # heuristic standardization
-            # state_real[half_length_idx:] -= norm_factors['means'][half_length_idx:]  # needs A LOT of samples
-            state_real[half_length_idx:] /= norm_factors['stds'][half_length_idx:]  # needs few samples
-            # state_real[half_length_idx:] /= 1.8363690554389926  # needs few samples
+            # state_real[half_length_idx:] -= norm_factors['phase_mean']  # needs A LOT of samples
+            state_real[half_length_idx:] /= norm_factors['phase_std']  # needs few samples
 
     elif csi_format == 'real_imag':
         state_real = complex_vector_to_double_real_vector(erroneous_csi)
@@ -58,8 +55,8 @@ def get_state_erroneous_channel_state_information(
             # state_real /= 7.015404816259004e-08
 
             # heuristic standardization
-            # state_real -= norm_factors['means']  # needs a lot of samples, todo: should be 0?
-            state_real /= norm_factors['stds']  # needs few samples
+            state_real -= norm_factors['mean']
+            state_real /= norm_factors['std']
 
     else:
         raise ValueError(f'Unknown CSI Format {csi_format}')
@@ -88,7 +85,7 @@ def get_state_aods(
     if norm_state:
 
         # heuristic standardization
-        state -= norm_factors['means']
-        state /= norm_factors['stds']
+        state -= norm_factors['mean']
+        state /= norm_factors['std']
 
     return state.flatten()
