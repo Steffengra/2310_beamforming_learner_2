@@ -21,3 +21,26 @@ def activation_penalized_tanh(
     y = tf.where(tf.less(x, 0), tf.multiply(y, a), y)
 
     return y
+
+
+def activation_shaped_tanh(
+        x: tf.Tensor
+) -> tf.Tensor:
+
+    """
+    LeCun recommends in [1] to reshape the standard tanh such that
+    1) When transforming the inputs of this tanh to have zero mean and var=1,
+        the output of this tanh will also have zero mean and var=1 on average
+    2) f(+-1) = +-1
+    3) x=1 is a 2nd derivative maximum
+    4) Effective gain close to 1
+
+    [1] LeCun, Yann, Leon Bottou, Genevieve B. Orr, and Klaus-Robert Müller. “Efficient BackProp.”, 1998
+    """
+
+    a = 1.7159
+    b = 2/3
+
+    y = a * tf.tanh(b * x)
+
+    return y

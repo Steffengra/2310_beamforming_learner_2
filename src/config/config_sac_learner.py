@@ -47,8 +47,8 @@ class ConfigSACLearner:
         self.network_args: dict = {
             'value_network_args': {
                 'hidden_layer_units': [512, 512, 512, 512],
-                'activation_hidden': 'tanh',  # >'relu', 'tanh', 'penalized_tanh'
-                'kernel_initializer_hidden': 'glorot_uniform'  # >glorot_uniform, he_uniform
+                'activation_hidden': 'tanh',  # >'relu', 'tanh', 'penalized_tanh', 'shaped_tanh'
+                'kernel_initializer_hidden': 'glorot_uniform'  # >'glorot_uniform', 'he_uniform'
             },
             'value_network_optimizer': tf.keras.optimizers.Adam,
             'value_network_optimizer_args': {
@@ -57,8 +57,8 @@ class ConfigSACLearner:
             },
             'policy_network_args': {
                 'hidden_layer_units': [512, 512, 512, 512],
-                'activation_hidden': 'tanh',  # >'relu', 'tanh', 'penalized_tanh'
-                'kernel_initializer_hidden': 'glorot_uniform'  # >glorot_uniform, he_uniform
+                'activation_hidden': 'tanh',  # >'relu', 'tanh', 'penalized_tanh', 'shaped_tanh'
+                'kernel_initializer_hidden': 'glorot_uniform'  # >'glorot_uniform', 'he_uniform'
             },
             'policy_network_optimizer': tf.keras.optimizers.Adam,
             'policy_network_optimizer_args': {
