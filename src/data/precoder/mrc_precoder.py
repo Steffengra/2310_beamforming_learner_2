@@ -10,7 +10,7 @@ def mrc_precoder_normalized(
     user_nr = channel_matrix.shape[0]
     sat_tot_ant_nr = channel_matrix.shape[1]
 
-    w_mrc = np.empty((sat_tot_ant_nr, user_nr), dtype='complex')
+    w_mrc = np.empty((sat_tot_ant_nr, user_nr), dtype='complex128')
 
     for user_id in range(user_nr):
 

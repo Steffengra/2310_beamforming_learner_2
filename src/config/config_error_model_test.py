@@ -44,8 +44,8 @@ class ConfigErrorModel:
         if self.error_model == los_channel_error_model_multiplicative_on_cos:
             self.error_model_name: str = 'err_mult_on_steering_cos'
             self.uniform_error_interval: dict = {
-                'low': -0.1,
-                'high': 0.1,
+                'low': -0.0,
+                'high': 0.0,
             }
 
         # SAT2USER DISTANCE ERROR MODEL
