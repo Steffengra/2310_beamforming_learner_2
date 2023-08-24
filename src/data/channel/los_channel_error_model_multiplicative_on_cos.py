@@ -18,7 +18,7 @@ def los_channel_error_model_multiplicative_on_cos(
     """
 
     # calculate indices for steering vectors
-    steering_idx = np.arange(0, satellite.antenna_nr) - (satellite.antenna_nr - 1) / 2
+    # steering_idx = np.arange(0, satellite.antenna_nr) - (satellite.antenna_nr - 1) / 2
 
  #   steering_error = np.exp(
  #       steering_idx * (
@@ -29,7 +29,6 @@ def los_channel_error_model_multiplicative_on_cos(
  #                                   size=(len(users), 1))
  #       )
  #   )
-
 
     erroneous_channel_state_to_users = satellite.channel_state_to_users * satellite.steering_error
 

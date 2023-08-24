@@ -45,6 +45,7 @@ class Satellite:
         self.distance_to_users = None  # user_idx[int]: dist[float]
         self.aods_to_users = None  # user_idx[int]: aod[float] in rad, [0, 2pi], most commonly ~pi/2, aod looks from sat towards users
         self.steering_vectors_to_users = None  # user_idx[int]: steering_vector[ndarray] \in 1 x antenna_nr
+        self.steering_error = None
 
         self.channel_state_to_users: np.ndarray = np.array([])  # depends on channel model
         self.erroneous_channel_state_to_users: np.ndarray = np.array([])  # depends on channel & error model
