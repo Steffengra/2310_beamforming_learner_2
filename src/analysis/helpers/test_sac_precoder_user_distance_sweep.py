@@ -59,6 +59,8 @@ def test_sac_precoder_user_distance_sweep(
     with gzip_open(Path(model_path, '..', 'config', 'norm_dict.gzip')) as file:
         norm_dict = pickle_load(file)
     norm_factors = norm_dict['norm_factors']
+    if norm_factors != {}:
+        config.config_learner.get_state_args['norm_state'] = True
 
     test_precoder_user_distance_sweep(
         config=config,

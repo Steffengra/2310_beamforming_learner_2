@@ -14,9 +14,13 @@ class ValueNetwork(tf.keras.Model):
             self,
             hidden_layer_units: list,
             activation_hidden: str,
-            kernel_initializer_hidden: str
+            kernel_initializer_hidden: str,
+            batch_norm: bool,
     ):
         super().__init__()
+
+        self.batch_norm = batch_norm
+
         # Activation----------------------------------------------------------------------------------------------------
         if activation_hidden == 'penalized_tanh':
             activation_hidden = activation_penalized_tanh
@@ -32,8 +36,16 @@ class ValueNetwork(tf.keras.Model):
                     size,
                     activation=activation_hidden,
                     kernel_initializer=kernel_initializer_hidden,  # default: 'glorot_uniform'
-                    bias_initializer='zeros'  # default: 'zeros'
-                ))
+                    bias_initializer='zeros',  # default: 'zeros'
+                )
+            )
+
+        if self.batch_norm:
+            self.batch_norm_layers = []
+            for _ in hidden_layer_units:
+                self.batch_norm_layers.append(
+                    tf.keras.layers.BatchNormalization(center=False, scale=False)
+                )
 
         self.output_layer = tf.keras.layers.Dense(1, dtype=tf.float32)
         # --------------------------------------------------------------------------------------------------------------
@@ -42,10 +54,17 @@ class ValueNetwork(tf.keras.Model):
     def call(
             self,
             inputs,
+            training=False,
     ) -> tf.Tensor:
         x = inputs
-        for layer in self.hidden_layers:
-            x = layer(x)
+
+        if self.batch_norm:
+            for layer, norm_layer in zip(self.hidden_layers, self.batch_norm_layers):
+                x = layer(x)
+                x = norm_layer(x, training=training)
+        else:
+            for layer in self.hidden_layers:
+                x = layer(x)
         output = self.output_layer(x)
 
         return output
@@ -67,10 +86,14 @@ class PolicyNetwork(tf.keras.Model):
             self,
             hidden_layer_units: list,
             num_actions: int,
+            batch_norm: bool,
             activation_hidden: str,
             kernel_initializer_hidden: str,
     ) -> None:
         super().__init__()
+
+        self.batch_norm = batch_norm
+
         # Activation----------------------------------------------------------------------------------------------------
         if activation_hidden == 'penalized_tanh':
             activation_hidden = activation_penalized_tanh
@@ -89,6 +112,13 @@ class PolicyNetwork(tf.keras.Model):
                     bias_initializer='zeros'  # default: 'zeros'
                 ))
 
+        if self.batch_norm:
+            self.batch_norm_layers: list = []
+            for _ in hidden_layer_units:
+                self.batch_norm_layers.append(
+                    tf.keras.layers.BatchNormalization(center=False, scale=False)
+                )
+
         self.output_layer = tf.keras.layers.Dense(num_actions,
                                                   # activation='softmax',
                                                   dtype=tf.float32)
@@ -98,10 +128,18 @@ class PolicyNetwork(tf.keras.Model):
     def call(
             self,
             inputs,
+            training=None,
     ) -> tf.Tensor:
+
         x = inputs
-        for layer in self.hidden_layers:
-            x = layer(x)
+        if self.batch_norm:
+            for layer, norm_layer in zip(self.hidden_layers, self.batch_norm_layers):
+                x = layer(x)
+                x = norm_layer(x, training=training)
+        else:
+            for layer in self.hidden_layers:
+                x = layer(x)
+
         output = self.output_layer(x)
 
         return output
@@ -130,10 +168,13 @@ class PolicyNetworkSoft(tf.keras.Model):
             self,
             num_actions: int,
             hidden_layer_units: list,
+            batch_norm: bool,
             activation_hidden: str = 'relu',
             kernel_initializer_hidden: str = 'glorot_uniform',
     ) -> None:
         super().__init__()
+
+        self.batch_norm = batch_norm
 
         if activation_hidden == 'penalized_tanh':
             activation_hidden = activation_penalized_tanh
@@ -150,6 +191,14 @@ class PolicyNetworkSoft(tf.keras.Model):
                     bias_initializer='zeros',  # default='zeros'
                 )
             )
+
+        if self.batch_norm:
+            self.batch_norm_layers: list = []
+            for _ in hidden_layer_units:
+                self.batch_norm_layers.append(
+                    tf.keras.layers.BatchNormalization(center=False, scale=False)
+                )
+
         self.output_layer_means = tf.keras.layers.Dense(units=num_actions, dtype=tf.float32)
         self.output_layer_log_stds = tf.keras.layers.Dense(units=num_actions, dtype=tf.float32)
 
@@ -161,9 +210,15 @@ class PolicyNetworkSoft(tf.keras.Model):
             masks=None,
             print_stds=False,
     ) -> tuple[tf.Tensor, tf.Tensor]:
+
         x = inputs
-        for layer in self.hidden_layers:
-            x = layer(x)
+        if self.batch_norm:
+            for layer, norm_layer in zip(self.hidden_layers, self.batch_norm_layers):
+                x = layer(x)
+                x = norm_layer(x, training=training)
+        else:
+            for layer in self.hidden_layers:
+                x = layer(x)
         means = self.output_layer_means(x)
         log_stds = self.output_layer_log_stds(x)
 
@@ -183,11 +238,13 @@ class PolicyNetworkSoft(tf.keras.Model):
     def get_action_and_log_prob_density(
             self,
             state,
+            training=False,
+            print_stds=False,
     ) -> tuple[tf.Tensor, tf.Tensor]:
         if state.shape.ndims == 1:
             state = tf.expand_dims(state, axis=0)
 
-        means, log_stds = self.call(state)
+        means, log_stds = self.call(state, training=training, print_stds=print_stds)
         stds = tf.exp(log_stds)
         distributions = tf_p.distributions.Normal(loc=means, scale=stds)
         actions = distributions.sample()

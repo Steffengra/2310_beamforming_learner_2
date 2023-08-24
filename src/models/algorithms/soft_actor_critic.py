@@ -129,7 +129,8 @@ class SoftActorCritic:
             self,
             state: np.ndarray,
     ) -> np.ndarray:
-        actions, _ = self.networks['policy'][0]['primary'].get_action_and_log_prob_density(state=state)
+        actions, _ = self.networks['policy'][0]['primary'].get_action_and_log_prob_density(state=state,
+                                                                                           print_stds=False)
 
         return actions.numpy().flatten()
 
@@ -209,7 +210,7 @@ class SoftActorCritic:
             value_network_input_batch = tf.concat([states, actions], axis=1)
             network = self.networks['value'][0]['primary']
             with tf.GradientTape() as tape:  # Autograd
-                estimated_q = network.call(value_network_input_batch)
+                estimated_q = network.call(value_network_input_batch, training=True)
                 td_error = estimated_q - target_q
                 value_loss = tf.reduce_mean(sample_importance_weights * td_error ** 2)
             gradients = tape.gradient(target=value_loss, sources=network.trainable_variables)
@@ -217,7 +218,7 @@ class SoftActorCritic:
 
             network = self.networks['value'][1]['primary']
             with tf.GradientTape() as tape:  # Autograd
-                estimated_q = network.call(value_network_input_batch)
+                estimated_q = network.call(value_network_input_batch, training=True)
                 td_error = estimated_q - target_q
                 value_loss = tf.reduce_mean(sample_importance_weights * td_error ** 2)
             gradients = tape.gradient(target=value_loss, sources=network.trainable_variables)
@@ -232,7 +233,7 @@ class SoftActorCritic:
                 (
                     policy_actions,
                     policy_action_log_prob_densities,
-                ) = network.get_action_and_log_prob_density(state=policy_network_input_batch)
+                ) = network.get_action_and_log_prob_density(state=policy_network_input_batch, training=True)
                 value_network_input_batch = tf.concat([states, policy_actions], axis=1)
                 # target or primary? primary -> faster updates, target -> stable but delayed
                 value_estimate_1 = self.networks['value'][0]['primary'].call(value_network_input_batch)
