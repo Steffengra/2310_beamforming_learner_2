@@ -22,7 +22,7 @@ class ExperienceBuffer:
 
         self.priority_scale_alpha: float = priority_scale_alpha
         self.importance_sampling_correction_beta: float = importance_sampling_correction_beta
-        self.min_priority: float = 1e-20
+        self.min_priority: float = 1e-12
         self.max_priority: float = self.min_priority
 
     def get_len(self) -> int:
@@ -32,6 +32,7 @@ class ExperienceBuffer:
             self,
             experience: dict,
     ) -> None:
+
         self.buffer[self.write_pointer] = experience.copy()
         self.priorities[self.write_pointer] = self.max_priority
 
@@ -48,20 +49,37 @@ class ExperienceBuffer:
         self.probabilities = np.divide(self.priorities, priority_sum)
 
         # Sample
-        sample_experience_ids = self.rng.choice(
-            a=self.buffer_size,
-            size=batch_size,
-            replace=False,  # Can an experience id be selected multiple times? Yes/No
-            p=self.probabilities,
-        )
+        if self.priority_scale_alpha != 0:
+            sample_experience_ids = self.rng.choice(
+                a=self.buffer_size,
+                size=batch_size,
+                replace=False,  # Can an experience id be selected multiple times? Yes/No
+                p=self.probabilities,
+            )
+        else:
+            if any(self.probabilities == 0):
+                sample_experience_ids = self.rng.choice(
+                    a=self.write_pointer,
+                    size=batch_size,
+                    replace=False,  # Can an experience id be selected multiple times? Yes/No
+                )
+            else:
+                sample_experience_ids = self.rng.choice(
+                    a=self.buffer_size,
+                    size=batch_size,
+                    replace=False,  # Can an experience id be selected multiple times? Yes/No
+                )
 
         sample_experiences = [self.buffer[ii] for ii in sample_experience_ids]
         sample_probabilities = self.probabilities[sample_experience_ids]
 
-        sample_importance_weights = np.power(sample_probabilities,
-                                             -self.importance_sampling_correction_beta)
-        sample_importance_weights = np.divide(sample_importance_weights,
-                                              np.max(sample_importance_weights))
+        if self.importance_sampling_correction_beta != 1:
+            sample_importance_weights = np.power(sample_probabilities,
+                                                 -self.importance_sampling_correction_beta)
+            sample_importance_weights = np.divide(sample_importance_weights,
+                                                  np.max(sample_importance_weights))
+        else:
+            sample_importance_weights = sample_probabilities / np.max(sample_probabilities)
 
         return (
             sample_experiences,
@@ -75,11 +93,16 @@ class ExperienceBuffer:
             new_priorities: np.ndarray,
     ) -> None:
 
-        new_priorities = np.power(new_priorities, self.priority_scale_alpha)
-        self.priorities[experience_ids] = np.where(new_priorities > self.min_priority,
-                                                   new_priorities, self.min_priority)
+        if self.priority_scale_alpha != 0:
+            new_priorities = np.power(new_priorities, self.priority_scale_alpha)
+            self.priorities[experience_ids] = np.where(new_priorities > self.min_priority,
+                                                       new_priorities, self.min_priority)
+            sample_max_priority = np.max(new_priorities)
 
-        sample_max_priority = np.max(new_priorities)
+        else:
+            self.priorities[experience_ids] = 1
+            sample_max_priority = 1
+
         if sample_max_priority > self.max_priority:
             self.max_priority = sample_max_priority
 

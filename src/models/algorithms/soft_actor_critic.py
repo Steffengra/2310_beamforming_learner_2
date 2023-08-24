@@ -156,7 +156,11 @@ class SoftActorCritic:
             sample_importance_weights,
         ) = self.experience_buffer.sample(batch_size=self.training_batch_size)
 
-        mean_log_prob_density, value_loss = self.train_graph(
+        (
+            mean_log_prob_density,
+            value_loss,
+            td_error,
+        ) = self.train_graph(
             states=np.array(
                 [experience['state'] for experience in sample_experiences], dtype='float32'),
             actions=np.array(
@@ -172,6 +176,11 @@ class SoftActorCritic:
             toggle_train_entropy_scale_alpha=toggle_train_entropy_scale_alpha,
         )
 
+        self.experience_buffer.adjust_priorities(
+            experience_ids=experience_ids,
+            new_priorities=abs(td_error.numpy().flatten())
+        )
+
         return mean_log_prob_density, value_loss
 
     @tf.function
@@ -185,7 +194,7 @@ class SoftActorCritic:
             toggle_train_value_networks,
             toggle_train_policy_network,
             toggle_train_entropy_scale_alpha,
-    ) -> tuple[tf.Tensor, tf.Tensor]:
+    ) -> tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
 
         if toggle_train_value_networks:
             # Construct target: r(s, a) + \gamma * (Q_hat(s', a') - \alpha * log prob(a'|s'))
@@ -257,4 +266,4 @@ class SoftActorCritic:
             alpha_gradients = tape.gradient(target=alpha_loss, sources=[self.log_entropy_scale_alpha])
             self.entropy_scale_alpha_optimizer.apply_gradients(zip(alpha_gradients, [self.log_entropy_scale_alpha]))
 
-        return tf.reduce_mean(policy_action_log_prob_densities), value_loss
+        return tf.reduce_mean(policy_action_log_prob_densities), value_loss, td_error
