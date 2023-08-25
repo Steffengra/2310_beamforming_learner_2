@@ -25,7 +25,11 @@ def robust_SLNR_precoder_no_norm(
 
         channel_vec_user_idx = channel_matrix[user_idx, :]
 
-        power_channel_user_idx = np.matmul(channel_vec_user_idx.conj(), channel_vec_user_idx)  # == trace
+        power_channel_user_idx = (
+                np.matmul(channel_vec_user_idx.conj(), channel_vec_user_idx)
+                / sat_tot_ant_nr
+        )
+        # == trace
 
         autocorrelation_matrix_user_idx = autocorrelation_matrix[user_idx, :, :]
 
@@ -36,11 +40,16 @@ def robust_SLNR_precoder_no_norm(
                     channel_matrix[other_user_idx, :].conj()
                 )  # TODO: ????????????????
             # )
+            / sat_tot_ant_nr
             * autocorrelation_matrix[other_user_idx, :, :]
             for other_user_idx in range(user_nr) if other_user_idx != user_idx
         ]
 
         sum_weighted_autocorrelation_matrices_other_users = sum(weighted_autocorrelation_matrices_other_users)
+
+        # print(sum_weighted_autocorrelation_matrices_other_users)
+        # print(user_nr * noise_power_watt / power_constraint_watt * np.eye(sat_tot_ant_nr))
+        # exit()
 
         generalized_Rayleigh_quotient = (
             np.linalg.inv(
@@ -51,10 +60,36 @@ def robust_SLNR_precoder_no_norm(
             * autocorrelation_matrix_user_idx
         )
 
-        eigenvalues, eigenvecs = np.linalg.eig(generalized_Rayleigh_quotient)
-        max_eigenvalue_idx = eigenvalues.argmax()
-        max_eigenvec = eigenvecs[max_eigenvalue_idx]
+        # with np.printoptions(linewidth=150):
+        #     print(generalized_Rayleigh_quotient)
+        #     print(scipy.linalg.ishermitian(generalized_Rayleigh_quotient, atol=1e-16))
+        # exit()
 
-        precoding_matrix[:, user_idx] = np.sqrt(power_constraint_watt/user_nr) * max_eigenvec
+        # eigenvalues, eigenvecs = np.linalg.eig(generalized_Rayleigh_quotient)
+        # max_eigenvalue_idx = eigenvalues.argmax()
+        # max_eigenvec = eigenvecs[max_eigenvalue_idx]
+
+        # print('.eig', eigenvalues)
+        # print('norm', np.linalg.norm(max_eigenvec), '\n')
+        # print(eigenvecs)
+
+        # eigenvalues2, eigenvecs2 = scipy.linalg.eig(
+        #     a=autocorrelation_matrix_user_idx * power_channel_user_idx,
+        #     b=(sum_weighted_autocorrelation_matrices_other_users + user_nr * noise_power_watt / power_constraint_watt * np.eye(sat_tot_ant_nr)),
+        # )
+        # max_eigenvalue2_idx = eigenvalues2.argmax()
+        # max_eigenvec2 = eigenvecs2[max_eigenvalue2_idx]
+        # print('generalized', eigenvalues2)
+        # print('norm', np.linalg.norm(max_eigenvec2), '\n')
+
+        eigenvalues3, eigenvecs3 = np.linalg.eigh(generalized_Rayleigh_quotient)
+
+        max_eigenvalue3_idx = eigenvalues3.argmax()
+        max_eigenvec3 = eigenvecs3[max_eigenvalue3_idx]
+        # print('.eigh', eigenvalues3)
+        # print('norm', np.linalg.norm(max_eigenvec3), '\n')
+        # print(eigenvecs3)
+
+        precoding_matrix[:, user_idx] = np.sqrt(power_constraint_watt/user_nr) * max_eigenvec3
 
     return precoding_matrix
