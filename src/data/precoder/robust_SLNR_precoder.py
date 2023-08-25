@@ -2,8 +2,6 @@
 import numpy as np
 import scipy
 
-# TODO: only works reliable if we have a uniform error > 1e-4
-
 
 def robust_SLNR_precoder_no_norm(
         channel_matrix: np.ndarray,
@@ -65,31 +63,31 @@ def robust_SLNR_precoder_no_norm(
         #     print(scipy.linalg.ishermitian(generalized_Rayleigh_quotient, atol=1e-16))
         # exit()
 
-        # eigenvalues, eigenvecs = np.linalg.eig(generalized_Rayleigh_quotient)
-        # max_eigenvalue_idx = eigenvalues.argmax()
-        # max_eigenvec = eigenvecs[max_eigenvalue_idx]
+        eigenvalues, eigenvecs = np.linalg.eig(generalized_Rayleigh_quotient)
+        max_eigenvalue_idx = eigenvalues.argmax()
+        max_eigenvec = eigenvecs[:, max_eigenvalue_idx]
 
         # print('.eig', eigenvalues)
         # print('norm', np.linalg.norm(max_eigenvec), '\n')
         # print(eigenvecs)
 
-        # eigenvalues2, eigenvecs2 = scipy.linalg.eig(
-        #     a=autocorrelation_matrix_user_idx * power_channel_user_idx,
-        #     b=(sum_weighted_autocorrelation_matrices_other_users + user_nr * noise_power_watt / power_constraint_watt * np.eye(sat_tot_ant_nr)),
-        # )
-        # max_eigenvalue2_idx = eigenvalues2.argmax()
-        # max_eigenvec2 = eigenvecs2[max_eigenvalue2_idx]
+        eigenvalues2, eigenvecs2 = scipy.linalg.eig(
+            a=autocorrelation_matrix_user_idx * power_channel_user_idx,
+            b=(sum_weighted_autocorrelation_matrices_other_users + user_nr * noise_power_watt / power_constraint_watt * np.eye(sat_tot_ant_nr)),
+        )
+        max_eigenvalue2_idx = eigenvalues2.argmax()
+        max_eigenvec2 = eigenvecs2[:, max_eigenvalue2_idx]
         # print('generalized', eigenvalues2)
         # print('norm', np.linalg.norm(max_eigenvec2), '\n')
 
-        eigenvalues3, eigenvecs3 = np.linalg.eigh(generalized_Rayleigh_quotient)
-
-        max_eigenvalue3_idx = eigenvalues3.argmax()
-        max_eigenvec3 = eigenvecs3[max_eigenvalue3_idx]
+        # eigenvalues3, eigenvecs3 = np.linalg.eigh(generalized_Rayleigh_quotient)
+        #
+        # max_eigenvalue3_idx = eigenvalues3.argmax()
+        # max_eigenvec3 = eigenvecs3[:, max_eigenvalue3_idx]
         # print('.eigh', eigenvalues3)
         # print('norm', np.linalg.norm(max_eigenvec3), '\n')
         # print(eigenvecs3)
 
-        precoding_matrix[:, user_idx] = np.sqrt(power_constraint_watt/user_nr) * max_eigenvec3
+        precoding_matrix[:, user_idx] = np.sqrt(power_constraint_watt/user_nr) * max_eigenvec2
 
     return precoding_matrix

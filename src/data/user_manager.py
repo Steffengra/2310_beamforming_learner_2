@@ -20,7 +20,7 @@ class UserManager:
         self.rng = config.rng
         self.logger = config.logger.getChild(__name__)
 
-        self.users: list = []
+        self.users: list[src.data.user.User] = []
         self._initialize_users(config=config)
 
         self.logger.info('user setup complete')
