@@ -52,23 +52,23 @@ def test_precoder_error_sweep(
         progress_printer(progress=progress, real_time_start=real_time_start)
 
     def set_new_error_value() -> None:
-        if config.error_model.error_model_name == 'err_mult_on_steering_cos':
-            config.error_model.uniform_error_interval['low'] = -1 * error_sweep_value
-            config.error_model.uniform_error_interval['high'] = error_sweep_value
-        elif config.error_model.error_model_name == 'err_sat2userdist':
-            config.error_model.distance_error_std = error_sweep_value
-        elif config.error_model.error_model_name == 'err_satpos_and_userpos':
+        if config.config_error_model.error_model_name == 'err_mult_on_steering_cos':
+            config.config_error_model.uniform_error_interval['low'] = -1 * error_sweep_value
+            config.config_error_model.uniform_error_interval['high'] = error_sweep_value
+        elif config.config_error_model.error_model_name == 'err_sat2userdist':
+            config.config_error_model.distance_error_std = error_sweep_value
+        elif config.config_error_model.error_model_name == 'err_satpos_and_userpos':
             # todo: this model has 2 params
             # config.error_model.uniform_error_interval['low'] = -1 * error_sweep_value
             # config.error_model.uniform_error_interval['high'] = error_sweep_value
-            config.error_model.phase_sat_error_std = error_sweep_value
+            config.config_error_model.phase_sat_error_std = error_sweep_value
 
         else:
             raise ValueError('Unknown error model name')
 
     def save_results():
         name = f'testing_{precoder_name}_sweep_{csit_error_sweep_range[0]}_{csit_error_sweep_range[-1]}_userwiggle_{config.user_dist_bound}.gzip'
-        results_path = Path(config.output_metrics_path, config.config_learner.training_name, config.error_model.error_model_name, 'error_sweep')
+        results_path = Path(config.output_metrics_path, config.config_learner.training_name, config.config_error_model.error_model_name, 'error_sweep')
         results_path.mkdir(parents=True, exist_ok=True)
         with gzip_open(Path(results_path, name), 'wb') as file:
             pickle_dump([csit_error_sweep_range, metrics], file=file)

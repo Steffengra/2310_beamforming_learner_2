@@ -25,6 +25,7 @@ class Satellite:
             antenna_gain_linear: float,
             freq: float,
             center_aod_earth_deg: float,
+            error_functions: dict,
     ) -> None:
 
         self.rng = rng
@@ -48,6 +49,9 @@ class Satellite:
 
         self.channel_state_to_users: np.ndarray = np.array([])  # depends on channel model
         self.erroneous_channel_state_to_users: np.ndarray = np.array([])  # depends on channel & error model
+
+        self.estimation_error_functions: dict = error_functions
+        self.estimation_errors: dict = {}
 
     def update_position(
             self,
@@ -105,6 +109,13 @@ class Satellite:
 
             if user_pos_idx[user.idx] >= 0:
                 self.aods_to_users[user.idx] = 2 * (self.center_aod_earth_deg * np.pi/180) - self.aods_to_users[user.idx]
+
+    def roll_estimation_errors(
+            self,
+    ) -> None:
+
+        for estimation_error_name, error_function in self.estimation_error_functions.items():
+            self.estimation_errors[estimation_error_name] = error_function()
 
     def calculate_steering_vectors(
             self,

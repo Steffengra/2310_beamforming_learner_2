@@ -126,6 +126,13 @@ class SatelliteManager:
         for satellite in self.satellites:
             satellite.calculate_aods_to_users(users=users)
 
+    def roll_estimation_errors(
+            self,
+    ) -> None:
+
+        for satellite in self.satellites:
+            satellite.roll_estimation_errors()
+
     def calculate_steering_vectors_to_users(
             self,
             users: list,

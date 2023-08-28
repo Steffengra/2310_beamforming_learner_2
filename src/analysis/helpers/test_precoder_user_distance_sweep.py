@@ -85,8 +85,8 @@ def test_precoder_user_distance_sweep(
 
         config.user_dist_average = distance_sweep_value
         config.user_dist_bound = 0
-        config.error_model.error_model = los_channel_error_model_no_error
-        config.error_model.update()
+        config.config_error_model.config_error_model = los_channel_error_model_no_error
+        config.config_error_model.update()
 
         update_sim(config, satellite_manager, user_manager)
 
