@@ -148,11 +148,11 @@ class Satellite:
         This function updates the channel state to given users
         according to a given channel model
         """
-        self.channel_state_to_users = channel_model(self, users)
+        self.channel_state_to_users = channel_model(self, users, error_free=True)
 
     def update_erroneous_channel_state_information(
             self,
-            error_model_config: 'src.config.config_error_model.ConfigErrorModel',
+            channel_model: 'src.config.config_error_model.ConfigErrorModel',
             users: list,
     ) -> None:
         """
@@ -160,6 +160,4 @@ class Satellite:
         according to a given user list and error model config
         """
 
-        self.erroneous_channel_state_to_users = error_model_config.error_model(error_model_config=error_model_config,
-                                                                               satellite=self,
-                                                                               users=users)
+        self.erroneous_channel_state_to_users = channel_model(satellite=self, users=users, error_free=False)

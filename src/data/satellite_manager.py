@@ -174,7 +174,7 @@ class SatelliteManager:
 
     def update_erroneous_channel_state_information(
             self,
-            error_model_config: 'src.config.config_error_model.ConfigErrorModel',
+            channel_model,
             users: list,
     ) -> None:
 
@@ -183,7 +183,7 @@ class SatelliteManager:
 
         # apply error model per satellite
         for satellite in self.satellites:
-            satellite.update_erroneous_channel_state_information(error_model_config=error_model_config, users=users)
+            satellite.update_erroneous_channel_state_information(channel_model=channel_model, users=users)
 
         # gather global erroneous channel state information
         erroneous_channel_state_per_satellite = np.zeros(

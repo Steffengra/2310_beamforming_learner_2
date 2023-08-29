@@ -11,6 +11,7 @@ class ConfigErrorModel:
 
     def __init__(
             self,
+            user_nr,
             channel_model,
             rng: np.random.Generator,
             wavelength: float,
@@ -20,6 +21,7 @@ class ConfigErrorModel:
 
         if channel_model == los_channel_model:
             self.error_rngs = self.set_los_channel_errors(
+                user_nr = user_nr,
                 wavelength=wavelength,
             )
 
@@ -28,18 +30,19 @@ class ConfigErrorModel:
 
     def set_los_channel_errors(
             self,
+            user_nr,
             wavelength: float,
     ) -> dict:
 
         def roll_additive_error_on_overall_phase_shift():
-            roll_satellite_to_user_distance_error = self.rng.uniform(-5, 5, size=None)
+            roll_satellite_to_user_distance_error = self.rng.uniform(0, 0, size=(user_nr))
             return 2 * np.pi / wavelength * (roll_satellite_to_user_distance_error % wavelength)
 
         def roll_additive_error_on_aod():
-            return self.rng.normal(0, 1, size=None)
+            return self.rng.normal(0, 0, size=(user_nr))
 
         def roll_additive_error_on_cosine_of_aod():
-            return self.rng.uniform(-5, 5, size=None)
+            return self.rng.uniform(0, 0, size=(user_nr))
 
         def roll_additive_error_on_channel_vector():
             return np.zeros(1)

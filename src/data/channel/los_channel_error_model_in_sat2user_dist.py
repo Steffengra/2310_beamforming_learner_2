@@ -33,6 +33,7 @@ def los_channel_error_model_in_sat2user_dist(
         amplitude_damping = np.sqrt(power_ratio)
 
         phase_shift = satellite_to_user_distance_estimate % satellite.wavelength * 2 * np.pi / satellite.wavelength
+    
 
         erroneous_channel_state_to_users[user.idx, :] = (
             amplitude_damping

@@ -115,6 +115,7 @@ class Config:
 
         # Error Model
         self.config_error_model = ConfigErrorModel(
+            self.user_nr,
             self.channel_model,
             self.rng,
             self.wavelength,
