@@ -50,7 +50,7 @@ def calc_autocorrelation(
                     raise ValueError('Unknown error distribution on cosine of AODs')
 
                 autocorrelation_matrix[user_id, antenna_row_id, antenna_col_id] = (
-                        np.exp(1j * wavenumber * sat_antenna_spacing * (antenna_row_id - antenna_col_id) * phi_dach)
+                        np.exp(-1j * wavenumber * sat_antenna_spacing * (antenna_row_id - antenna_col_id) * phi_dach)
                         * characteristic_function
                 )
 
