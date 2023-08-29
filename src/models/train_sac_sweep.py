@@ -10,15 +10,6 @@ from src.config.config import (
 from src.models.train_sac import (
     train_sac_single_error,
 )
-from src.data.channel.los_channel_error_model_multiplicative_on_cos import (
-    los_channel_error_model_multiplicative_on_cos,
-)
-from src.data.channel.los_channel_error_model_in_sat2user_dist import (
-    los_channel_error_model_in_sat2user_dist,
-)
-from src.data.channel.los_channel_error_model_in_sat_and_user_pos import (
-    los_channel_error_model_in_sat_and_user_pos,
-)
 from src.analysis.helpers.test_sac_precoder_error_sweep import (
     test_sac_precoder_error_sweep,
 )
@@ -37,10 +28,10 @@ def learn_on_userdist_and_mult_error(
     cfg.show_plots = False
     cfg.config_learner.training_name = f'sat_{cfg.sat_nr}_ant_{cfg.sat_tot_ant_nr}_usr_{cfg.user_nr}_satdist_{cfg.sat_dist_average}_usrdist_{userdist}'
     cfg.user_dist_average = userdist
-    cfg.error_model.error_model = los_channel_error_model_multiplicative_on_cos
-    cfg.error_model.update()
-    cfg.error_model.uniform_error_interval['low'] = -mult_error
-    cfg.error_model.uniform_error_interval['high'] = mult_error
+    cfg.config_error_model.config_error_model = los_channel_error_model_multiplicative_on_cos
+    cfg.config_error_model.update()
+    cfg.config_error_model.uniform_error_interval['low'] = -mult_error
+    cfg.config_error_model.uniform_error_interval['high'] = mult_error
 
     best_model_path = train_sac_single_error(config=cfg)
 
@@ -60,9 +51,9 @@ def learn_on_userdist_and_sat2userdist_error(
     cfg.show_plots = False
     cfg.config_learner.training_name = f'sat_{cfg.sat_nr}_ant_{cfg.sat_tot_ant_nr}_usr_{cfg.user_nr}_satdist_{cfg.sat_dist_average}_usrdist_{userdist}'
     cfg.user_dist_average = userdist
-    cfg.error_model.error_model = los_channel_error_model_in_sat2user_dist
-    cfg.error_model.update()
-    cfg.error_model.distance_error_std = sat2userdisterror_std
+    cfg.config_error_model.config_error_model = los_channel_error_model_in_sat2user_dist
+    cfg.config_error_model.update()
+    cfg.config_error_model.distance_error_std = sat2userdisterror_std
 
     best_model_path = train_sac_single_error(config=deepcopy(cfg))
 
@@ -82,11 +73,11 @@ def learn_on_userdist_and_satpos_and_userpos_error(
     cfg.show_plots = False
     cfg.config_learner.training_name = f'sat_{cfg.sat_nr}_ant_{cfg.sat_tot_ant_nr}_usr_{cfg.user_nr}_satdist_{cfg.sat_dist_average}_usrdist_{userdist}'
     cfg.user_dist_average = userdist
-    cfg.error_model.error_model = los_channel_error_model_in_sat_and_user_pos
-    cfg.error_model.update()
-    cfg.error_model.uniform_error_interval['low'] = -mult_error_bound
-    cfg.error_model.uniform_error_interval['high'] = mult_error_bound
-    cfg.error_model.phase_sat_error_std = phase_sat_error_std
+    cfg.config_error_model.config_error_model = los_channel_error_model_in_sat_and_user_pos
+    cfg.config_error_model.update()
+    cfg.config_error_model.uniform_error_interval['low'] = -mult_error_bound
+    cfg.config_error_model.uniform_error_interval['high'] = mult_error_bound
+    cfg.config_error_model.phase_sat_error_std = phase_sat_error_std
 
     best_model_path = train_sac_single_error(config=cfg)
 
@@ -128,7 +119,7 @@ def test_precoder(
         config=deepcopy(config),
         model_parent_path=model_parent_path,
         model_name=model_name,
-        csit_error_sweep_range=error_sweep_range,
+        error_sweep_range=error_sweep_range,
         monte_carlo_iterations=monte_carlo_iterations,
     )
 
@@ -139,7 +130,7 @@ def test_precoder(
         config=deepcopy(config),
         model_parent_path=model_parent_path,
         model_name=model_name,
-        csit_error_sweep_range=error_sweep_range,
+        error_sweep_range=error_sweep_range,
         monte_carlo_iterations=monte_carlo_iterations,
     )
     config.user_dist_bound = old_user_dist_bound

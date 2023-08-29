@@ -69,14 +69,14 @@ class Config:
         # User
         self.user_nr: int = 3  # Number of users
         self.user_gain_dBi: float = 0  # User gain in dBi
-        self.user_dist_average: float = 1_000  # Average user distance in m  # todo: remember that get_state standardization currently is very sensitive to changing this
+        self.user_dist_average: float = 100_000  # Average user distance in m  # todo: remember that get_state standardization currently is very sensitive to changing this
         self.user_dist_bound: float = 30  # Variance of user distance, uniform distribution [avg-bound, avg+bound]
         self.user_center_aod_earth_deg: float = 90  # Average center of users
 
         self.user_gain_linear: float = 10**(self.user_gain_dBi / 10)  # User gain linear
 
         # Satellite
-        self.sat_nr: int = 2  # Number of satellites
+        self.sat_nr: int = 1  # Number of satellites
         self.sat_tot_ant_nr: int = 4  # Total number of  Tx antennas, should be a number larger than sat nr
         self.sat_gain_dBi: float = 20  # Total sat TODO: Wert nochmal checken
         self.sat_dist_average: float = 10_000  # Average satellite distance in meter  # todo: remember that get_state standardization currently is very sensitive to changing this
@@ -114,7 +114,12 @@ class Config:
     ) -> None:
 
         # Error Model
-        self.error_model = ConfigErrorModel()
+        self.config_error_model = ConfigErrorModel(
+            channel_model=self.channel_model,
+            rng=self.rng,
+            wavelength=self.wavelength,
+            user_nr=self.user_nr,
+        )
 
         # Learner
         self.config_learner = ConfigSACLearner(
@@ -134,8 +139,10 @@ class Config:
             'antenna_nr': self.sat_ant_nr,
             'antenna_distance': self.sat_ant_dist,
             'antenna_gain_linear': self.sat_ant_gain_linear,
+            'user_nr': self.user_nr,
             'freq': self.freq,
             'center_aod_earth_deg': self.sat_center_aod_earth_deg,
+            'error_functions': self.config_error_model.error_rngs
         }
 
         self.user_args: dict = {

@@ -23,9 +23,6 @@ from src.data.satellite_manager import (
 from src.data.user_manager import (
     UserManager,
 )
-from src.data.channel.los_channel_error_model_no_error import (
-    los_channel_error_model_no_error,
-)
 from src.utils.plot_sweep import (
     plot_sweep,
 )
@@ -85,8 +82,8 @@ def test_precoder_user_distance_sweep(
 
         config.user_dist_average = distance_sweep_value
         config.user_dist_bound = 0
-        config.error_model.error_model = los_channel_error_model_no_error
-        config.error_model.update()
+
+        config.config_error_model.set_zero_error()
 
         update_sim(config, satellite_manager, user_manager)
 

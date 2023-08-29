@@ -7,7 +7,7 @@ def euclidian_distance(
         vec_2: np.ndarray,
 ) -> np.ndarray:
     """
-    This function calculates the euclidean distance between two 3D vectors
+    This function calculates the Euclidean distance between two 3D vectors
     """
 
     x_dist = vec_1[0] - vec_2[0]

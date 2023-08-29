@@ -31,7 +31,8 @@ from src.utils.norm_precoder import (
 def test_sac_precoder_error_sweep(
         config: 'src.config.config.Config',
         model_path: Path,
-        csit_error_sweep_range: np.ndarray,
+        error_sweep_parameter: str,
+        error_sweep_range: np.ndarray,
         monte_carlo_iterations: int,
 ) -> None:
 
@@ -63,7 +64,8 @@ def test_sac_precoder_error_sweep(
 
     test_precoder_error_sweep(
         config=config,
-        csit_error_sweep_range=csit_error_sweep_range,
+        error_sweep_parameter=error_sweep_parameter,
+        error_sweep_range=error_sweep_range,
         precoder_name='learned',
         monte_carlo_iterations=monte_carlo_iterations,
         get_precoder_func=get_precoder_function_learned,

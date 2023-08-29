@@ -1,7 +1,6 @@
 
 import numpy as np
 
-import src
 from src.utils.spherical_to_cartesian_coordinates import (
     spherical_to_cartesian_coordinates,
 )
@@ -23,8 +22,10 @@ class Satellite:
             antenna_nr: int,
             antenna_distance: float,
             antenna_gain_linear: float,
+            user_nr: int,
             freq: float,
             center_aod_earth_deg: float,
+            error_functions: dict,
     ) -> None:
 
         self.rng = rng
@@ -37,6 +38,8 @@ class Satellite:
         self.antenna_distance: float = antenna_distance  # antenna distance in meters
         self.antenna_gain_linear: float = antenna_gain_linear
 
+        self.user_nr: int = user_nr
+
         self.freq: float = freq
         self.wavelength: float = get_wavelength(self.freq)
 
@@ -44,15 +47,18 @@ class Satellite:
 
         self.distance_to_users = None  # user_idx[int]: dist[float]
         self.aods_to_users = None  # user_idx[int]: aod[float] in rad, [0, 2pi], most commonly ~pi/2, aod looks from sat towards users
-        self.steering_vectors_to_users = None  # user_idx[int]: steering_vector[ndarray] \in 1 x antenna_nr
+        self.steering_error = None
 
         self.channel_state_to_users: np.ndarray = np.array([])  # depends on channel model
         self.erroneous_channel_state_to_users: np.ndarray = np.array([])  # depends on channel & error model
 
+        self.estimation_error_functions: dict = error_functions
+        self.estimation_errors: dict = {}
+
     def update_position(
             self,
             spherical_coordinates: np.ndarray,
-    ):
+    ) -> None:
 
         self.spherical_coordinates = spherical_coordinates
         self.cartesian_coordinates = spherical_to_cartesian_coordinates(spherical_coordinates)
@@ -106,27 +112,12 @@ class Satellite:
             if user_pos_idx[user.idx] >= 0:
                 self.aods_to_users[user.idx] = 2 * (self.center_aod_earth_deg * np.pi/180) - self.aods_to_users[user.idx]
 
-    def calculate_steering_vectors(
+    def roll_estimation_errors(
             self,
-            users: list,
     ) -> None:
-        """
-        This function provides the steering vectors for a given ULA and AOD
-        """
 
-        if self.steering_vectors_to_users is None:
-            self.steering_vectors_to_users = np.zeros((len(users), self.antenna_nr), dtype='complex128')
-
-        steering_idx = np.arange(0, self.antenna_nr) - (self.antenna_nr - 1) / 2
-
-        for user in users:
-            self.steering_vectors_to_users[user.idx, :] = np.exp(
-                steering_idx * (
-                    -1j * 2 * np.pi / self.wavelength
-                    * self.antenna_distance
-                    * np.cos(self.aods_to_users[user.idx])
-                )
-            )
+        for estimation_error_name, error_function in self.estimation_error_functions.items():
+            self.estimation_errors[estimation_error_name] = error_function()
 
     def update_channel_state_information(
             self,
@@ -137,11 +128,11 @@ class Satellite:
         This function updates the channel state to given users
         according to a given channel model
         """
-        self.channel_state_to_users = channel_model(self, users)
+        self.channel_state_to_users = channel_model(self, users, error_free=True)
 
     def update_erroneous_channel_state_information(
             self,
-            error_model_config: 'src.config.config_error_model.ConfigErrorModel',
+            channel_model,
             users: list,
     ) -> None:
         """
@@ -149,6 +140,4 @@ class Satellite:
         according to a given user list and error model config
         """
 
-        self.erroneous_channel_state_to_users = error_model_config.error_model(error_model_config=error_model_config,
-                                                                               satellite=self,
-                                                                               users=users)
+        self.erroneous_channel_state_to_users = channel_model(satellite=self, users=users, error_free=False)

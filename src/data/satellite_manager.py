@@ -126,18 +126,12 @@ class SatelliteManager:
         for satellite in self.satellites:
             satellite.calculate_aods_to_users(users=users)
 
-    def calculate_steering_vectors_to_users(
+    def roll_estimation_errors(
             self,
-            users: list,
     ) -> None:
 
-        """
-        This function calculates the steering vectors (one value per antenna) for each satellite to
-        each user
-        """
-
         for satellite in self.satellites:
-            satellite.calculate_steering_vectors(users=users)
+            satellite.roll_estimation_errors()
 
     def update_channel_state_information(
             self,
@@ -167,7 +161,7 @@ class SatelliteManager:
 
     def update_erroneous_channel_state_information(
             self,
-            error_model_config: 'src.config.config_error_model.ConfigErrorModel',
+            channel_model,
             users: list,
     ) -> None:
 
@@ -176,7 +170,7 @@ class SatelliteManager:
 
         # apply error model per satellite
         for satellite in self.satellites:
-            satellite.update_erroneous_channel_state_information(error_model_config=error_model_config, users=users)
+            satellite.update_erroneous_channel_state_information(channel_model=channel_model, users=users)
 
         # gather global erroneous channel state information
         erroneous_channel_state_per_satellite = np.zeros(
