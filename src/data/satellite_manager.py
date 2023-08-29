@@ -90,6 +90,14 @@ class SatelliteManager:
                 )
             )
 
+    def update_estimation_error_functions(
+            self,
+            estimation_error_functions: dict,
+    ) -> None:
+
+        for satellite in self.satellites:
+            satellite.update_estimation_error_functions(estimation_error_functions)
+
     def update_positions(
             self,
             config: 'src.config.config.Config',

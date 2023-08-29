@@ -53,6 +53,13 @@ class Satellite:
         self.estimation_error_functions: dict = error_functions
         self.estimation_errors: dict = {}
 
+    def update_estimation_error_functions(
+            self,
+            estimation_error_functions: dict,
+    ) -> None:
+
+        self.estimation_error_functions = estimation_error_functions
+
     def update_position(
             self,
             spherical_coordinates: np.ndarray,
