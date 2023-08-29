@@ -36,19 +36,20 @@ class ConfigSACLearner:
                 'learning_rate': 1e-4,  # LR=0.0 -> No adaptive entropy scale -> manually tune initial entropy scale
             },
             'training_minimum_experiences': 1_000,
-            'training_batch_size': 512,
+            'training_batch_size': 1024,
             'training_target_update_momentum_tau': 0,  # How much of the primary network copy to target networks
         }
         self.experience_buffer_args: dict = {
-            'buffer_size': 10_000,
+            'buffer_size': 2_000,
             'priority_scale_alpha': 0.0,  # alpha in [0, 1], alpha=0 uniform sampling, 1 is fully prioritized sampling
             'importance_sampling_correction_beta': 1.0  # beta in [0%, 100%], beta=100% is full correction
         }
         self.network_args: dict = {
             'value_network_args': {
-                'hidden_layer_units': [512, 512, 512, 512],
-                'activation_hidden': 'tanh',  # >'relu', 'tanh', 'penalized_tanh'
-                'kernel_initializer_hidden': 'glorot_uniform'  # >glorot_uniform, he_uniform
+                'hidden_layer_units': [512, 512, 512, 512,],
+                'activation_hidden': 'relu',  # >'relu', 'tanh', 'penalized_tanh', 'shaped_tanh'
+                'kernel_initializer_hidden': 'glorot_uniform',  # >'glorot_uniform', 'he_uniform'
+                'batch_norm': True,
             },
             'value_network_optimizer': tf.keras.optimizers.Adam,
             'value_network_optimizer_args': {
@@ -56,14 +57,15 @@ class ConfigSACLearner:
                 'amsgrad': False,
             },
             'policy_network_args': {
-                'hidden_layer_units': [512, 512, 512, 512],
-                'activation_hidden': 'tanh',  # >'relu', 'tanh', 'penalized_tanh'
-                'kernel_initializer_hidden': 'glorot_uniform'  # >glorot_uniform, he_uniform
+                'hidden_layer_units': [512, 512, 512, 512,],
+                'activation_hidden': 'relu',  # >'relu', 'tanh', 'penalized_tanh', 'shaped_tanh'
+                'kernel_initializer_hidden': 'glorot_uniform',  # >'glorot_uniform', 'he_uniform'
+                'batch_norm': True,
             },
             'policy_network_optimizer': tf.keras.optimizers.Adam,
             'policy_network_optimizer_args': {
                 'learning_rate': 1e-5,
-                'amsgrad': True,
+                'amsgrad': False,
             },
         }
 

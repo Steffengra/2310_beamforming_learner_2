@@ -90,6 +90,14 @@ class SatelliteManager:
                 )
             )
 
+    def update_estimation_error_functions(
+            self,
+            estimation_error_functions: dict,
+    ) -> None:
+
+        for satellite in self.satellites:
+            satellite.update_estimation_error_functions(estimation_error_functions)
+
     def update_positions(
             self,
             config: 'src.config.config.Config',
@@ -125,6 +133,13 @@ class SatelliteManager:
 
         for satellite in self.satellites:
             satellite.calculate_aods_to_users(users=users)
+
+    def roll_estimation_errors(
+            self,
+    ) -> None:
+
+        for satellite in self.satellites:
+            satellite.roll_estimation_errors()
 
     def calculate_steering_vectors_to_users(
             self,
@@ -167,7 +182,7 @@ class SatelliteManager:
 
     def update_erroneous_channel_state_information(
             self,
-            error_model_config: 'src.config.config_error_model.ConfigErrorModel',
+            channel_model,
             users: list,
     ) -> None:
 
@@ -176,7 +191,7 @@ class SatelliteManager:
 
         # apply error model per satellite
         for satellite in self.satellites:
-            satellite.update_erroneous_channel_state_information(error_model_config=error_model_config, users=users)
+            satellite.update_erroneous_channel_state_information(channel_model=channel_model, users=users)
 
         # gather global erroneous channel state information
         erroneous_channel_state_per_satellite = np.zeros(

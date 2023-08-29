@@ -25,6 +25,7 @@ class Satellite:
             antenna_gain_linear: float,
             freq: float,
             center_aod_earth_deg: float,
+            error_functions: dict,
     ) -> None:
 
         self.rng = rng
@@ -49,6 +50,16 @@ class Satellite:
 
         self.channel_state_to_users: np.ndarray = np.array([])  # depends on channel model
         self.erroneous_channel_state_to_users: np.ndarray = np.array([])  # depends on channel & error model
+
+        self.estimation_error_functions: dict = error_functions
+        self.estimation_errors: dict = {}
+
+    def update_estimation_error_functions(
+            self,
+            estimation_error_functions: dict,
+    ) -> None:
+
+        self.estimation_error_functions = estimation_error_functions
 
     def update_position(
             self,
@@ -107,6 +118,13 @@ class Satellite:
             if user_pos_idx[user.idx] >= 0:
                 self.aods_to_users[user.idx] = 2 * (self.center_aod_earth_deg * np.pi/180) - self.aods_to_users[user.idx]
 
+    def roll_estimation_errors(
+            self,
+    ) -> None:
+
+        for estimation_error_name, error_function in self.estimation_error_functions.items():
+            self.estimation_errors[estimation_error_name] = error_function()
+
     def calculate_steering_vectors(
             self,
             users: list,
@@ -138,11 +156,11 @@ class Satellite:
         This function updates the channel state to given users
         according to a given channel model
         """
-        self.channel_state_to_users = channel_model(self, users)
+        self.channel_state_to_users = channel_model(self, users, error_free=True)
 
     def update_erroneous_channel_state_information(
             self,
-            error_model_config: 'src.config.config_error_model.ConfigErrorModel',
+            channel_model: 'src.config.config_error_model.ConfigErrorModel',
             users: list,
     ) -> None:
         """
@@ -150,6 +168,4 @@ class Satellite:
         according to a given user list and error model config
         """
 
-        self.erroneous_channel_state_to_users = error_model_config.error_model(error_model_config=error_model_config,
-                                                                               satellite=self,
-                                                                               users=users)
+        self.erroneous_channel_state_to_users = channel_model(satellite=self, users=users, error_free=False)

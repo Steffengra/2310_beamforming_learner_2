@@ -114,7 +114,12 @@ class Config:
     ) -> None:
 
         # Error Model
-        self.error_model = ConfigErrorModel()
+        self.config_error_model = ConfigErrorModel(
+            self.user_nr,
+            self.channel_model,
+            self.rng,
+            self.wavelength,
+        )
 
         # Learner
         self.config_learner = ConfigSACLearner(
@@ -136,6 +141,7 @@ class Config:
             'antenna_gain_linear': self.sat_ant_gain_linear,
             'freq': self.freq,
             'center_aod_earth_deg': self.sat_center_aod_earth_deg,
+            'error_functions': self.config_error_model.error_rngs
         }
 
         self.user_args: dict = {
