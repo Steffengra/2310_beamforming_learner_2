@@ -4,9 +4,9 @@ import src
 
 
 def get_steering_vec(
-        satellite,
-        phase_aod_steering
-):
+        satellite: 'src.data.satellite.Satellite',
+        phase_aod_steering: float,
+) -> np.ndarray:
 
     steering_vector_to_user = np.zeros(satellite.antenna_nr, dtype='complex128')
 
@@ -14,10 +14,10 @@ def get_steering_vec(
     steering_idx = np.arange(0, satellite.antenna_nr)
 
     steering_vector_to_user[:] = np.exp(
-            steering_idx * (
-            -1j * 2 * np.pi / satellite.wavelength
-            * satellite.antenna_distance
-            * phase_aod_steering)
-        )
+        steering_idx
+        * -1j * 2 * np.pi / satellite.wavelength
+        * satellite.antenna_distance
+        * phase_aod_steering
+    )
 
     return steering_vector_to_user

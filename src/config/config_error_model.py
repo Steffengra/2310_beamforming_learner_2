@@ -100,5 +100,3 @@ class ConfigErrorModel:
             for arg, value in parameter_content['args'].items():
                 if arg != 'size':
                     self.error_rng_parametrizations[parameter_name]['args'][arg] = 0
-
-        self.set_los_channel_error_functions()

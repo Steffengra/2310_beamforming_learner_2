@@ -1,16 +1,13 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from copy import (
-    deepcopy,
-)
+from copy import deepcopy
 
 import src
 from src.data.satellite_manager import SatelliteManager
 from src.data.user_manager import UserManager
 from src.config.config import Config
 from src.utils.update_sim import update_sim
-from src.data.precoder.mmse_precoder import mmse_precoder_normalized
 
 
 def plot_beampattern(
@@ -55,12 +52,13 @@ def plot_beampattern(
         user_manager_local.users[user_main_idx].update_position(
             [user_manager_local.users[user_main_idx].spherical_coordinates[0], user_manager_local.users[user_main_idx].spherical_coordinates[1], angle]
         )
+
         satellite_manager_local.update_positions(config=config_local)
         satellite_manager_local.calculate_satellite_distances_to_users(users=user_manager_local.users)
         satellite_manager_local.calculate_satellite_aods_to_users(users=user_manager_local.users)
-        satellite_manager_local.calculate_steering_vectors_to_users(users=user_manager_local.users)
+        satellite_manager_local.roll_estimation_errors()
         satellite_manager_local.update_channel_state_information(channel_model=config_local.channel_model, users=user_manager_local.users)
-        satellite_manager_local.update_erroneous_channel_state_information(error_model_config=config_local.error_model, users=user_manager_local.users)
+        satellite_manager_local.update_erroneous_channel_state_information(channel_model=config.channel_model, users=user_manager_local.users)
 
         power_gain_user_main = abs(np.matmul(satellite_manager_local.channel_state_information[user_main_idx, :], w_precoder[:, user_main_idx])) ** 2
         power_fading_precoded_other_users_sigma_i = [

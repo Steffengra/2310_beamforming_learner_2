@@ -40,7 +40,8 @@ from src.utils.update_sim import (
 
 def test_precoder_error_sweep(
     config: 'src.config.config.Config',
-    csit_error_sweep_range: np.ndarray,
+    error_sweep_parameter: str,
+    error_sweep_range: np.ndarray,
     precoder_name: str,
     monte_carlo_iterations: int,
     get_precoder_func,
@@ -48,30 +49,24 @@ def test_precoder_error_sweep(
 ) -> None:
 
     def progress_print() -> None:
-        progress = (error_sweep_idx * monte_carlo_iterations + iter_idx + 1) / (len(csit_error_sweep_range) * monte_carlo_iterations)
+        progress = (error_sweep_idx * monte_carlo_iterations + iter_idx + 1) / (len(error_sweep_range) * monte_carlo_iterations)
         progress_printer(progress=progress, real_time_start=real_time_start)
 
     def set_new_error_value() -> None:
-        if config.config_error_model.error_model_name == 'err_mult_on_steering_cos':
-            config.config_error_model.uniform_error_interval['low'] = -1 * error_sweep_value
-            config.config_error_model.uniform_error_interval['high'] = error_sweep_value
-        elif config.config_error_model.error_model_name == 'err_sat2userdist':
-            config.config_error_model.distance_error_std = error_sweep_value
-        elif config.config_error_model.error_model_name == 'err_satpos_and_userpos':
-            # todo: this model has 2 params
-            # config.error_model.uniform_error_interval['low'] = -1 * error_sweep_value
-            # config.error_model.uniform_error_interval['high'] = error_sweep_value
-            config.config_error_model.phase_sat_error_std = error_sweep_value
-
+        if 'low' in config.config_error_model.error_rng_parametrizations[error_sweep_parameter]['args']:
+            config.config_error_model.error_rng_parametrizations[error_sweep_parameter]['args']['low'] = -1 * error_sweep_value
+            config.config_error_model.error_rng_parametrizations[error_sweep_parameter]['args']['high'] = error_sweep_value
+        elif 'scale' in config.config_error_model.error_rng_parametrizations[error_sweep_parameter]['args']:
+            config.config_error_model.error_rng_parametrizations[error_sweep_parameter]['args']['scale'] = error_sweep_range
         else:
-            raise ValueError('Unknown error model name')
+            raise ValueError('Unknown error distribution')
 
     def save_results():
-        name = f'testing_{precoder_name}_sweep_{csit_error_sweep_range[0]}_{csit_error_sweep_range[-1]}_userwiggle_{config.user_dist_bound}.gzip'
-        results_path = Path(config.output_metrics_path, config.config_learner.training_name, config.config_error_model.error_model_name, 'error_sweep')
+        name = f'testing_{precoder_name}_sweep_{error_sweep_range[0]}_{error_sweep_range[-1]}_userwiggle_{config.user_dist_bound}.gzip'
+        results_path = Path(config.output_metrics_path, config.config_learner.training_name, 'error_sweep')
         results_path.mkdir(parents=True, exist_ok=True)
         with gzip_open(Path(results_path, name), 'wb') as file:
-            pickle_dump([csit_error_sweep_range, metrics], file=file)
+            pickle_dump([error_sweep_range, metrics], file=file)
 
     satellite_manager = SatelliteManager(config=config)
     user_manager = UserManager(config=config)
@@ -84,12 +79,12 @@ def test_precoder_error_sweep(
 
     metrics = {
         'sum_rate': {
-            'mean': np.zeros(len(csit_error_sweep_range)),
-            'std': np.zeros(len(csit_error_sweep_range)),
+            'mean': np.zeros(len(error_sweep_range)),
+            'std': np.zeros(len(error_sweep_range)),
         },
     }
 
-    for error_sweep_idx, error_sweep_value in enumerate(csit_error_sweep_range):
+    for error_sweep_idx, error_sweep_value in enumerate(error_sweep_range):
 
         # set new error value
         set_new_error_value()
@@ -127,7 +122,7 @@ def test_precoder_error_sweep(
     save_results()
 
     plot_sweep(
-        x=csit_error_sweep_range,
+        x=error_sweep_range,
         y=metrics['sum_rate']['mean'],
         yerr=metrics['sum_rate']['std'],
         xlabel='error value',

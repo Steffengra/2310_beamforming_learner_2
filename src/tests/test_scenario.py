@@ -4,6 +4,7 @@ import unittest
 from src.config.config import Config
 from src.data.satellite_manager import SatelliteManager
 from src.data.user_manager import UserManager
+from src.utils.update_sim import update_sim
 
 
 class TestSystemState(unittest.TestCase):
@@ -19,13 +20,7 @@ class TestSystemState(unittest.TestCase):
         self.user_manager.update_positions(config=self.config)
         self.satellite_manager.update_positions(config=self.config)
 
-        self.satellite_manager.calculate_satellite_distances_to_users(users=self.user_manager.users)
-        self.satellite_manager.calculate_satellite_aods_to_users(users=self.user_manager.users)
-        self.satellite_manager.calculate_steering_vectors_to_users(users=self.user_manager.users)
-        self.satellite_manager.update_channel_state_information(channel_model=self.config.channel_model,
-                                                                users=self.user_manager.users)
-        self.satellite_manager.update_erroneous_channel_state_information(error_model_config=self.config.config_error_model,
-                                                                          users=self.user_manager.users)
+        update_sim(config=self.config, satellite_manager=self.satellite_manager, user_manager=self.user_manager)
 
 
 if __name__ == '__main__':

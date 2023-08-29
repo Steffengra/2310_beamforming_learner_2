@@ -14,20 +14,7 @@ def robust_SLNR_precoder_no_norm(
     sat_tot_ant_nr = channel_matrix.shape[1]
     precoding_matrix = np.empty((sat_tot_ant_nr, user_nr), dtype='complex128')
 
-    # eigenvalues_channel, eingenvecs_channel = np.linalg.eig(np.matmul(channel_matrix, channel_matrix.conj().T))
-    # print('Eigenvalues channel')
-    # print(eigenvalues_channel)
-    # print('Eigenvalues ende')
-
     for user_idx in range(user_nr):
-
-        channel_vec_user_idx = channel_matrix[user_idx, :]
-
-        power_channel_user_idx = (
-                np.matmul(channel_vec_user_idx.conj(), channel_vec_user_idx)
-                / sat_tot_ant_nr
-        )
-        # == trace
 
         weighted_autocorrelation_matrices_other_users = [
             np.matmul(  # == trace

@@ -119,7 +119,7 @@ def test_precoder(
         config=deepcopy(config),
         model_parent_path=model_parent_path,
         model_name=model_name,
-        csit_error_sweep_range=error_sweep_range,
+        error_sweep_range=error_sweep_range,
         monte_carlo_iterations=monte_carlo_iterations,
     )
 
@@ -130,7 +130,7 @@ def test_precoder(
         config=deepcopy(config),
         model_parent_path=model_parent_path,
         model_name=model_name,
-        csit_error_sweep_range=error_sweep_range,
+        error_sweep_range=error_sweep_range,
         monte_carlo_iterations=monte_carlo_iterations,
     )
     config.user_dist_bound = old_user_dist_bound

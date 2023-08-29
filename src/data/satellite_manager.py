@@ -90,14 +90,6 @@ class SatelliteManager:
                 )
             )
 
-    def update_estimation_error_functions(
-            self,
-            estimation_error_functions: dict,
-    ) -> None:
-
-        for satellite in self.satellites:
-            satellite.update_estimation_error_functions(estimation_error_functions)
-
     def update_positions(
             self,
             config: 'src.config.config.Config',
@@ -140,19 +132,6 @@ class SatelliteManager:
 
         for satellite in self.satellites:
             satellite.roll_estimation_errors()
-
-    def calculate_steering_vectors_to_users(
-            self,
-            users: list,
-    ) -> None:
-
-        """
-        This function calculates the steering vectors (one value per antenna) for each satellite to
-        each user
-        """
-
-        for satellite in self.satellites:
-            satellite.calculate_steering_vectors(users=users)
 
     def update_channel_state_information(
             self,

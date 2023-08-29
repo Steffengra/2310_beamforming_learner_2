@@ -8,7 +8,7 @@ from src.data.channel.get_steering_vec import get_steering_vec
 def los_channel_model(
         satellite: 'src.data.satellite.Satellite',
         users: list,
-        error_free: bool= False
+        error_free: bool = False,
 ) -> np.ndarray:
 
     """
@@ -20,7 +20,6 @@ def los_channel_model(
     """
 
     if error_free is True:
-
         errors = {
             'additive_error_on_overall_phase_shift': np.zeros(len(users)),
             'additive_error_on_aod': np.zeros(len(users)),
@@ -29,12 +28,11 @@ def los_channel_model(
         }
         
     else:
-        
         errors = satellite.estimation_errors
 
     channel_state_information = np.zeros((len(users), satellite.antenna_nr), dtype='complex128')
 
-    for user_idx,user in enumerate(users):
+    for user_idx, user in enumerate(users):
         power_ratio = (
                 satellite.antenna_gain_linear
                 * user.gain_linear

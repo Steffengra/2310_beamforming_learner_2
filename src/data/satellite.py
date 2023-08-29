@@ -1,7 +1,6 @@
 
 import numpy as np
 
-import src
 from src.utils.spherical_to_cartesian_coordinates import (
     spherical_to_cartesian_coordinates,
 )
@@ -48,7 +47,6 @@ class Satellite:
 
         self.distance_to_users = None  # user_idx[int]: dist[float]
         self.aods_to_users = None  # user_idx[int]: aod[float] in rad, [0, 2pi], most commonly ~pi/2, aod looks from sat towards users
-        self.steering_vectors_to_users = None  # user_idx[int]: steering_vector[ndarray] \in 1 x antenna_nr
         self.steering_error = None
 
         self.channel_state_to_users: np.ndarray = np.array([])  # depends on channel model
@@ -57,17 +55,10 @@ class Satellite:
         self.estimation_error_functions: dict = error_functions
         self.estimation_errors: dict = {}
 
-    def update_estimation_error_functions(
-            self,
-            estimation_error_functions: dict,
-    ) -> None:
-
-        self.estimation_error_functions = estimation_error_functions
-
     def update_position(
             self,
             spherical_coordinates: np.ndarray,
-    ):
+    ) -> None:
 
         self.spherical_coordinates = spherical_coordinates
         self.cartesian_coordinates = spherical_to_cartesian_coordinates(spherical_coordinates)
@@ -128,28 +119,6 @@ class Satellite:
         for estimation_error_name, error_function in self.estimation_error_functions.items():
             self.estimation_errors[estimation_error_name] = error_function()
 
-    def calculate_steering_vectors(
-            self,
-            users: list,
-    ) -> None:
-        """
-        This function provides the steering vectors for a given ULA and AOD
-        """
-
-        if self.steering_vectors_to_users is None:
-            self.steering_vectors_to_users = np.zeros((len(users), self.antenna_nr), dtype='complex128')
-
-        steering_idx = np.arange(0, self.antenna_nr) - (self.antenna_nr - 1) / 2
-
-        for user in users:
-            self.steering_vectors_to_users[user.idx, :] = np.exp(
-                steering_idx * (
-                    -1j * 2 * np.pi / self.wavelength
-                    * self.antenna_distance
-                    * np.cos(self.aods_to_users[user.idx])
-                )
-            )
-
     def update_channel_state_information(
             self,
             channel_model,
@@ -163,7 +132,7 @@ class Satellite:
 
     def update_erroneous_channel_state_information(
             self,
-            channel_model: 'src.config.config_error_model.ConfigErrorModel',
+            channel_model,
             users: list,
     ) -> None:
         """
