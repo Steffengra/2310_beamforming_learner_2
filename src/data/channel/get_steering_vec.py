@@ -8,7 +8,8 @@ def get_steering_vec(
         phase_aod_steering
 ):
 
-    steering_vector_to_user = np.zeros((satellite.antenna_nr), dtype='complex128')
+    steering_vector_to_user = np.zeros(satellite.antenna_nr, dtype='complex128')
+
     # steering_idx = np.arange(0, satellite.antenna_nr) - (satellite.antenna_nr - 1) / 2  # todo
     steering_idx = np.arange(0, satellite.antenna_nr)
 

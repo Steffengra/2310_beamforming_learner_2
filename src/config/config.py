@@ -69,7 +69,7 @@ class Config:
         # User
         self.user_nr: int = 3  # Number of users
         self.user_gain_dBi: float = 0  # User gain in dBi
-        self.user_dist_average: float = 1_000  # Average user distance in m  # todo: remember that get_state standardization currently is very sensitive to changing this
+        self.user_dist_average: float = 100_000  # Average user distance in m  # todo: remember that get_state standardization currently is very sensitive to changing this
         self.user_dist_bound: float = 30  # Variance of user distance, uniform distribution [avg-bound, avg+bound]
         self.user_center_aod_earth_deg: float = 90  # Average center of users
 
@@ -115,10 +115,10 @@ class Config:
 
         # Error Model
         self.config_error_model = ConfigErrorModel(
-            self.user_nr,
-            self.channel_model,
-            self.rng,
-            self.wavelength,
+            channel_model=self.channel_model,
+            rng=self.rng,
+            wavelength=self.wavelength,
+            user_nr=self.user_nr,
         )
 
         # Learner
@@ -139,6 +139,7 @@ class Config:
             'antenna_nr': self.sat_ant_nr,
             'antenna_distance': self.sat_ant_dist,
             'antenna_gain_linear': self.sat_ant_gain_linear,
+            'user_nr': self.user_nr,
             'freq': self.freq,
             'center_aod_earth_deg': self.sat_center_aod_earth_deg,
             'error_functions': self.config_error_model.error_rngs

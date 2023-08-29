@@ -11,62 +11,64 @@ class ConfigErrorModel:
 
     def __init__(
             self,
-            user_nr,
             channel_model,
             rng: np.random.Generator,
             wavelength: float,
+            user_nr: int,
     ) -> None:
 
         self.rng = rng
 
         self.error_rng_parametrizations: dict = {}
 
+        self._wavelength = wavelength
+        self._user_nr = user_nr
+
         if channel_model == los_channel_model:
-            self.error_rngs = self.set_los_channel_errors(
-                user_nr = user_nr,
-                wavelength=wavelength,
-            )
+            self.set_los_channel_error_parameters()
+            self.error_rngs = self.set_los_channel_error_functions()
 
         else:
             raise ValueError(f'Unknown channel model {channel_model}')
 
-    def set_los_channel_errors(
+    def set_los_channel_error_parameters(
             self,
-            user_nr,
-            wavelength: float,
-    ) -> dict:
+    ) -> None:
 
         self.error_rng_parametrizations['satellite_to_user_distance_error'] = {
             'distribution': self.rng.uniform,
             'args': {
                 'low': 0,
                 'high': 0,
-                'size': user_nr,
+                'size': self._user_nr,
             },
         }
-
         self.error_rng_parametrizations['additive_error_on_aod'] = {
             'distribution': self.rng.normal,
             'args': {
                 'loc': 0,
                 'scale': 0,
-                'size': user_nr,
+                'size': self._user_nr,
             },
         }
         self.error_rng_parametrizations['additive_error_on_cosine_of_aod'] = {
             'distribution': self.rng.uniform,
             'args': {
-                'low': 0,
-                'high': 0,
-                'size': user_nr,
+                'low': -0.0,
+                'high': 0.0,
+                'size': self._user_nr,
             },
         }
+
+    def set_los_channel_error_functions(
+            self,
+    ) -> dict:
 
         def roll_additive_error_on_overall_phase_shift():
             roll_satellite_to_user_distance_error = self.error_rng_parametrizations['satellite_to_user_distance_error']['distribution'](
                 **self.error_rng_parametrizations['satellite_to_user_distance_error']['args']
             )
-            return 2 * np.pi / wavelength * (roll_satellite_to_user_distance_error % wavelength)
+            return 2 * np.pi / self._wavelength * (roll_satellite_to_user_distance_error % self._wavelength)
 
         def roll_additive_error_on_aod():
             return self.error_rng_parametrizations['additive_error_on_aod']['distribution'](
@@ -89,3 +91,14 @@ class ConfigErrorModel:
         }
 
         return error_rngs
+
+    def set_zero_error(
+            self,
+    ) -> None:
+
+        for parameter_name, parameter_content in self.error_rng_parametrizations.items():
+            for arg, value in parameter_content['args'].items():
+                if arg != 'size':
+                    self.error_rng_parametrizations[parameter_name]['args'][arg] = 0
+
+        self.set_los_channel_error_functions()

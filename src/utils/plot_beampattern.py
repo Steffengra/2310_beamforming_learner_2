@@ -11,7 +11,6 @@ from src.data.user_manager import UserManager
 from src.config.config import Config
 from src.utils.update_sim import update_sim
 from src.data.precoder.mmse_precoder import mmse_precoder_normalized
-from src.data.channel.los_channel_error_model_no_error import los_channel_error_model_no_error
 
 
 def plot_beampattern(
@@ -31,8 +30,8 @@ def plot_beampattern(
 
     config_local = deepcopy(config)
     config_local.user_dist_bound = 0
-    config_local.error_model.error_model = los_channel_error_model_no_error
-    config_local.error_model.update()
+
+    config.config_error_model.set_zero_error()
 
     satellite_manager_local = deepcopy(satellite_manager)
     user_manager_local = deepcopy(user_manager)

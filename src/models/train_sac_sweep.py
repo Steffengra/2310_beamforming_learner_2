@@ -10,15 +10,6 @@ from src.config.config import (
 from src.models.train_sac import (
     train_sac_single_error,
 )
-from src.data.channel.los_channel_error_model_multiplicative_on_cos import (
-    los_channel_error_model_multiplicative_on_cos,
-)
-from src.data.channel.los_channel_error_model_in_sat2user_dist import (
-    los_channel_error_model_in_sat2user_dist,
-)
-from src.data.channel.los_channel_error_model_in_sat_and_user_pos import (
-    los_channel_error_model_in_sat_and_user_pos,
-)
 from src.analysis.helpers.test_sac_precoder_error_sweep import (
     test_sac_precoder_error_sweep,
 )

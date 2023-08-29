@@ -23,9 +23,6 @@ from src.data.satellite_manager import (
 from src.data.user_manager import (
     UserManager,
 )
-from src.data.channel.los_channel_error_model_no_error import (
-    los_channel_error_model_no_error,
-)
 from src.utils.plot_sweep import (
     plot_sweep,
 )
@@ -86,26 +83,7 @@ def test_precoder_user_distance_sweep(
         config.user_dist_average = distance_sweep_value
         config.user_dist_bound = 0
 
-        # def roll_additive_error_on_overall_phase_shift():
-        #     roll_satellite_to_user_distance_error = config.rng.uniform(0, 0, size=(config.user_nr))
-        #     return 2 * np.pi / config.wavelength * (roll_satellite_to_user_distance_error % config.wavelength)
-        #
-        # def roll_additive_error_on_aod():
-        #     return config.rng.normal(0, 0, size=(config.user_nr))
-        #
-        # def roll_additive_error_on_cosine_of_aod():
-        #     return config.rng.uniform(0, 0, size=(config.user_nr))
-        #
-        # def roll_additive_error_on_channel_vector():
-        #     return np.zeros(1)
-        #
-        # config.config_error_model.error_rngs = {
-        #     'additive_error_on_overall_phase_shift': roll_additive_error_on_overall_phase_shift,
-        #     'additive_error_on_aod': roll_additive_error_on_aod,
-        #     'additive_error_on_cosine_of_aod': roll_additive_error_on_cosine_of_aod,
-        #     'additive_error_on_channel_vector': roll_additive_error_on_channel_vector,
-        # }
-        # satellite_manager.update_estimation_error_functions(config.config_error_model.error_rngs)
+        config.config_error_model.set_zero_error()
 
         update_sim(config, satellite_manager, user_manager)
 

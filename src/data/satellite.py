@@ -23,6 +23,7 @@ class Satellite:
             antenna_nr: int,
             antenna_distance: float,
             antenna_gain_linear: float,
+            user_nr: int,
             freq: float,
             center_aod_earth_deg: float,
             error_functions: dict,
@@ -37,6 +38,8 @@ class Satellite:
         self.antenna_nr: int = antenna_nr
         self.antenna_distance: float = antenna_distance  # antenna distance in meters
         self.antenna_gain_linear: float = antenna_gain_linear
+
+        self.user_nr: int = user_nr
 
         self.freq: float = freq
         self.wavelength: float = get_wavelength(self.freq)
