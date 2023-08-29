@@ -44,7 +44,6 @@ def los_channel_model(
 
         phase_shift = satellite.distance_to_users[user.idx] % satellite.wavelength * 2 * np.pi / satellite.wavelength
         phase_shift_error = errors['additive_error_on_overall_phase_shift'][user_idx]
-        print('DIm error user aod')
         phase_aod_steering = np.cos(satellite.aods_to_users[user_idx] + errors['additive_error_on_aod'][user_idx]) + errors['additive_error_on_cosine_of_aod'][user_idx]
 
         steering_vector_to_user = get_steering_vec(
@@ -57,6 +56,5 @@ def los_channel_model(
             * np.exp(-1j * (phase_shift + phase_shift_error))
             * steering_vector_to_user
         )
-    print('test ')
-    print(channel_state_information)
+
     return channel_state_information

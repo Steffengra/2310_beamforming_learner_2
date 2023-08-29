@@ -19,6 +19,8 @@ class ConfigErrorModel:
 
         self.rng = rng
 
+        self.error_rng_parametrizations: dict = {}
+
         if channel_model == los_channel_model:
             self.error_rngs = self.set_los_channel_errors(
                 user_nr = user_nr,
@@ -34,15 +36,47 @@ class ConfigErrorModel:
             wavelength: float,
     ) -> dict:
 
+        self.error_rng_parametrizations['satellite_to_user_distance_error'] = {
+            'distribution': self.rng.uniform,
+            'args': {
+                'low': 0,
+                'high': 0,
+                'size': user_nr,
+            },
+        }
+
+        self.error_rng_parametrizations['additive_error_on_aod'] = {
+            'distribution': self.rng.normal,
+            'args': {
+                'loc': 0,
+                'scale': 0,
+                'size': user_nr,
+            },
+        }
+        self.error_rng_parametrizations['additive_error_on_cosine_of_aod'] = {
+            'distribution': self.rng.uniform,
+            'args': {
+                'low': 0,
+                'high': 0,
+                'size': user_nr,
+            },
+        }
+
         def roll_additive_error_on_overall_phase_shift():
-            roll_satellite_to_user_distance_error = self.rng.uniform(0, 0, size=(user_nr))
+            roll_satellite_to_user_distance_error = self.error_rng_parametrizations['satellite_to_user_distance_error']['distribution'](
+                **self.error_rng_parametrizations['satellite_to_user_distance_error']['args']
+            )
             return 2 * np.pi / wavelength * (roll_satellite_to_user_distance_error % wavelength)
 
         def roll_additive_error_on_aod():
-            return self.rng.normal(0, 0, size=(user_nr))
+            return self.error_rng_parametrizations['additive_error_on_aod']['distribution'](
+                **self.error_rng_parametrizations['additive_error_on_aod']['args']
+            )
 
         def roll_additive_error_on_cosine_of_aod():
-            return self.rng.uniform(0, 0, size=(user_nr))
+            return self.error_rng_parametrizations['additive_error_on_cosine_of_aod']['distribution'](
+                **self.error_rng_parametrizations['additive_error_on_cosine_of_aod']['args']
+            )
 
         def roll_additive_error_on_channel_vector():
             return np.zeros(1)
