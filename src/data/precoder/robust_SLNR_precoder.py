@@ -29,15 +29,11 @@ def robust_SLNR_precoder_no_norm(
         )
         # == trace
 
-        autocorrelation_matrix_user_idx = autocorrelation_matrix[user_idx, :, :]
-
         weighted_autocorrelation_matrices_other_users = [
-            # np.trace(
-                np.matmul(  # == trace
-                    channel_matrix[other_user_idx, :],
-                    channel_matrix[other_user_idx, :].conj()
-                )  # TODO: ????????????????
-            # )
+            np.matmul(  # == trace
+                channel_matrix[other_user_idx, :].conj().T,
+                channel_matrix[other_user_idx, :]
+            )  # TODO: ????????????????
             / sat_tot_ant_nr
             * autocorrelation_matrix[other_user_idx, :, :]
             for other_user_idx in range(user_nr) if other_user_idx != user_idx
@@ -45,9 +41,7 @@ def robust_SLNR_precoder_no_norm(
 
         sum_weighted_autocorrelation_matrices_other_users = sum(weighted_autocorrelation_matrices_other_users)
 
-        # print(sum_weighted_autocorrelation_matrices_other_users)
-        # print(user_nr * noise_power_watt / power_constraint_watt * np.eye(sat_tot_ant_nr))
-        # exit()
+        autocorrelation_matrix_user_idx = autocorrelation_matrix[user_idx, :, :]
 
         generalized_Rayleigh_quotient = (
             np.linalg.inv(
@@ -80,10 +74,10 @@ def robust_SLNR_precoder_no_norm(
         # print('generalized', eigenvalues2)
         # print('norm', np.linalg.norm(max_eigenvec2), '\n')
 
-        # eigenvalues3, eigenvecs3 = np.linalg.eigh(generalized_Rayleigh_quotient)
-        #
-        # max_eigenvalue3_idx = eigenvalues3.argmax()
-        # max_eigenvec3 = eigenvecs3[:, max_eigenvalue3_idx]
+        eigenvalues3, eigenvecs3 = np.linalg.eigh(generalized_Rayleigh_quotient)
+
+        max_eigenvalue3_idx = eigenvalues3.argmax()
+        max_eigenvec3 = eigenvecs3[:, max_eigenvalue3_idx]
         # print('.eigh', eigenvalues3)
         # print('norm', np.linalg.norm(max_eigenvec3), '\n')
         # print(eigenvecs3)
