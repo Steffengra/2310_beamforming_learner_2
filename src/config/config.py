@@ -70,7 +70,7 @@ class Config:
         self.user_nr: int = 3  # Number of users
         self.user_gain_dBi: float = 0  # User gain in dBi
         self.user_dist_average: float = 100_000  # Average user distance in m  # todo: remember that get_state standardization currently is very sensitive to changing this
-        self.user_dist_bound: float = 30  # Variance of user distance, uniform distribution [avg-bound, avg+bound]
+        self.user_dist_bound: float = 50_000  # Variance of user distance, uniform distribution [avg-bound, avg+bound]
         self.user_center_aod_earth_deg: float = 90  # Average center of users
 
         self.user_gain_linear: float = 10**(self.user_gain_dBi / 10)  # User gain linear
