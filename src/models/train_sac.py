@@ -118,20 +118,12 @@ def train_sac_single_error(
 
     def save_model_checkpoint(extra=None):
 
-        if config.config_error_model.error_model_name == 'err_mult_on_steering_cos':
-            name = f'error_{config.config_error_model.uniform_error_interval["high"]}_userwiggle_{config.user_dist_bound}'
-        elif config.config_error_model.error_model_name == 'err_sat2userdist':
-            name = f'error_{config.config_error_model.distance_error_std}_userwiggle_{config.user_dist_bound}'
-        elif config.config_error_model.error_model_name == 'err_satpos_and_userpos':
-            name = f'error_st_{config.config_error_model.uniform_error_interval["high"]}_ph_{config.config_error_model.phase_sat_error_std}_userwiggle_{config.user_dist_bound}'
-        else:
-            raise ValueError('unknown error model name')
+        name = f'userwiggle_{config.user_dist_bound}'
         if extra is not None:
             name += f'_snap_{extra:.3f}'
         checkpoint_path = Path(
             config.trained_models_path,
             config.config_learner.training_name,
-            config.config_error_model.error_model_name,
             'single_error',
             name,
         )
@@ -153,14 +145,9 @@ def train_sac_single_error(
         for high_score_prior_id, high_score_prior in enumerate(reversed(high_scores)):
             if high_score > 1.05 * high_score_prior or high_score_prior_id > 3:
 
-                if config.config_error_model.error_model_name == 'err_mult_on_steering_cos':
-                    name = f'error_{config.config_error_model.uniform_error_interval["high"]}_userwiggle_{config.user_dist_bound}_snap_{high_score_prior:.3f}'
-                elif config.config_error_model.error_model_name == 'err_sat2userdist':
-                    name = f'error_{config.config_error_model.distance_error_std}_userwiggle_{config.user_dist_bound}_snap_{high_score_prior:.3f}'
-                elif config.config_error_model.error_model_name == 'err_satpos_and_userpos':
-                    name = f'error_st_{config.config_error_model.uniform_error_interval["high"]}_ph_{config.config_error_model.phase_sat_error_std}_userwiggle_{config.user_dist_bound}_snap_{high_score_prior:.3f}'
+                name = f'userwiggle_{config.user_dist_bound}_snap_{high_score_prior:.3f}'
 
-                prior_checkpoint_path = Path(config.trained_models_path, config.config_learner.training_name, config.config_error_model.error_model_name, 'single_error', name)
+                prior_checkpoint_path = Path(config.trained_models_path, config.config_learner.training_name, 'single_error', name)
                 rmtree(path=prior_checkpoint_path, ignore_errors=True)
                 high_scores.remove(high_score_prior)
 
@@ -168,16 +155,9 @@ def train_sac_single_error(
 
     def save_results():
 
-        if config.config_error_model.error_model_name == 'err_mult_on_steering_cos':
-            name = f'training_error_{config.config_error_model.uniform_error_interval["high"]}_userwiggle_{config.user_dist_bound}.gzip'
-        elif config.config_error_model.error_model_name == 'err_sat2userdist':
-            name = f'training_error_{config.config_error_model.distance_error_std}_userwiggle_{config.user_dist_bound}.gzip'
-        elif config.config_error_model.error_model_name == 'err_satpos_and_userpos':
-            name = f'training_error_st_{config.config_error_model.uniform_error_interval["high"]}_ph_{config.config_error_model.phase_sat_error_std}_userwiggle_{config.user_dist_bound}.gzip'
-        else:
-            raise ValueError('unknown model name')
+        name = f'training_error_userwiggle_{config.user_dist_bound}.gzip'
 
-        results_path = Path(config.output_metrics_path, config.config_learner.training_name, config.config_error_model.error_model_name, 'single_error')
+        results_path = Path(config.output_metrics_path, config.config_learner.training_name, 'single_error')
         results_path.mkdir(parents=True, exist_ok=True)
         with gzip_open(Path(results_path, name), 'wb') as file:
             pickle_dump(metrics, file=file)
