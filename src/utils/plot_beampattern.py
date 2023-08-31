@@ -73,7 +73,8 @@ def plot_beampattern(
         ]
         sum_power_gain = sum(power_gain_all_users)
 
-        sinr = power_gain_user_main / (config_local.noise_power_watt + sum_interference)
+        #sinr = power_gain_user_main / (config_local.noise_power_watt + sum_interference)
+        sinr = power_gain_user_main
         sinrs[angle_id] = sinr
         sum_power_gains[angle_id] = sum_power_gain / config_local.noise_power_watt
 
