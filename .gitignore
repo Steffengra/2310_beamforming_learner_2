@@ -15,4 +15,4 @@ venv/
 /src/analysis/test_precoder_error_sweep.py
 /src/analysis/test_precoder_user_distance_sweep.py
 
-.pylintrc
+/.pylintrc
