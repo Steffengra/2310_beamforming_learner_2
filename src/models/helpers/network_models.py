@@ -15,10 +15,12 @@ class ValueNetwork(tf.keras.Model):
             hidden_layer_units: list,
             activation_hidden: str,
             kernel_initializer_hidden: str,
+            batch_norm_input: bool,
             batch_norm: bool,
     ):
         super().__init__()
 
+        self.batch_norm_input = batch_norm_input
         self.batch_norm = batch_norm
 
         # Activation----------------------------------------------------------------------------------------------------
@@ -29,6 +31,9 @@ class ValueNetwork(tf.keras.Model):
         # --------------------------------------------------------------------------------------------------------------
 
         # Layers--------------------------------------------------------------------------------------------------------
+        if self.batch_norm_input:
+            self.batch_norm_input_layer = tf.keras.layers.BatchNormalization(center=False, scale=False)
+
         self.hidden_layers = []
         for size in hidden_layer_units:
             self.hidden_layers.append(
@@ -56,7 +61,10 @@ class ValueNetwork(tf.keras.Model):
             inputs,
             training=False,
     ) -> tf.Tensor:
+
         x = inputs
+        if self.batch_norm_input:
+            x = self.batch_norm_input_layer(x, training=training)
 
         if self.batch_norm:
             for layer, norm_layer in zip(self.hidden_layers, self.batch_norm_layers):
@@ -86,12 +94,14 @@ class PolicyNetwork(tf.keras.Model):
             self,
             hidden_layer_units: list,
             num_actions: int,
+            batch_norm_input: bool,
             batch_norm: bool,
             activation_hidden: str,
             kernel_initializer_hidden: str,
     ) -> None:
         super().__init__()
 
+        self.batch_norm_input = batch_norm_input
         self.batch_norm = batch_norm
 
         # Activation----------------------------------------------------------------------------------------------------
@@ -102,6 +112,9 @@ class PolicyNetwork(tf.keras.Model):
         # --------------------------------------------------------------------------------------------------------------
 
         # Layers--------------------------------------------------------------------------------------------------------
+        if self.batch_norm_input:
+            self.batch_norm_input_layer = tf.keras.layers.BatchNormalization(center=False, scale=False)
+
         self.hidden_layers = []
         for size in hidden_layer_units:
             self.hidden_layers.append(
@@ -132,6 +145,9 @@ class PolicyNetwork(tf.keras.Model):
     ) -> tf.Tensor:
 
         x = inputs
+        if self.batch_norm_input:
+            x = self.batch_norm_input_layer(x, training=training)
+
         if self.batch_norm:
             for layer, norm_layer in zip(self.hidden_layers, self.batch_norm_layers):
                 x = layer(x)
@@ -168,18 +184,23 @@ class PolicyNetworkSoft(tf.keras.Model):
             self,
             num_actions: int,
             hidden_layer_units: list,
+            batch_norm_input: bool,
             batch_norm: bool,
             activation_hidden: str = 'relu',
             kernel_initializer_hidden: str = 'glorot_uniform',
     ) -> None:
         super().__init__()
 
+        self.batch_norm_input = batch_norm_input
         self.batch_norm = batch_norm
 
         if activation_hidden == 'penalized_tanh':
             activation_hidden = activation_penalized_tanh
         if activation_hidden == 'shaped_tanh':
             activation_hidden = activation_shaped_tanh
+
+        if self.batch_norm_input:
+            self.batch_norm_input_layer = tf.keras.layers.BatchNormalization(center=False, scale=False)
 
         self.hidden_layers: list = []
         for units in hidden_layer_units:
@@ -212,6 +233,9 @@ class PolicyNetworkSoft(tf.keras.Model):
     ) -> tuple[tf.Tensor, tf.Tensor]:
 
         x = inputs
+        if self.batch_norm_input:
+            x = self.batch_norm_input_layer(x, training=training)
+
         if self.batch_norm:
             for layer, norm_layer in zip(self.hidden_layers, self.batch_norm_layers):
                 x = layer(x)
