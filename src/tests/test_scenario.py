@@ -17,10 +17,13 @@ class TestSystemState(unittest.TestCase):
         self.satellite_manager = SatelliteManager(config=self.config)
         self.user_manager = UserManager(config=self.config)
 
-        self.user_manager.update_positions(config=self.config)
-        self.satellite_manager.update_positions(config=self.config)
-
         update_sim(config=self.config, satellite_manager=self.satellite_manager, user_manager=self.user_manager)
+
+    def test_no_error(
+            self,
+    ) -> None:
+
+        pass
 
 
 if __name__ == '__main__':
