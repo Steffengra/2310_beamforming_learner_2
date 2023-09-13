@@ -15,12 +15,12 @@ class ConfigSACLearner:
             user_nr,
     ) -> None:
 
-        self.training_name: str = 'test'
+        self.training_name: str = '1_sat_16_ant_3_usr_100000_dist_0.05_error_on_cos_0.1_fading'
 
         self.get_state = get_state_erroneous_channel_state_information
         self.get_state_args = {
             'csi_format': 'rad_phase',  # 'rad_phase', 'real_imag'
-            'norm_state': True,  # !!HEURISTIC!!, this will break if you dramatically change the setup
+            'norm_state': False,  # !!HEURISTIC!!, this will break if you dramatically change the setup
         }
         self.get_state_norm_factors_iterations: int = 100_000  # how many samples to calculate means and stds
 
@@ -73,10 +73,12 @@ class ConfigSACLearner:
 
         # TRAINING
         self.training_episodes: int = 3_000  # a new episode is a full reset of the simulation environment
-        self.training_steps_per_episode: int = 1_000
+        self.training_steps_per_episode: int = 10_000
 
-        self.train_policy_every_k_steps: int = 1  # train policy only every k steps to give value approx. time to settle
+        self.train_policy_every_k_steps: int = 10  # train policy only every k steps to give value approx. time to settle
         self.train_policy_after_j_steps: int = 0  # start training policy only after value approx. starts being sensible
+        self.train_value_every_k_steps: int = 10  # train value only every k steps
+        self.train_value_after_j_steps: int = 0  # start training value after j steps
 
         self._post_init(sat_nr=sat_nr, sat_ant_nr=sat_ant_nr, user_nr=user_nr)
 
