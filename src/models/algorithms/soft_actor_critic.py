@@ -148,7 +148,7 @@ class SoftActorCritic:
     ) -> tuple:
 
         if self.experience_buffer.get_len() < self.training_minimum_experiences:
-            return 0, -1
+            return np.nan, np.nan
 
         (
             sample_experiences,

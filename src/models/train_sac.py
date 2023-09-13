@@ -50,6 +50,7 @@ from src.data.precoder.mmse_precoder import (
 from src.utils.real_complex_vector_reshaping import (
     real_vector_to_half_complex_vector,
     complex_vector_to_double_real_vector,
+    rad_and_phase_to_complex_vector,
 )
 from src.utils.norm_precoder import (
     norm_precoder,
@@ -89,6 +90,16 @@ def train_sac_single_error(
             simulation_step > config.config_learner.train_policy_after_j_steps
             and
             (simulation_step % config.config_learner.train_policy_every_k_steps) == 0
+        ):
+            return True
+        return False
+
+    def value_training_criterion() -> bool:
+        """Train value networks only every k steps and/or only after j total steps"""
+        if (
+            simulation_step > config.config_learner.train_value_after_j_steps
+            and
+            (simulation_step % config.config_learner.train_value_every_k_steps) == 0
         ):
             return True
         return False
@@ -215,6 +226,7 @@ def train_sac_single_error(
 
             # reshape to fit reward calculation
             w_precoder_vector = real_vector_to_half_complex_vector(action)
+            # w_precoder_vector = rad_and_phase_to_complex_vector(action)
             w_precoder = w_precoder_vector.reshape((config.sat_nr*config.sat_ant_nr, config.user_nr))
             w_precoder_normed = norm_precoder(precoding_matrix=w_precoder, power_constraint_watt=config.power_constraint_watt,
                                               per_satellite=True, sat_nr=config.sat_nr, sat_ant_nr=config.sat_ant_nr)
@@ -248,11 +260,19 @@ def train_sac_single_error(
             train_policy = False
             if policy_training_criterion():
                 train_policy = True
-            mean_log_prob_density, value_loss = sac.train(
-                toggle_train_value_networks=True,
-                toggle_train_policy_network=train_policy,
-                toggle_train_entropy_scale_alpha=True,
-            )
+            train_value = False
+            if value_training_criterion():
+                train_value = True
+
+            if train_value or train_policy:
+                mean_log_prob_density, value_loss = sac.train(
+                    toggle_train_value_networks=train_value,
+                    toggle_train_policy_network=train_policy,
+                    toggle_train_entropy_scale_alpha=True,
+                )
+            else:
+                mean_log_prob_density = np.nan
+                value_loss = np.nan
 
             # log results
             episode_metrics['sum_rate_per_step'][training_step_id] = reward
@@ -264,7 +284,7 @@ def train_sac_single_error(
                     progress_print()
 
         # log episode results
-        episode_mean_sum_rate = np.mean(episode_metrics['sum_rate_per_step'])
+        episode_mean_sum_rate = np.nanmean(episode_metrics['sum_rate_per_step'])
         metrics['mean_sum_rate_per_episode'][training_episode_id] = episode_mean_sum_rate
 
         if config.verbosity > 0:
@@ -273,9 +293,9 @@ def train_sac_single_error(
         logger.info(
             f'Episode {training_episode_id}:'
             f' Episode mean reward: {episode_mean_sum_rate:.4f}'
-            f' std {np.std(episode_metrics["sum_rate_per_step"]):.2f},'
-            f' current exploration: {np.mean(episode_metrics["mean_log_prob_density"]):.2f},'
-            f' value loss: {np.mean(episode_metrics["value_loss"]):.5f}'
+            f' std {np.nanstd(episode_metrics["sum_rate_per_step"]):.2f},'
+            f' current exploration: {np.nanmean(episode_metrics["mean_log_prob_density"]):.2f},'
+            f' value loss: {np.nanmean(episode_metrics["value_loss"]):.5f}'
         )
 
         # save network snapshot
