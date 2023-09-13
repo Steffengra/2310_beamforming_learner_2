@@ -35,6 +35,16 @@ class ConfigErrorModel:
             self,
     ) -> None:
 
+        # for large scale fading, we assume that it's applied on both CSI and erroneous CSI
+        self.error_rng_parametrizations['large_scale_fading'] = {
+            'distribution': self.rng.lognormal,
+            'args': {
+                'mean': 0.0,
+                'sigma': 0.1,
+                'size': self._user_nr,
+            }
+        }
+
         self.error_rng_parametrizations['satellite_to_user_distance_error'] = {
             'distribution': self.rng.uniform,
             'args': {
@@ -43,6 +53,7 @@ class ConfigErrorModel:
                 'size': self._user_nr,
             },
         }
+
         self.error_rng_parametrizations['additive_error_on_aod'] = {
             'distribution': self.rng.normal,
             'args': {
@@ -51,11 +62,21 @@ class ConfigErrorModel:
                 'size': self._user_nr,
             },
         }
+
         self.error_rng_parametrizations['additive_error_on_cosine_of_aod'] = {
             'distribution': self.rng.uniform,
             'args': {
-                'low': -0.1,
-                'high': 0.1,
+                'low': -0.01,
+                'high': 0.01,
+                'size': self._user_nr,
+            },
+        }
+
+        self.error_rng_parametrizations['additive_error_on_channel_vector'] = {
+            'distribution': self.rng.normal,
+            'args': {
+                'loc': 0.0,
+                'scale': 0.0,
                 'size': self._user_nr,
             },
         }
@@ -63,6 +84,11 @@ class ConfigErrorModel:
     def set_los_channel_error_functions(
             self,
     ) -> dict:
+
+        def roll_large_scale_fading():
+            return self.error_rng_parametrizations['large_scale_fading']['distribution'](
+                **self.error_rng_parametrizations['large_scale_fading']['args']
+            )
 
         def roll_additive_error_on_overall_phase_shift():
             roll_satellite_to_user_distance_error = self.error_rng_parametrizations['satellite_to_user_distance_error']['distribution'](
@@ -81,9 +107,12 @@ class ConfigErrorModel:
             )
 
         def roll_additive_error_on_channel_vector():
-            return np.zeros(1)
+            return self.error_rng_parametrizations['additive_error_on_channel_vector']['distribution'](
+                **self.error_rng_parametrizations['additive_error_on_channel_vector']['args']
+            )
 
         error_rngs = {
+            'large_scale_fading': roll_large_scale_fading,
             'additive_error_on_overall_phase_shift': roll_additive_error_on_overall_phase_shift,
             'additive_error_on_aod': roll_additive_error_on_aod,
             'additive_error_on_cosine_of_aod': roll_additive_error_on_cosine_of_aod,
