@@ -1,5 +1,6 @@
 
 import numpy as np
+import tensorflow as tf
 
 from gzip import open as gzip_open
 from pickle import load as pickle_load
@@ -22,8 +23,8 @@ from src.utils.norm_precoder import norm_precoder
 
 plot = [
     'mmse',
-    'slnr',
-    # 'learned',
+    # 'slnr',
+    'learned',
     # 'ones',
 ]
 
@@ -31,13 +32,13 @@ angle_sweep_range = np.arange((90 - 30) * np.pi / 180, (90 + 30) * np.pi / 180, 
 
 
 config = Config()
-# config.user_dist_bound = 0  # disable user wiggle
+config.user_dist_bound = 0  # disable user wiggle
 
 model_path = Path(  # SAC only
     config.trained_models_path,
-    'test',
+    '1_sat_16_ant_3_usr_100000_dist_0.05_error_on_cos_0.1_fading',
     'single_error',
-    'userwiggle_50000_snap_4.520',
+    'userwiggle_50000_snap_2.112',
     'model',
 )
 
@@ -73,6 +74,8 @@ if 'mmse' in plot:
         angle_sweep_range=angle_sweep_range,
     )
 
+    print(f'mmse: {sum_rate_mmse}')
+
 
 # SLNR
 if 'slnr' in plot:
@@ -102,38 +105,44 @@ if 'slnr' in plot:
         plot_title='slnr',
         angle_sweep_range=angle_sweep_range,
     )
+    print(f'slnr: {sum_rate_slnr}')
 
 
 # Learned
 if 'learned' in plot:
-    with gzip_open(Path(model_path, '..', 'config', 'norm_dict.gzip')) as file:
-        norm_dict = pickle_load(file)
-    norm_factors = norm_dict['norm_factors']
-    if norm_factors != {}:
-        config.config_learner.get_state_args['norm_state'] = True
 
-    precoder_network = load_model(model_path)
+    with tf.device('CPU:0'):
 
-    state = config.config_learner.get_state(satellite_manager=satellite_manager, norm_factors=norm_factors, **config.config_learner.get_state_args)
-    w_precoder, _ = precoder_network.call(state.astype('float32')[np.newaxis])
-    w_precoder = w_precoder.numpy().flatten()
+        with gzip_open(Path(model_path, '..', 'config', 'norm_dict.gzip')) as file:
+            norm_dict = pickle_load(file)
+        norm_factors = norm_dict['norm_factors']
+        if norm_factors != {}:
+            config.config_learner.get_state_args['norm_state'] = True
 
-    w_precoder = real_vector_to_half_complex_vector(w_precoder)
-    w_precoder = w_precoder.reshape((config.sat_nr * config.sat_ant_nr, config.user_nr))
+        precoder_network = load_model(model_path)
 
-    w_learned = norm_precoder(
-        precoding_matrix=w_precoder,
-        power_constraint_watt=config.power_constraint_watt,
-        per_satellite=True,
-        sat_nr=config.sat_nr,
-        sat_ant_nr=config.sat_ant_nr
-    )
+        state = config.config_learner.get_state(satellite_manager=satellite_manager, norm_factors=norm_factors, **config.config_learner.get_state_args)
+        w_precoder, _ = precoder_network.call(state.astype('float32')[np.newaxis])
+        w_precoder = w_precoder.numpy().flatten()
 
-    sum_rate_learned = calc_sum_rate(
-        channel_state=satellite_manager.channel_state_information,
-        w_precoder=w_learned,
-        noise_power_watt=config.noise_power_watt,
-    )
+        w_precoder = real_vector_to_half_complex_vector(w_precoder)
+        w_precoder = w_precoder.reshape((config.sat_nr * config.sat_ant_nr, config.user_nr))
+
+        w_learned = norm_precoder(
+            precoding_matrix=w_precoder,
+            power_constraint_watt=config.power_constraint_watt,
+            per_satellite=True,
+            sat_nr=config.sat_nr,
+            sat_ant_nr=config.sat_ant_nr
+        )
+
+        sum_rate_learned = calc_sum_rate(
+            channel_state=satellite_manager.channel_state_information,
+            w_precoder=w_learned,
+            noise_power_watt=config.noise_power_watt,
+        )
+
+    print(f'learned: {sum_rate_learned}')
 
     plot_beampattern(
         satellite=satellite_manager.satellites[0],
@@ -161,5 +170,7 @@ if 'ones' in plot:
         plot_title='ones',
         angle_sweep_range=angle_sweep_range,
     )
+
+    print(f'ones: {sum_rate_ones}')
 
 plt_show()
