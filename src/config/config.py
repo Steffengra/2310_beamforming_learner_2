@@ -69,7 +69,7 @@ class Config:
         # User
         self.user_nr: int = 3  # Number of users
         self.user_gain_dBi: float = 0  # User gain in dBi
-        self.user_dist_average: float = 100_000  # Average user distance in m  # todo: remember that get_state standardization currently is very sensitive to changing this
+        self.user_dist_average: float = 100_000  # Average user distance in m
         self.user_dist_bound: float = 50_000  # Variance of user distance, uniform distribution [avg-bound, avg+bound]
         self.user_center_aod_earth_deg: float = 90  # Average center of users
 
@@ -77,9 +77,9 @@ class Config:
 
         # Satellite
         self.sat_nr: int = 1  # Number of satellites
-        self.sat_tot_ant_nr: int = 4  # Total number of  Tx antennas, should be a number larger than sat nr
+        self.sat_tot_ant_nr: int = 16  # Total number of  Tx antennas, should be a number larger than sat nr
         self.sat_gain_dBi: float = 20  # Total sat TODO: Wert nochmal checken
-        self.sat_dist_average: float = 10_000  # Average satellite distance in meter  # todo: remember that get_state standardization currently is very sensitive to changing this
+        self.sat_dist_average: float = 10_000  # Average satellite distance in meter
         self.sat_dist_bound: float = 0  # Variance of sat distance, uniform distribution [avg-bound, avg+bound]
         self.sat_center_aod_earth_deg: float = 90  # Average center of satellites
 
@@ -184,7 +184,8 @@ class Config:
 
         tensorflow_logger = tf_get_logger()
         tensorflow_logger.setLevel(self._logging_level_tensorflow)
-        tensorflow_logger.handlers.pop(0)  # remove tf handler, we've got our own
+        if len(tensorflow_logger.handlers) > 0:
+            tensorflow_logger.handlers.pop(0)  # remove tf handler, we've got our own
 
         matplotlib_logger = logging.getLogger('matplotlib')
         matplotlib_logger.setLevel(self._logging_level_matplotlib)
