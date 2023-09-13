@@ -20,7 +20,7 @@ def robust_SLNR_precoder_no_norm(
             np.matmul(  # == trace
                 channel_matrix[other_user_idx, :].conj().T,
                 channel_matrix[other_user_idx, :]
-            )  # TODO: ????????????????
+            )
             / sat_tot_ant_nr
             * autocorrelation_matrix[other_user_idx, :, :]
             for other_user_idx in range(user_nr) if other_user_idx != user_idx
