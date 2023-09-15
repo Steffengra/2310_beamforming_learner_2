@@ -1,20 +1,11 @@
 
+from datetime import datetime
+from pathlib import Path
+import gzip
+import pickle
+
 import numpy as np
-from datetime import (
-    datetime,
-)
-from pathlib import (
-    Path,
-)
-from gzip import (
-    open as gzip_open,
-)
-from pickle import (
-    dump as pickle_dump,
-)
-from matplotlib.pyplot import (
-    show as plt_show,
-)
+from matplotlib.pyplot import show as plt_show
 
 import src
 from src.data.satellite_manager import (
@@ -45,7 +36,6 @@ def test_precoder_user_distance_sweep(
     get_precoder_func,
     calc_sum_rate_func,
 ) -> None:
-
     """
     Calculate the sum rates that a given precoder achieves for a given config
     over a given range of inter-user-distances with no channel error
@@ -59,8 +49,8 @@ def test_precoder_user_distance_sweep(
         name = f'testing_{precoder_name}_sweep_{round(distance_sweep_range[0])}_{round(distance_sweep_range[-1])}.gzip'
         results_path = Path(config.output_metrics_path, config.config_learner.training_name, 'distance_sweep')
         results_path.mkdir(parents=True, exist_ok=True)
-        with gzip_open(Path(results_path, name), 'wb') as file:
-            pickle_dump([distance_sweep_range, metrics], file=file)
+        with gzip.open(Path(results_path, name), 'wb') as file:
+            pickle.dump([distance_sweep_range, metrics], file=file)
 
     satellite_manager = SatelliteManager(config=config)
     user_manager = UserManager(config=config)

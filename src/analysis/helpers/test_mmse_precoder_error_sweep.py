@@ -19,6 +19,7 @@ def test_mmse_precoder_error_sweep(
     error_sweep_range: np.ndarray,
     monte_carlo_iterations: int,
 ) -> None:
+    """Test the MMSE precoder for a range of error configuration with monte carlo average."""
 
     def get_precoder_mmse(
         config: 'src.config.config.Config',

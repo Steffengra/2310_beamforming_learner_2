@@ -17,6 +17,7 @@ def test_mrc_precoder_user_distance_sweep(
     config: 'src.config.config.Config',
     distance_sweep_range: np.ndarray,
 ) -> None:
+    """Test the MRC precoder over a range of distances with zero error."""
 
     def get_precoder_mrc(
         config: 'src.config.config.Config',

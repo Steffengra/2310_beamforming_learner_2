@@ -12,6 +12,7 @@ def calc_autocorrelation(
         error_model_config: 'src.config.config_error_model.ConfigErrorModel',
         error_distribution: str,
 ) -> np.ndarray:
+    """TODO: Comment"""
 
     wavelength = get_wavelength(satellite.freq)
     wavenumber = 2 * np.pi / wavelength
@@ -24,7 +25,13 @@ def calc_autocorrelation(
 
     for user_id in range(user_nr):
 
-        phi_dach = np.cos(satellite.aods_to_users[user_id] + errors['additive_error_on_aod'][user_id]) + errors['additive_error_on_cosine_of_aod'][user_id]
+        phi_dach = (
+                np.cos(
+                    satellite.aods_to_users[user_id]
+                    + errors['additive_error_on_aod'][user_id]
+                )
+                + errors['additive_error_on_cosine_of_aod'][user_id]
+        )
 
         for antenna_row_id in range(sat_ant_nr):
 

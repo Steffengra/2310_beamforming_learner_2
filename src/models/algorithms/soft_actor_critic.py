@@ -12,6 +12,8 @@ from src.models.helpers.experience_buffer import (
 
 
 class SoftActorCritic:
+    """A Soft Actor Critic learning algorithm. TODO: More"""
+
     def __init__(
             self,
             rng: np.random.Generator,

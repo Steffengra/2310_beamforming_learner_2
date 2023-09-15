@@ -8,9 +8,7 @@ from src.data.user import (
 
 
 class UserManager:
-    """
-    Users holds all user objects
-    """
+    """A UserManager object holds user objects and gives functions to interface with all users."""
 
     def __init__(
             self,
@@ -29,6 +27,7 @@ class UserManager:
             self,
             config: 'src.config.config.Config',
     ) -> (np.ndarray, list):
+        """TODO: Comment"""
 
         # calculate average user positions
         user_pos_average = (np.arange(0, config.user_nr) - (config.user_nr - 1) / 2) * config.user_dist_average
@@ -37,6 +36,7 @@ class UserManager:
         random_factor = self.rng.uniform(low=-config.user_dist_bound,
                                          high=config.user_dist_bound,
                                          size=config.user_nr)
+        # random_factor = self.rng.choice([-config.user_dist_bound, 0, config.user_dist_bound])
         user_dist = user_pos_average + random_factor
 
         # calculate user_aods_diff_earth_rad
@@ -68,6 +68,7 @@ class UserManager:
             self,
             config: 'src.config.config.Config',
     ) -> None:
+        """TODO: Comment"""
 
         user_spherical_coordinates = self.calc_spherical_coordinates(config=config)
 
@@ -84,6 +85,7 @@ class UserManager:
             self,
             config: 'src.config.config.Config',
     ) -> None:
+        """TODO: Comment"""
 
         user_spherical_coordinates = self.calc_spherical_coordinates(config=config)
 

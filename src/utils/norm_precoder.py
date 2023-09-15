@@ -10,7 +10,7 @@ def norm_precoder(
         sat_ant_nr: int = 1,
 ) -> np.ndarray:
     """
-    normalizes precoding matrix of dimension (sat_nr * ant_nr, user_nr)
+    Normalizes precoding matrix of dimension (sat_nr * ant_nr, user_nr)
     with sat 1 ant 1, sat1 ant 2, sat1 ant 3, sat 2 ant 1...
 
     tr(A^H * A) is the sum of squared elements

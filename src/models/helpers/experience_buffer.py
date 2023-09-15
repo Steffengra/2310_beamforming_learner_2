@@ -3,6 +3,7 @@ import numpy as np
 
 
 class ExperienceBuffer:
+    """The circular Experience Buffer object holds a number of objects, e.g., dicts, and can be sampled."""
 
     def __init__(
             self,
@@ -32,6 +33,7 @@ class ExperienceBuffer:
             self,
             experience: dict,
     ) -> None:
+        """Add an object to the current position of the buffer."""
 
         self.buffer[self.write_pointer] = experience.copy()
         self.priorities[self.write_pointer] = self.max_priority
@@ -43,6 +45,7 @@ class ExperienceBuffer:
             self,
             batch_size: int,
     ) -> tuple[list, np.ndarray, np.ndarray]:
+        """Sample a number of objects from the buffer. Objects can have different sampling probablities."""
 
         # Update Probabilities
         priority_sum = np.sum(self.priorities)
@@ -92,6 +95,7 @@ class ExperienceBuffer:
             experience_ids: np.ndarray,
             new_priorities: np.ndarray,
     ) -> None:
+        """Adjust the priority -> sampling probability of a number of objects in buffer."""
 
         if self.priority_scale_alpha != 0:
             new_priorities = np.power(new_priorities, self.priority_scale_alpha)
@@ -109,6 +113,7 @@ class ExperienceBuffer:
     def clear(
             self,
     ) -> None:
+        """Reset the buffer."""
 
         self.write_pointer: int = 0
 

@@ -7,6 +7,7 @@ from src.utils.spherical_to_cartesian_coordinates import (
 
 
 class User:
+    """A user object represents a physical user."""
 
     def __init__(
             self,
@@ -25,6 +26,7 @@ class User:
             self,
             spherical_coordinates: np.ndarray,
     ) -> None:
+        """TODO: Comment"""
 
         self.spherical_coordinates = spherical_coordinates
         self.cartesian_coordinates = spherical_to_cartesian_coordinates(spherical_coordinates)

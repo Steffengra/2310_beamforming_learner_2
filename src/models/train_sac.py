@@ -1,29 +1,19 @@
 
-from pathlib import (
-    Path,
-)
+from datetime import datetime
+from pathlib import Path
 from sys import path as sys_path
-
-project_root_path = Path(Path(__file__).parent, '..', '..')
-sys_path.append(str(project_root_path.resolve()))
-
-import numpy as np
-from datetime import (
-    datetime,
-)
 from shutil import (
     copytree,
     rmtree,
 )
-from gzip import (
-    open as gzip_open,
-)
-from pickle import (
-    dump as pickle_dump,
-)
-from matplotlib.pyplot import (
-    show as plt_show,
-)
+import gzip
+import pickle
+
+import numpy as np
+from matplotlib.pyplot import show as plt_show
+
+project_root_path = Path(Path(__file__).parent, '..', '..')
+sys_path.append(str(project_root_path.resolve()))
 
 import src
 from src.config.config import (
@@ -73,6 +63,7 @@ from src.utils.update_sim import (
 def train_sac_single_error(
         config: 'src.config.config.Config',
 ) -> Path:
+    """Train a Soft Actor Critic precoder according to the config."""
 
     def progress_print(to_log: bool = False) -> None:
         progress = (
@@ -149,8 +140,8 @@ def train_sac_single_error(
                  dirs_exist_ok=True)
 
         # save norm dict
-        with gzip_open(Path(checkpoint_path, 'config', 'norm_dict.gzip'), 'wb') as file:
-            pickle_dump(norm_dict, file)
+        with gzip.open(Path(checkpoint_path, 'config', 'norm_dict.gzip'), 'wb') as file:
+            pickle.dump(norm_dict, file)
 
         # clean model checkpoints
         for high_score_prior_id, high_score_prior in enumerate(reversed(high_scores)):
@@ -158,7 +149,12 @@ def train_sac_single_error(
 
                 name = f'userwiggle_{config.user_dist_bound}_snap_{high_score_prior:.3f}'
 
-                prior_checkpoint_path = Path(config.trained_models_path, config.config_learner.training_name, 'single_error', name)
+                prior_checkpoint_path = Path(
+                    config.trained_models_path,
+                    config.config_learner.training_name,
+                    'single_error',
+                    name
+                )
                 rmtree(path=prior_checkpoint_path, ignore_errors=True)
                 high_scores.remove(high_score_prior)
 
@@ -170,8 +166,8 @@ def train_sac_single_error(
 
         results_path = Path(config.output_metrics_path, config.config_learner.training_name, 'single_error')
         results_path.mkdir(parents=True, exist_ok=True)
-        with gzip_open(Path(results_path, name), 'wb') as file:
-            pickle_dump(metrics, file=file)
+        with gzip.open(Path(results_path, name), 'wb') as file:
+            pickle.dump(metrics, file=file)
 
     logger = config.logger.getChild(__name__)
 

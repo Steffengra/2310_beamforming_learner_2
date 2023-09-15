@@ -1,4 +1,6 @@
 
+"""Various Neural Network training internals with explanations."""
+
 import tensorflow as tf
 
 
@@ -99,6 +101,8 @@ def mse_loss(
         td_error,
         importance_sampling_weights,
 ) -> tf.Tensor:
+    """The mean squared error loss."""
+
     squared_error = tf.multiply(importance_sampling_weights, tf.square(td_error))
 
     return tf.reduce_mean(squared_error)

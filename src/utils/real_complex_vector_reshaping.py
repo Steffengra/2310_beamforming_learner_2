@@ -1,4 +1,6 @@
 
+"""Provides functions to convert complex to real vectors and the reverse."""
+
 import numpy as np
 
 

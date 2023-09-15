@@ -1,21 +1,12 @@
 
 import logging
-from logging.handlers import (
-    RotatingFileHandler,
-)
+from logging.handlers import RotatingFileHandler
+from pathlib import Path
+from sys import stdout
+
 import numpy as np
-from pathlib import (
-    Path,
-)
-from sys import (
-    stdout,
-)
-from scipy import (
-    constants,
-)
-from tensorflow import (
-    get_logger as tf_get_logger,
-)
+from scipy import constants
+from tensorflow import get_logger as tf_get_logger
 
 from src.config.config_error_model import (
     ConfigErrorModel,
@@ -32,9 +23,7 @@ from src.utils.get_wavelength import (
 
 
 class Config:
-    """
-    The config sets up all global parameters
-    """
+    """The config sets up all global parameters."""
 
     def __init__(
             self,
@@ -77,7 +66,7 @@ class Config:
 
         # Satellite
         self.sat_nr: int = 1  # Number of satellites
-        self.sat_tot_ant_nr: int = 16  # Total number of  Tx antennas, should be a number larger than sat nr
+        self.sat_tot_ant_nr: int = 8  # Total number of  Tx antennas, should be a number larger than sat nr
         self.sat_gain_dBi: float = 20  # Total sat TODO: Wert nochmal checken
         self.sat_dist_average: float = 10_000  # Average satellite distance in meter
         self.sat_dist_bound: float = 0  # Variance of sat distance, uniform distribution [avg-bound, avg+bound]

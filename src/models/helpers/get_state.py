@@ -14,6 +14,7 @@ def get_state_erroneous_channel_state_information(
         norm_state: bool,
         norm_factors: dict = None,
 ) -> np.ndarray:
+    """TODO: Comment"""
 
     # FOR CONFIG:
     # self.get_state_args = {
@@ -27,8 +28,7 @@ def get_state_erroneous_channel_state_information(
     erroneous_csi = satellite_manager.erroneous_channel_state_information.flatten()
 
     if csi_format == 'rad_phase':
-        # TODO: Heuristic standardization for this falls apart when inter user distances or inter satellite
-        #  distances are changed significantly
+
         state_real = complex_vector_to_rad_and_phase(erroneous_csi)
         if norm_state:
 
@@ -69,9 +69,7 @@ def get_state_aods(
         norm_state: bool,
         norm_factors: dict = None,
 ) -> np.ndarray:
-
-    # TODO: Heuristic standardization for this falls apart when inter user distances or inter satellite
-    #  distances are changed significantly
+    """TODO: Comment"""
 
     # FOR CONFIG:
     # self.get_state_args = {

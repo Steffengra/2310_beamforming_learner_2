@@ -5,6 +5,7 @@ from matplotlib import colors as mpl_colors
 
 import src
 from src.data.channel.get_steering_vec import get_steering_vec
+from src.config.config_plotting import generic_styling
 
 
 def plot_beampattern(
@@ -14,22 +15,27 @@ def plot_beampattern(
         angle_sweep_range: np.ndarray or None = None,
         plot_title: str or None = None,
 ) -> None:
-
-    """
-    Plots beam power toward each user from the point of view of a satellite for a given precoding w_precoder
-    """
+    """Plots beam power toward each user from the point of view of a satellite for a given precoding w_precoder."""
 
     # create a figure
     fig, ax = plt.subplots()
 
     # mark user positions
     for user_idx in range(len(users)):
-        ax.scatter(satellite.aods_to_users[user_idx], 0, label=f'user {user_idx}')
-        ax.axvline(satellite.aods_to_users[user_idx], color=mpl_colors.TABLEAU_COLORS[list(mpl_colors.TABLEAU_COLORS.keys())[user_idx]], linestyle='dashed')
+        ax.scatter(
+            satellite.aods_to_users[user_idx],
+            0,
+            label=f'user {user_idx}'
+        )
+        ax.axvline(
+            satellite.aods_to_users[user_idx],
+            color=mpl_colors.TABLEAU_COLORS[list(mpl_colors.TABLEAU_COLORS.keys())[user_idx]],
+            linestyle='dashed'
+        )
 
     # calculate auto x axis scaling
     if angle_sweep_range is None:
-        max_dist = (users[-1].spherical_coordinates[2] - users[0].spherical_coordinates[2])
+        max_dist = users[-1].spherical_coordinates[2] - users[0].spherical_coordinates[2]
 
         angle_sweep_range = np.arange(
             users[0].spherical_coordinates[2] - 0.5 * max_dist,
@@ -53,8 +59,8 @@ def plot_beampattern(
         ax.plot(angle_sweep_range, power_gains[user_idx, :])
 
     ax.legend()
-    ax.grid(alpha=0.25)
     ax.set_xlabel('User AOD from satellite')
-    # plt.ylabel('User main SINR')
     if plot_title is not None:
         ax.set_title(plot_title)
+
+    generic_styling(ax=ax)

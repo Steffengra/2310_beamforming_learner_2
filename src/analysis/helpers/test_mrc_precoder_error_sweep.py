@@ -19,6 +19,7 @@ def test_mrc_precoder_error_sweep(
         error_sweep_range: np.ndarray,
         monte_carlo_iterations: int,
 ) -> None:
+    """Test the MRC precoder for a range of error configuration with monte carlo average."""
 
     def get_precoder_mrc(
         config: 'src.config.config.Config',

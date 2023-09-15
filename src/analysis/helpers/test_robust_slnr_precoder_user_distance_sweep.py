@@ -2,9 +2,6 @@
 import numpy as np
 
 import src
-from src.config.config import (
-    Config,
-)
 from src.analysis.helpers.test_precoder_user_distance_sweep import (
     test_precoder_user_distance_sweep,
 )
@@ -25,6 +22,7 @@ def test_robust_slnr_precoder_distance_sweep(
         config: 'src.config.config.Config',
         distance_sweep_range: np.ndarray,
 ) -> None:
+    """Test the robust SLNR precoder over a range of distances with zero error."""
 
     def get_precoder_robust_slnr(
             config: 'src.config.config.Config',

@@ -17,7 +17,7 @@ class ValueNetwork(tf.keras.Model):
             kernel_initializer_hidden: str,
             batch_norm_input: bool,
             batch_norm: bool,
-    ):
+    ) -> None:
         super().__init__()
 
         self.batch_norm_input = batch_norm_input
@@ -81,9 +81,8 @@ class ValueNetwork(tf.keras.Model):
             self,
             inputs,
     ) -> None:
-        """
-        Ensure each method is traced once for saving
-        """
+        """Ensure each method is traced once for saving."""
+
         self(inputs)
         self.call(inputs)
 
@@ -164,9 +163,7 @@ class PolicyNetwork(tf.keras.Model):
             self,
             inputs,
     ) -> None:
-        """
-        Ensure each method is traced once for saving
-        """
+        """Ensure each method is traced once for saving."""
         self(inputs)
         self.call(inputs)
 
@@ -283,8 +280,7 @@ class PolicyNetworkSoft(tf.keras.Model):
             self,
             inputs,
     ) -> None:
-        """
-        Ensure each method is traced once for saving
-        """
+        """Ensure each method is traced once for saving."""
+
         self(inputs)
         self.call(inputs)

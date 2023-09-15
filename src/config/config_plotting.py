@@ -1,11 +1,12 @@
 
+from pathlib import Path
+
 import matplotlib.pyplot as plt
-from pathlib import (
-    Path,
-)
 
 
 class PlotConfig:
+    """Define common parameters for consistent plotting."""
+
     def __init__(
             self,
     ) -> None:
@@ -129,6 +130,7 @@ def save_figures(
         plot_name,
         padding,
 ) -> None:
+    """Save a pyplot fig in multiple formats."""
 
     plt.savefig(Path(plots_parent_path, 'pgf', f'{plot_name}.pgf'),
                 bbox_inches='tight', pad_inches=padding, transparent=True)
@@ -141,6 +143,7 @@ def save_figures(
 def generic_styling(
         ax,
 ) -> None:
+    """Generic styling used for most plots."""
 
     ax.set_axisbelow(True)
     ax.grid()
@@ -155,12 +158,16 @@ def generic_styling(
 def pt_to_inches(
         pt: float
 ) -> float:
+    """Convert pt to inches."""
+
     return 0.01389 * pt
 
 
 def plot_color_palette(
         color_palette: dict
 ) -> None:
+    """Plot a color palette from the plotting config."""
+
     list_of_colors = list(color_palette.keys())
 
     plt.figure()

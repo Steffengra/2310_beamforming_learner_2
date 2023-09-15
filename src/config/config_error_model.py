@@ -5,9 +5,7 @@ from src.data.channel.los_channel_model import los_channel_model
 
 
 class ConfigErrorModel:
-    """
-    Defines parameters for the error model
-    """
+    """Defines parameters for the error model."""
 
     def __init__(
             self,
@@ -34,6 +32,7 @@ class ConfigErrorModel:
     def set_los_channel_error_parameters(
             self,
     ) -> None:
+        """Define error parametrizations here."""
 
         # for large scale fading, we assume that it's applied on both CSI and erroneous CSI
         self.error_rng_parametrizations['large_scale_fading'] = {
@@ -66,8 +65,8 @@ class ConfigErrorModel:
         self.error_rng_parametrizations['additive_error_on_cosine_of_aod'] = {
             'distribution': self.rng.uniform,
             'args': {
-                'low': -0.01,
-                'high': 0.01,
+                'low': -0.0,
+                'high': 0.0,
                 'size': self._user_nr,
             },
         }
@@ -84,6 +83,7 @@ class ConfigErrorModel:
     def set_los_channel_error_functions(
             self,
     ) -> dict:
+        """This function sets up the functions that are later called to get rng realizations."""
 
         def roll_large_scale_fading():
             return self.error_rng_parametrizations['large_scale_fading']['distribution'](
@@ -124,8 +124,9 @@ class ConfigErrorModel:
     def set_zero_error(
             self,
     ) -> None:
+        """Tries to set all rng parametrizations to zero."""
 
-        for parameter_name, parameter_content in self.error_rng_parametrizations.items():
-            for arg, value in parameter_content['args'].items():
+        for parameter_content in self.error_rng_parametrizations.values():
+            for arg in parameter_content['args'].keys():
                 if arg != 'size':
-                    self.error_rng_parametrizations[parameter_name]['args'][arg] = 0
+                    parameter_content['args'][arg] = 0

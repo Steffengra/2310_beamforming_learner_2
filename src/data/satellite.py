@@ -13,6 +13,7 @@ from src.utils.get_wavelength import (
 
 
 class Satellite:
+    """A satellite object represents a physical satellite."""
 
     def __init__(
             self,
@@ -59,6 +60,7 @@ class Satellite:
             self,
             spherical_coordinates: np.ndarray,
     ) -> None:
+        """TODO: Comment"""
 
         self.spherical_coordinates = spherical_coordinates
         self.cartesian_coordinates = spherical_to_cartesian_coordinates(spherical_coordinates)
@@ -67,7 +69,7 @@ class Satellite:
             self,
             users: list,
     ) -> None:
-        # TODO: This doesn't change values of users that might have disappeared
+        """TODO: Comment"""
 
         if self.distance_to_users is None:
             self.distance_to_users = np.zeros(len(users))
@@ -88,7 +90,6 @@ class Satellite:
             (2 * (orbit+radius_earth) * sat_user_dist)
         )
         """
-        # TODO: This doesn't change values of users that might have disappeared
 
         if self.aods_to_users is None:
             self.aods_to_users = np.zeros(len(users))
@@ -110,11 +111,15 @@ class Satellite:
             )
 
             if user_pos_idx[user.idx] >= 0:
-                self.aods_to_users[user.idx] = 2 * (self.center_aod_earth_deg * np.pi/180) - self.aods_to_users[user.idx]
+                self.aods_to_users[user.idx] = (
+                        2 * (self.center_aod_earth_deg * np.pi/180)
+                        - self.aods_to_users[user.idx]
+                )
 
     def roll_estimation_errors(
             self,
     ) -> None:
+        """TODO: Comment"""
 
         for estimation_error_name, error_function in self.estimation_error_functions.items():
             self.estimation_errors[estimation_error_name] = error_function()
@@ -126,7 +131,7 @@ class Satellite:
     ) -> None:
         """
         This function updates the channel state to given users
-        according to a given channel model
+        according to a given channel model.
         """
         self.channel_state_to_users = channel_model(self, users, error_free=True)
 
@@ -137,7 +142,7 @@ class Satellite:
     ) -> None:
         """
         This function updates erroneous channel state information to users
-        according to a given user list and error model config
+        according to a given user list and error model config.
         """
 
         self.erroneous_channel_state_to_users = channel_model(satellite=self, users=users, error_free=False)

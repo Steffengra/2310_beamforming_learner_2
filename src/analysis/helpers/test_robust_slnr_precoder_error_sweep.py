@@ -22,6 +22,7 @@ def test_robust_slnr_precoder_error_sweep(
         error_sweep_range: np.ndarray,
         monte_carlo_iterations: int,
 ) -> None:
+    """Test the robust SLNR precoder for a range of error configuration with monte carlo average."""
 
     def get_precoder_robust_slnr(
             config: 'src.config.config.Config',

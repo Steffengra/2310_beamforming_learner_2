@@ -9,6 +9,7 @@ def robust_SLNR_precoder_no_norm(
         noise_power_watt: float,
         power_constraint_watt: float,
 ) -> np.ndarray:
+    """TODO: Comment"""
 
     user_nr = channel_matrix.shape[0]
     sat_tot_ant_nr = channel_matrix.shape[1]
@@ -32,7 +33,8 @@ def robust_SLNR_precoder_no_norm(
 
         eigenvalues, eigenvecs = scipy.linalg.eig(
             a=autocorrelation_matrix_user_idx,
-            b=(sum_weighted_autocorrelation_matrices_other_users + user_nr * noise_power_watt / power_constraint_watt * np.eye(sat_tot_ant_nr)),
+            b=(sum_weighted_autocorrelation_matrices_other_users
+               + user_nr * noise_power_watt / power_constraint_watt * np.eye(sat_tot_ant_nr)),
         )
         max_eigenvalue_idx = eigenvalues.argmax()
         max_eigenvec = eigenvecs[:, max_eigenvalue_idx]

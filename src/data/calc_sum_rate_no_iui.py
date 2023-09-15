@@ -7,6 +7,7 @@ def calc_sum_rate_no_iui(
     w_precoder: np.ndarray,
     noise_power_watt: float,
 ) -> float:
+    """TODO: Comment"""
 
     user_nr = channel_state.shape[0]
 

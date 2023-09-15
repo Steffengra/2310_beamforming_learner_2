@@ -1,12 +1,9 @@
 
+import gzip
+import pickle
+
 import matplotlib.pyplot as plt
 import numpy as np
-from gzip import (
-    open as gzip_open,
-)
-from pickle import (
-    load as pickle_load,
-)
 from pathlib import (
     Path,
 )
@@ -37,8 +34,8 @@ def plot_distance_sweep_testing_graph(
 
     data = []
     for path in paths:
-        with gzip_open(path, 'rb') as file:
-            data.append(pickle_load(file))
+        with gzip.open(path, 'rb') as file:
+            data.append(pickle.load(file))
     for data_id, data_entry in enumerate(data):
         first_entry = list(data_entry[1]['sum_rate'].keys())[0]
         if markerstyle is not None:

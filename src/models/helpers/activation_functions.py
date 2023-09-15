@@ -1,9 +1,11 @@
 
+"""Custom activation functions for neural networks."""
+
 import tensorflow as tf
 
 
 def activation_penalized_tanh(
-        x: tf.Tensor
+        inputs: tf.Tensor
 ) -> tf.Tensor:
 
     """
@@ -16,15 +18,15 @@ def activation_penalized_tanh(
     [1] Revise Saturated Activation Functions, Bing Xu, Ruitong Huang, Mu Li, 2016
     """
 
-    a = 0.25
-    y = tf.tanh(x)
-    y = tf.where(tf.less(x, 0), tf.multiply(y, a), y)
+    penalty = 0.25
+    output = tf.tanh(inputs)
+    output = tf.where(tf.less(inputs, 0), tf.multiply(output, penalty), output)
 
-    return y
+    return output
 
 
 def activation_shaped_tanh(
-        x: tf.Tensor
+        inputs: tf.Tensor
 ) -> tf.Tensor:
 
     """
@@ -41,6 +43,6 @@ def activation_shaped_tanh(
     a = 1.7159
     b = 2/3
 
-    y = a * tf.tanh(b * x)
+    y = a * tf.tanh(b * inputs)
 
     return y

@@ -1,12 +1,5 @@
-from numpy import (
-    ones,
-    ndarray,
-    finfo,
-    eye,
-    matmul,
-    trace,
-    sqrt,
-)
+
+import numpy as np
 from numpy.linalg import (
     inv,
 )
@@ -27,7 +20,7 @@ def rate_splitting_test_no_norm(
         noise_power_watt: float,
         power_constraint_watt: float,
         rsma_factor: float,
-) -> ndarray:
+) -> np.ndarray:
     
     # inversion_constant_lambda = finfo('float32').tiny
     inversion_constant_lambda = 0
@@ -35,7 +28,7 @@ def rate_splitting_test_no_norm(
     user_nr = channel_matrix.shape[0]
     sat_tot_ant_nr = channel_matrix.shape[1]
 
-    w_common = ones()
+    w_common = np.ones()
     
     w_private = mmse_precoder_normalized(
         channel_matrix=satellite_manager.erroneous_channel_state_information,

@@ -1,17 +1,10 @@
 
+from pathlib import Path
+import gzip
+import pickle
+
 import numpy as np
-from keras.models import (
-    load_model,
-)
-from pathlib import (
-    Path,
-)
-from gzip import (
-    open as gzip_open,
-)
-from pickle import (
-    load as pickle_load,
-)
+from keras.models import load_model
 
 import src
 from src.analysis.helpers.test_precoder_user_distance_sweep import (
@@ -33,13 +26,18 @@ def test_sac_precoder_user_distance_sweep(
     distance_sweep_range: np.ndarray,
     model_path: Path,
 ) -> None:
+    """Test a precoder over a range of distances with zero error."""
 
     def get_precoder_function_learned(
         config: 'src.config.config.Config',
         satellite_manager: 'src.data.satellite_manager.SatelliteManager',
     ):
 
-        state = config.config_learner.get_state(satellite_manager=satellite_manager, norm_factors=norm_factors, **config.config_learner.get_state_args)
+        state = config.config_learner.get_state(
+            satellite_manager=satellite_manager,
+            norm_factors=norm_factors,
+            **config.config_learner.get_state_args
+        )
         w_precoder, _ = precoder_network.call(state.astype('float32')[np.newaxis])
         w_precoder = w_precoder.numpy().flatten()
 
@@ -56,8 +54,8 @@ def test_sac_precoder_user_distance_sweep(
 
     precoder_network = load_model(model_path)
 
-    with gzip_open(Path(model_path, '..', 'config', 'norm_dict.gzip')) as file:
-        norm_dict = pickle_load(file)
+    with gzip.open(Path(model_path, '..', 'config', 'norm_dict.gzip')) as file:
+        norm_dict = pickle.load(file)
     norm_factors = norm_dict['norm_factors']
     if norm_factors != {}:
         config.config_learner.get_state_args['norm_state'] = True

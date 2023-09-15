@@ -21,10 +21,9 @@ def add_random_distribution(
         tau_momentum: float,
         normalize: bool = False,
 ) -> np.ndarray:
-
     """
     Mix an action vector with a random_uniform vector of same length
-    by tau * random_distribution + (1 - tau) * action
+    by tau * random_distribution + (1 - tau) * action.
     """
 
     if tau_momentum == 0.0:

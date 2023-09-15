@@ -8,6 +8,7 @@ def progress_printer(
         real_time_start: datetime,
         logger: logging.Logger = None,
 ) -> None:
+    """Print simulation progress and estimated finish time using print() or a logger."""
 
     timedelta = datetime.now() - real_time_start
     finish_time = real_time_start + timedelta / progress

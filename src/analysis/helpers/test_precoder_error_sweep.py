@@ -1,20 +1,11 @@
 
+from datetime import datetime
+from pathlib import Path
+import gzip
+import pickle
+
 import numpy as np
-from datetime import (
-    datetime,
-)
-from pathlib import (
-    Path,
-)
-from gzip import (
-    open as gzip_open,
-)
-from pickle import (
-    dump as pickle_dump,
-)
-from matplotlib.pyplot import (
-    show as plt_show,
-)
+from matplotlib.pyplot import show as plt_show
 
 import src
 from src.data.satellite_manager import (
@@ -47,9 +38,13 @@ def test_precoder_error_sweep(
     get_precoder_func,
     calc_sum_rate_func,
 ) -> None:
+    """Test a precoder for a range of error configuration with monte carlo average."""
 
     def progress_print() -> None:
-        progress = (error_sweep_idx * monte_carlo_iterations + iter_idx + 1) / (len(error_sweep_range) * monte_carlo_iterations)
+        progress = (
+                (error_sweep_idx * monte_carlo_iterations + iter_idx + 1)
+                / (len(error_sweep_range) * monte_carlo_iterations)
+        )
         progress_printer(progress=progress, real_time_start=real_time_start)
 
     def set_new_error_value() -> None:
@@ -62,11 +57,16 @@ def test_precoder_error_sweep(
             raise ValueError('Unknown error distribution')
 
     def save_results():
-        name = f'testing_{precoder_name}_sweep_{error_sweep_range[0]}_{error_sweep_range[-1]}_userwiggle_{config.user_dist_bound}.gzip'
+        name = (
+            f'testing_{precoder_name}'
+            f'_sweep_{error_sweep_range[0]}_{error_sweep_range[-1]}'
+            f'_userwiggle_{config.user_dist_bound}'
+            f'.gzip'
+        )
         results_path = Path(config.output_metrics_path, config.config_learner.training_name, 'error_sweep')
         results_path.mkdir(parents=True, exist_ok=True)
-        with gzip_open(Path(results_path, name), 'wb') as file:
-            pickle_dump([error_sweep_range, metrics], file=file)
+        with gzip.open(Path(results_path, name), 'wb') as file:
+            pickle.dump([error_sweep_range, metrics], file=file)
 
     satellite_manager = SatelliteManager(config=config)
     user_manager = UserManager(config=config)

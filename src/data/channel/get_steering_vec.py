@@ -1,5 +1,6 @@
 
 import numpy as np
+
 import src
 
 
@@ -7,6 +8,7 @@ def get_steering_vec(
         satellite: 'src.data.satellite.Satellite',
         phase_aod_steering: float,
 ) -> np.ndarray:
+    """TODO: Comment"""
 
     steering_vector_to_user = np.zeros(satellite.antenna_nr, dtype='complex128')
 

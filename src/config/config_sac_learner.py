@@ -8,6 +8,8 @@ from src.models.helpers.get_state import (
 
 
 class ConfigSACLearner:
+    """Defines parameters to use when learning with Soft Actor Critic."""
+
     def __init__(
             self,
             sat_nr,
@@ -15,12 +17,19 @@ class ConfigSACLearner:
             user_nr,
     ) -> None:
 
-        self.training_name: str = '1_sat_16_ant_3_usr_100000_dist_0.05_error_on_cos_0.1_fading'
+        self.training_name: str = (
+            '1_sat'
+            '_8_ant'
+            '_3_usr'
+            '_100000_dist'
+            '_0.0_error_on_cos'
+            '_0.1_fading'
+        )
 
         self.get_state = get_state_erroneous_channel_state_information
         self.get_state_args = {
             'csi_format': 'rad_phase',  # 'rad_phase', 'real_imag'
-            'norm_state': False,  # !!HEURISTIC!!, this will break if you dramatically change the setup
+            'norm_state': True,  # !!HEURISTIC!!, this will break if you dramatically change the setup
         }
         self.get_state_norm_factors_iterations: int = 100_000  # how many samples to calculate means and stds
 
@@ -49,35 +58,39 @@ class ConfigSACLearner:
                 'hidden_layer_units': [512, 512, 512, 512, ],
                 'activation_hidden': 'leaky_relu',  # >'relu', 'leaky_relu', 'tanh', 'penalized_tanh', 'shaped_tanh'
                 'kernel_initializer_hidden': 'glorot_uniform',  # >'glorot_uniform', 'he_uniform'
-                'batch_norm_input': True,
-                'batch_norm': True,
+                'batch_norm_input': False,  # might not be a good idea due to 32bit input
+                'batch_norm': True,  # too high learning rate will lead to problems w/ weights changing too fast
             },
             'value_network_optimizer': tf.keras.optimizers.Adam,
             'value_network_optimizer_args': {
-                'learning_rate': 1e-2,
-                'amsgrad': True,
+                # 'learning_rate': 1e-3,
+                'learning_rate': tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=1e-3,
+                                                                                   first_decay_steps=10),
+                'amsgrad': False,
             },
             'policy_network_args': {
                 'hidden_layer_units': [512, 512, 512, 512, ],
                 'activation_hidden': 'shaped_tanh',  # >'relu', 'leaky_relu', 'tanh', 'penalized_tanh', 'shaped_tanh'
                 'kernel_initializer_hidden': 'glorot_uniform',  # >'glorot_uniform', 'he_uniform'
-                'batch_norm_input': True,
-                'batch_norm': True,
+                'batch_norm_input': False,  # might not be a good idea due to 32bit input
+                'batch_norm': True,  # too high learning rate will lead to problems w/ weights changing too fast
             },
             'policy_network_optimizer': tf.keras.optimizers.Adam,
             'policy_network_optimizer_args': {
-                'learning_rate': 1e-3,
+                # 'learning_rate': 1e-4,
+                'learning_rate': tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=1e-4,
+                                                                                   first_decay_steps=10),
                 'amsgrad': True,
             },
         }
 
         # TRAINING
         self.training_episodes: int = 3_000  # a new episode is a full reset of the simulation environment
-        self.training_steps_per_episode: int = 10_000
+        self.training_steps_per_episode: int = 1_000
 
-        self.train_policy_every_k_steps: int = 10  # train policy only every k steps to give value approx. time to settle
+        self.train_policy_every_k_steps: int = 1  # train policy only every k steps to give value approx. time to settle
         self.train_policy_after_j_steps: int = 0  # start training policy only after value approx. starts being sensible
-        self.train_value_every_k_steps: int = 10  # train value only every k steps
+        self.train_value_every_k_steps: int = 1  # train value only every k steps
         self.train_value_after_j_steps: int = 0  # start training value after j steps
 
         self._post_init(sat_nr=sat_nr, sat_ant_nr=sat_ant_nr, user_nr=user_nr)
@@ -103,10 +116,11 @@ class ConfigSACLearner:
 
     def update(
             self,
-            sat_nr,
-            sat_ant_nr,
-            user_nr,
+            sat_nr: int,
+            sat_ant_nr: int,
+            user_nr: int,
     ) -> None:
+        """Update those config parameters that are calculated from others."""
 
         if self.get_state == get_state_aods:
             self.network_args['size_state'] = sat_nr * user_nr
