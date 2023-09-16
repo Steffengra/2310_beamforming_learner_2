@@ -13,12 +13,7 @@ from src.analysis.helpers.test_precoder_error_sweep import (
 from src.data.calc_sum_rate import (
     calc_sum_rate,
 )
-from src.utils.real_complex_vector_reshaping import (
-    real_vector_to_half_complex_vector,
-)
-from src.utils.norm_precoder import (
-    norm_precoder,
-)
+from src.models.helpers.learned_precoder import get_learned_precoder_normalized
 
 
 def test_sac_precoder_error_sweep(
@@ -40,19 +35,14 @@ def test_sac_precoder_error_sweep(
             norm_factors=norm_factors,
             **config.config_learner.get_state_args
         )
-        w_precoder, _ = precoder_network.call(state.astype('float32')[np.newaxis])
-        w_precoder = w_precoder.numpy().flatten()
 
-        # reshape to fit reward calculation
-        w_precoder = real_vector_to_half_complex_vector(w_precoder)
-        w_precoder = w_precoder.reshape((config.sat_nr * config.sat_ant_nr, config.user_nr))
+        w_precoder_normalized = get_learned_precoder_normalized(
+            state=state,
+            precoder_network=precoder_network,
+            **config.learned_precoder_args,
+        )
 
-        return norm_precoder(
-            precoding_matrix=w_precoder,
-            power_constraint_watt=config.power_constraint_watt,
-            per_satellite=True,
-            sat_nr=config.sat_nr,
-            sat_ant_nr=config.sat_ant_nr)
+        return w_precoder_normalized
 
     precoder_network = load_model(model_path)
 

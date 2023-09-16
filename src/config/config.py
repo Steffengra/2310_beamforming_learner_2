@@ -149,6 +149,13 @@ class Config:
             'power_constraint_watt': self.power_constraint_watt,
         }
 
+        self.learned_precoder_args: dict = {
+            'sat_nr': self.sat_nr,
+            'sat_ant_nr': self.sat_ant_nr,
+            'user_nr': self.user_nr,
+            'power_constraint_watt': self.power_constraint_watt,
+        }
+
     def __logging_setup(
             self,
     ) -> None:

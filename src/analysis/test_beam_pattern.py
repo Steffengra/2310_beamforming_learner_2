@@ -11,14 +11,13 @@ from matplotlib.pyplot import show as plt_show
 from src.data.satellite_manager import SatelliteManager
 from src.data.user_manager import UserManager
 from src.config.config import Config
-from src.data.precoder.robust_SLNR_precoder import robust_SLNR_precoder_no_norm
 from src.data.precoder.calc_autocorrelation import calc_autocorrelation
-from src.data.precoder.mmse_precoder import mmse_precoder_normalized, mmse_precoder_no_norm
+from src.data.precoder.robust_SLNR_precoder import robust_SLNR_precoder_no_norm
+from src.data.precoder.mmse_precoder import mmse_precoder_normalized
+from src.models.helpers.learned_precoder import get_learned_precoder_normalized
 from src.data.calc_sum_rate import calc_sum_rate
 from src.utils.plot_beampattern import plot_beampattern
 from src.utils.update_sim import update_sim
-from src.utils.real_complex_vector_reshaping import real_vector_to_half_complex_vector
-from src.utils.norm_precoder import norm_precoder
 
 
 plot = [
@@ -39,7 +38,7 @@ model_path = Path(  # SAC only
     config.trained_models_path,
     '1_sat_8_ant_3_usr_100000_dist_0.0_error_on_cos_0.1_fading',
     'single_error',
-    'userwiggle_50000_snap_4.008',
+    'userwiggle_50000_snap_4.305',
     'model',
 )
 
@@ -59,12 +58,6 @@ for iter_id in range(2):
         w_mmse = mmse_precoder_normalized(
             channel_matrix=satellite_manager.erroneous_channel_state_information,
             **config.mmse_args,
-        )
-
-        test = mmse_precoder_no_norm(
-            channel_matrix=satellite_manager.erroneous_channel_state_information,
-            noise_power_watt=config.noise_power_watt,
-            power_constraint_watt=config.power_constraint_watt,
         )
 
         sum_rate_mmse = calc_sum_rate(
@@ -124,8 +117,6 @@ for iter_id in range(2):
             if norm_factors != {}:
                 config.config_learner.get_state_args['norm_state'] = True
 
-            print(norm_factors)
-
             precoder_network = load_model(model_path)
 
             state = config.config_learner.get_state(
@@ -133,18 +124,11 @@ for iter_id in range(2):
                 norm_factors=norm_factors,
                 **config.config_learner.get_state_args
             )
-            w_precoder, _ = precoder_network.call(state.astype('float32')[np.newaxis])
-            w_precoder = w_precoder.numpy().flatten()
 
-            w_precoder = real_vector_to_half_complex_vector(w_precoder)
-            w_precoder = w_precoder.reshape((config.sat_nr * config.sat_ant_nr, config.user_nr))
-
-            w_learned = norm_precoder(
-                precoding_matrix=w_precoder,
-                power_constraint_watt=config.power_constraint_watt,
-                per_satellite=True,
-                sat_nr=config.sat_nr,
-                sat_ant_nr=config.sat_ant_nr
+            w_learned = get_learned_precoder_normalized(
+                state=state,
+                precoder_network=precoder_network,
+                **config.learned_precoder_args,
             )
 
             sum_rate_learned = calc_sum_rate(
