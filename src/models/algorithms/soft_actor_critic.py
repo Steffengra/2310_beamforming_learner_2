@@ -25,6 +25,8 @@ class SoftActorCritic:
             training_minimum_experiences: int,
             training_batch_size: int,
             training_target_update_momentum_tau: float,
+            training_l2_norm_scale_value: float,
+            training_l2_norm_scale_policy: float,
             experience_buffer_args: dict,
             network_args: dict,
     ) -> None:
@@ -42,6 +44,9 @@ class SoftActorCritic:
         self.training_minimum_experiences = training_minimum_experiences
         self.training_batch_size = training_batch_size
         self.training_target_update_momentum_tau = training_target_update_momentum_tau
+
+        self.l2_norm_scale_value = training_l2_norm_scale_value
+        self.l2_norm_scale_policy = training_l2_norm_scale_policy
 
         self.experience_buffer = ExperienceBuffer(rng=rng, **experience_buffer_args)
 
@@ -223,7 +228,11 @@ class SoftActorCritic:
             with tf.GradientTape() as tape:  # Autograd
                 estimated_q = network.call(value_network_input_batch, training=True)
                 td_error = estimated_q - target_q
-                value_loss = tf.reduce_mean(sample_importance_weights * td_error ** 2)
+                l2_norm_loss = self.l2_norm_scale_value * tf.reduce_sum([tf.reduce_sum(tf.square(weights_layer)) for weights_layer in network.trainable_weights])
+                value_loss = (
+                    tf.reduce_mean(sample_importance_weights * td_error ** 2)
+                    + l2_norm_loss
+                )
             gradients = tape.gradient(target=value_loss, sources=network.trainable_variables)
             network.optimizer.apply_gradients(zip(gradients, network.trainable_variables))
 
@@ -231,7 +240,11 @@ class SoftActorCritic:
             with tf.GradientTape() as tape:  # Autograd
                 estimated_q = network.call(value_network_input_batch, training=True)
                 td_error = estimated_q - target_q
-                value_loss = tf.reduce_mean(sample_importance_weights * td_error ** 2)
+                l2_norm_loss = self.l2_norm_scale_value * tf.reduce_sum([tf.reduce_sum(tf.square(weights_layer)) for weights_layer in network.trainable_weights])
+                value_loss = (
+                    tf.reduce_mean(sample_importance_weights * td_error ** 2)
+                    + l2_norm_loss
+                )
             gradients = tape.gradient(target=value_loss, sources=network.trainable_variables)
             network.optimizer.apply_gradients(zip(gradients, network.trainable_variables))
 
@@ -250,11 +263,13 @@ class SoftActorCritic:
                 value_estimate_1 = self.networks['value'][0]['primary'].call(value_network_input_batch)
                 value_estimate_2 = self.networks['value'][1]['primary'].call(value_network_input_batch)
                 value_estimate_min = tf.reduce_min([value_estimate_1, value_estimate_2], axis=0)
+                l2_norm_loss = self.l2_norm_scale_policy * tf.reduce_sum([tf.reduce_sum(tf.square(weights_layer)) for weights_layer in network.trainable_weights])
                 policy_loss = tf.reduce_mean(
                     # pull towards high value:
                     sample_importance_weights * -value_estimate_min
                     # pulls towards high variance - we want to minimize mean log probs -> more uncertainty:
                     + tf.exp(self.log_entropy_scale_alpha) * policy_action_log_prob_densities
+                    + l2_norm_loss
                 )
             gradients = tape.gradient(target=policy_loss, sources=network.trainable_variables)
             network.optimizer.apply_gradients(zip(gradients, network.trainable_variables))
