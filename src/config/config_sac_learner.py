@@ -19,10 +19,10 @@ class ConfigSACLearner:
 
         self.training_name: str = (
             '1_sat'
-            '_8_ant'
+            '_16_ant'
             '_3_usr'
             '_100000_dist'
-            '_0.0_error_on_cos'
+            '_0.05_error_on_cos'
             '_0.1_fading'
         )
 
@@ -47,6 +47,8 @@ class ConfigSACLearner:
             'training_minimum_experiences': 1_000,
             'training_batch_size': 1024,
             'training_target_update_momentum_tau': 0,  # How much of the primary network copy to target networks
+            'training_l2_norm_scale_value': 0.01,
+            'training_l2_norm_scale_policy': 0.01,  # related to weight decay
         }
         self.experience_buffer_args: dict = {
             'buffer_size': 100_000,
@@ -74,7 +76,7 @@ class ConfigSACLearner:
             },
             'policy_network_args': {
                 'hidden_layer_units': [512, 512, 512, 512, ],
-                'activation_hidden': 'shaped_tanh',  # >'relu', 'leaky_relu', 'tanh', 'penalized_tanh', 'shaped_tanh'
+                'activation_hidden': 'penalized_tanh',  # >'relu', 'leaky_relu', 'tanh', 'penalized_tanh', 'shaped_tanh'
                 'kernel_initializer_hidden': 'glorot_uniform',  # >'glorot_uniform', 'he_uniform'
                 'batch_norm_input': False,  # might not be a good idea due to 32bit input
                 'batch_norm': True,  # too high learning rate will lead to problems w/ weights changing too fast

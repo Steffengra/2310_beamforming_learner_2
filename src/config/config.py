@@ -66,7 +66,7 @@ class Config:
 
         # Satellite
         self.sat_nr: int = 1  # Number of satellites
-        self.sat_tot_ant_nr: int = 8  # Total number of  Tx antennas, should be a number larger than sat nr
+        self.sat_tot_ant_nr: int = 16  # Total number of  Tx antennas, should be a number larger than sat nr
         self.sat_gain_dBi: float = 20  # Total sat TODO: Wert nochmal checken
         self.sat_dist_average: float = 10_000  # Average satellite distance in meter
         self.sat_dist_bound: float = 0  # Variance of sat distance, uniform distribution [avg-bound, avg+bound]

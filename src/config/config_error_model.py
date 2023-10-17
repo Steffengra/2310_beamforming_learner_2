@@ -65,8 +65,8 @@ class ConfigErrorModel:
         self.error_rng_parametrizations['additive_error_on_cosine_of_aod'] = {
             'distribution': self.rng.uniform,
             'args': {
-                'low': -0.0,
-                'high': 0.0,
+                'low': -0.05,
+                'high': 0.05,
                 'size': self._user_nr,
             },
         }

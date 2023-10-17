@@ -228,6 +228,8 @@ class SoftActorCritic:
             with tf.GradientTape() as tape:  # Autograd
                 estimated_q = network.call(value_network_input_batch, training=True)
                 td_error = estimated_q - target_q
+                # todo 1: l2 norm calculated currently even when scale=0 -> performance loss
+                # todo 2: should we calculate norm only for kernel instead of kernel and bias?
                 l2_norm_loss = self.l2_norm_scale_value * tf.reduce_sum([tf.reduce_sum(tf.square(weights_layer)) for weights_layer in network.trainable_weights])
                 value_loss = (
                     tf.reduce_mean(sample_importance_weights * td_error ** 2)
