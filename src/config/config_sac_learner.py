@@ -28,7 +28,7 @@ class ConfigSACLearner:
 
         self.get_state = get_state_erroneous_channel_state_information
         self.get_state_args = {
-            'csi_format': 'rad_phase',  # 'rad_phase', 'real_imag'
+            'csi_format': 'rad_phase',  # 'rad_phase', 'rad_phase_reduced', 'real_imag'
             'norm_state': True,  # !!HEURISTIC!!, this will break if you dramatically change the setup
         }
         self.get_state_norm_factors_iterations: int = 100_000  # how many samples to calculate means and stds
@@ -42,17 +42,21 @@ class ConfigSACLearner:
             'target_entropy': 1.0,  # SAC heuristic impl. = product of action_space.shape
             'entropy_scale_optimizer': tf.keras.optimizers.SGD,
             'entropy_scale_optimizer_args': {
-                'learning_rate': 1e-4,  # LR=0.0 -> No adaptive entropy scale -> manually tune initial entropy scale
+                'learning_rate': 1e-3,  # LR=0.0 -> No adaptive entropy scale -> manually tune initial entropy scale
             },
             'training_minimum_experiences': 1_000,
             'training_batch_size': 1024,
             'training_target_update_momentum_tau': 0,  # How much of the primary network copy to target networks
         }
         self.experience_buffer_args: dict = {
-            'buffer_size': 2_000,
+            'buffer_size': 100_000,
             'priority_scale_alpha': 0.0,  # alpha in [0, 1], alpha=0 uniform sampling, 1 is fully prioritized sampling
             'importance_sampling_correction_beta': 1.0  # beta in [0%, 100%], beta=100% is full correction
         }
+        self.train_policy_every_k_steps: int = 10  # train policy only every k steps to give value approx. time to settle
+        self.train_policy_after_j_steps: int = 0  # start training policy only after value approx. starts being sensible
+        self.train_value_every_k_steps: int = 10  # train value only every k steps
+        self.train_value_after_j_steps: int = 0  # start training value after j steps
         self.network_args: dict = {
             'value_network_args': {
                 'hidden_layer_units': [512, 512, 512, 512, ],
@@ -64,8 +68,8 @@ class ConfigSACLearner:
             'value_network_optimizer': tf.keras.optimizers.Adam,
             'value_network_optimizer_args': {
                 # 'learning_rate': 1e-3,
-                'learning_rate': tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=1e-3,
-                                                                                   first_decay_steps=10),
+                'learning_rate': tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=7e-5,
+                                                                                   first_decay_steps=100),
                 'amsgrad': False,
             },
             'policy_network_args': {
@@ -78,20 +82,15 @@ class ConfigSACLearner:
             'policy_network_optimizer': tf.keras.optimizers.Adam,
             'policy_network_optimizer_args': {
                 # 'learning_rate': 1e-4,
-                'learning_rate': tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=1e-4,
-                                                                                   first_decay_steps=10),
+                'learning_rate': tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=7e-6,
+                                                                                   first_decay_steps=100),
                 'amsgrad': True,
             },
         }
 
         # TRAINING
-        self.training_episodes: int = 3_000  # a new episode is a full reset of the simulation environment
+        self.training_episodes: int = 20_000  # a new episode is a full reset of the simulation environment
         self.training_steps_per_episode: int = 1_000
-
-        self.train_policy_every_k_steps: int = 1  # train policy only every k steps to give value approx. time to settle
-        self.train_policy_after_j_steps: int = 0  # start training policy only after value approx. starts being sensible
-        self.train_value_every_k_steps: int = 1  # train value only every k steps
-        self.train_value_after_j_steps: int = 0  # start training value after j steps
 
         self._post_init(sat_nr=sat_nr, sat_ant_nr=sat_ant_nr, user_nr=user_nr)
 
@@ -125,5 +124,8 @@ class ConfigSACLearner:
         if self.get_state == get_state_aods:
             self.network_args['size_state'] = sat_nr * user_nr
         elif self.get_state == get_state_erroneous_channel_state_information:
-            self.network_args['size_state'] = 2 * sat_nr * sat_ant_nr * user_nr
+            if self.get_state_args['csi_format'] in ['rad_phase', 'real_imag']:
+                self.network_args['size_state'] = 2 * sat_nr * sat_ant_nr * user_nr
+            elif self.get_state_args['csi_format'] == 'rad_phase_reduced':
+                self.network_args['size_state'] = sat_nr * sat_ant_nr * user_nr + sat_nr * user_nr
         self.network_args['num_actions'] = 2 * sat_nr * sat_ant_nr * user_nr

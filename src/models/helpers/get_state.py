@@ -44,6 +44,33 @@ def get_state_erroneous_channel_state_information(
             # state_real[half_length_idx:] -= norm_factors['phase_mean']  # needs A LOT of samples
             state_real[half_length_idx:] /= norm_factors['phase_std']  # needs few samples
 
+    # like rad_phase, but only one radius per satellite+user. Rationale: path loss dominates as d_satuser >> d_antenna
+    elif csi_format == 'rad_phase_reduced':
+
+        state_real = complex_vector_to_rad_and_phase(erroneous_csi)
+        if norm_state:
+
+            half_length_idx = int(len(state_real) / 2)
+
+            # normalize radius
+            # heuristic standardization
+            state_real[:half_length_idx] -= norm_factors['radius_mean']  # needs a moderate amount of samples
+            state_real[:half_length_idx] /= norm_factors['radius_std']  # needs few samples
+
+            # normalize phase
+            # heuristic standardization
+            # state_real[half_length_idx:] -= norm_factors['phase_mean']  # needs A LOT of samples
+            state_real[half_length_idx:] /= norm_factors['phase_std']  # needs few samples
+
+        num_users = satellite_manager.satellites[0].user_nr
+        num_antennas = satellite_manager.satellites[0].antenna_nr
+        num_satellites = len(satellite_manager.satellites)
+        if num_satellites > 1:
+            raise ValueError('Not implemented yet, you need to add some math here')  # todo
+        keep_indices = np.arange(num_users) * num_antennas
+        remove_indices = np.delete(np.arange(num_users * num_antennas), keep_indices)
+        state_real = np.delete(state_real, remove_indices)
+
     elif csi_format == 'real_imag':
         state_real = complex_vector_to_double_real_vector(erroneous_csi)
         if norm_state:

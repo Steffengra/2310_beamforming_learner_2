@@ -60,6 +60,17 @@ def get_state_norm_factors(
             # note: statistical analysis has shown that the means, especially of phase,
             #  take a lot of iterations to determine with confidence. Hence, we might only use std for norm.
 
+        elif get_state_args['csi_format'] == 'rad_phase_reduced':
+            num_users = satellite_manager.satellites[0].user_nr
+            num_satellites = len(satellite_manager.satellites)
+            states_radius = np.array([state[:num_users * num_satellites] for state in states]).flatten()
+            states_phase = np.array([state[num_users * num_satellites:] for state in states]).flatten()
+
+            norm_dict['norm_factors']['radius_mean'] = np.mean(states_radius)
+            norm_dict['norm_factors']['radius_std'] = np.std(states_radius)
+            norm_dict['norm_factors']['phase_mean'] = np.mean(states_phase)
+            norm_dict['norm_factors']['phase_std'] = np.std(states_phase)
+
         elif get_state_args['csi_format'] == 'real_imag':
 
             states_real_imag = np.array(states).flatten()

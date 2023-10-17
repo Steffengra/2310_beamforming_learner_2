@@ -292,6 +292,7 @@ def train_sac_single_error(
             f' std {np.nanstd(episode_metrics["sum_rate_per_step"]):.2f},'
             f' current exploration: {np.nanmean(episode_metrics["mean_log_prob_density"]):.2f},'
             f' value loss: {np.nanmean(episode_metrics["value_loss"]):.5f}'
+            f' curr. lr: {sac.networks["policy"][0]["primary"].optimizer.learning_rate(sac.networks["policy"][0]["primary"].optimizer.iterations):.2E}'
         )
 
         # save network snapshot
