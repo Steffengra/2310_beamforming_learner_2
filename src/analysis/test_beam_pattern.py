@@ -1,6 +1,7 @@
 
 import gzip
 import pickle
+import pprint
 from pathlib import Path
 
 import numpy as np
@@ -22,23 +23,24 @@ from src.utils.update_sim import update_sim
 
 plot = [
     'mmse',
-    # 'slnr',
+    'slnr',
     'learned',
     # 'ones',
 ]
 
-angle_sweep_range = np.arange((90 - 30) * np.pi / 180, (90 + 30) * np.pi / 180, 0.1 * np.pi / 180)  # arange or None
+# angle_sweep_range = np.arange((90 - 30) * np.pi / 180, (90 + 30) * np.pi / 180, 0.1 * np.pi / 180)  # arange or None
+angle_sweep_range = np.arange(1.2, 1.9, 0.1 * np.pi / 180)  # arange or None
 
 
 config = Config()
 # config.user_dist_bound = 0  # disable user wiggle
-config.user_dist_bound = 50_000
+# config.user_dist_bound = 50_000
 
 model_path = Path(  # SAC only
     config.trained_models_path,
-    '1_sat_8_ant_3_usr_100000_dist_0.0_error_on_cos_0.1_fading',
+    '1_sat_10_ant_3_usr_100000_dist_0.05_error_on_cos_0.1_fading',
     'single_error',
-    'userwiggle_50000_snap_4.305',
+    'userwiggle_50000_snap_3.662',
     'model',
 )
 
@@ -46,12 +48,26 @@ if 'learned' in plot:
     from src.utils.compare_configs import compare_configs
     compare_configs(config, Path(model_path, '..', 'config'))
 
+    with tf.device('CPU:0'):
+
+        with gzip.open(Path(model_path, '..', 'config', 'norm_dict.gzip')) as file:
+            norm_dict = pickle.load(file)
+        norm_factors = norm_dict['norm_factors']
+        if norm_factors != {}:
+            config.config_learner.get_state_args['norm_state'] = True
+        else:
+            config.config_learner.get_state_args['norm_state'] = False
+
+        precoder_network = load_model(model_path)
+
 satellite_manager = SatelliteManager(config)
 user_manager = UserManager(config)
 
 for iter_id in range(2):
 
     update_sim(config=config, satellite_manager=satellite_manager, user_manager=user_manager)
+    for satellite in satellite_manager.satellites:
+        pprint.pprint(satellite.estimation_errors)
 
     # MMSE
     if 'mmse' in plot:
@@ -110,14 +126,6 @@ for iter_id in range(2):
     if 'learned' in plot:
 
         with tf.device('CPU:0'):
-
-            with gzip.open(Path(model_path, '..', 'config', 'norm_dict.gzip')) as file:
-                norm_dict = pickle.load(file)
-            norm_factors = norm_dict['norm_factors']
-            if norm_factors != {}:
-                config.config_learner.get_state_args['norm_state'] = True
-
-            precoder_network = load_model(model_path)
 
             state = config.config_learner.get_state(
                 satellite_manager=satellite_manager,

@@ -60,6 +60,7 @@ def plot_beampattern(
 
     ax.legend()
     ax.set_xlabel('User AOD from satellite')
+    ax.set_ylabel('Power Gain')
     if plot_title is not None:
         ax.set_title(plot_title)
 
