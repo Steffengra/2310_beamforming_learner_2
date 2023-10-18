@@ -7,7 +7,9 @@ from src.utils.spherical_to_cartesian_coordinates import (
 
 
 class User:
-    """A user object represents a physical user."""
+    """
+    A user object represents a physical user.
+    """
 
     def __init__(
             self,

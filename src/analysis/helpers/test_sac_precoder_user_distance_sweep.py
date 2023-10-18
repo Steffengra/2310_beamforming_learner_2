@@ -10,12 +10,6 @@ import src
 from src.analysis.helpers.test_precoder_user_distance_sweep import (
     test_precoder_user_distance_sweep,
 )
-from src.utils.real_complex_vector_reshaping import (
-    real_vector_to_half_complex_vector,
-)
-from src.utils.norm_precoder import (
-    norm_precoder,
-)
 from src.data.calc_sum_rate import (
     calc_sum_rate,
 )

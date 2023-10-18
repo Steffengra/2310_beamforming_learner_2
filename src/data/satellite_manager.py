@@ -8,7 +8,6 @@ from src.data.satellite import (
 
 
 class SatelliteManager:
-
     """
     Satellites holds all satellite objects and helper functions
     """
@@ -24,9 +23,9 @@ class SatelliteManager:
         self.satellites: list[Satellite] = []
         self._initialize_satellites(config=config)
 
-        self.channel_state_information: np.ndarray = np.array([])  # ndarray \in dim_user x (nr_antennas * nr_satellites)
-                                                             #  per user: sat 1 ant1, sat 1 ant 2, sat 1 ant 3, sat 2 ant 1, ...
-        self.erroneous_channel_state_information: np.ndarray = np.array([])  # ndarray \in dim_user x (nr_antennas * nr_satellites)
+        self.channel_state_information: np.ndarray = np.array([])  # nr_user x (nr_antennas * nr_satellites)
+                                                                   #   per user: sat 1 ant1, sat 1 ant 2, sat 1 ant 3, sat 2 ant 1, ...
+        self.erroneous_channel_state_information: np.ndarray = np.array([])  # nr_user x (nr_antennas * nr_satellites)
 
         self.logger.info('satellites setup complete')
 
@@ -34,6 +33,7 @@ class SatelliteManager:
             self,
             config: 'src.config.config.Config',
     ) -> np.ndarray:
+        """Todo: doc"""
 
         # calculate average satellite positions
         sat_pos_average = (np.arange(0, config.sat_nr) - (config.sat_nr - 1) / 2) * config.sat_dist_average
@@ -74,7 +74,6 @@ class SatelliteManager:
             self,
             config: 'src.config.config.Config',
     ) -> None:
-
         """
         Initializes satellite object list for given configuration
         """
@@ -94,6 +93,7 @@ class SatelliteManager:
             self,
             config: 'src.config.config.Config',
     ) -> None:
+        """Todo: doc"""
 
         sat_spherical_coordinates = self.calc_spherical_coordinates(config=config)
 
@@ -117,7 +117,6 @@ class SatelliteManager:
             self,
             users: list,
     ) -> None:
-
         """
         This function calculates the AODs (angles of departure) from each satellite to
         each user (Earth and satellite orbits are assumed to be circular)
@@ -129,6 +128,7 @@ class SatelliteManager:
     def roll_estimation_errors(
             self,
     ) -> None:
+        """Todo: doc"""
 
         for satellite in self.satellites:
             satellite.roll_estimation_errors()
@@ -164,6 +164,7 @@ class SatelliteManager:
             channel_model,
             users: list,
     ) -> None:
+        """Todo: doc"""
 
         # TODO: This will break when satellites dont have the same nr of antennas
         # TODO: This will also produce weird results when users or sats are not numbered consecutively
@@ -185,6 +186,7 @@ class SatelliteManager:
     def get_aods_to_users(
             self,
     ) -> np.ndarray:
+        """Todo: doc"""
 
         aods_to_users = np.zeros((len(self.satellites), len(self.satellites[0].aods_to_users)))
         for satellite_id, satellite in enumerate(self.satellites):

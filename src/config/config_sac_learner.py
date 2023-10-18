@@ -55,8 +55,8 @@ class ConfigSACLearner:
             'priority_scale_alpha': 0.0,  # alpha in [0, 1], alpha=0 uniform sampling, 1 is fully prioritized sampling
             'importance_sampling_correction_beta': 1.0  # beta in [0%, 100%], beta=100% is full correction
         }
-        self.train_policy_every_k_steps: int = 10  # train policy only every k steps to give value approx. time to settle
-        self.train_policy_after_j_steps: int = 0  # start training policy only after value approx. starts being sensible
+        self.train_policy_every_k_steps: int = 10  # train policy only every k steps
+        self.train_policy_after_j_steps: int = 0  # start training policy after j steps
         self.train_value_every_k_steps: int = 10  # train value only every k steps
         self.train_value_after_j_steps: int = 0  # start training value after j steps
         self.network_args: dict = {

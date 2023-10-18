@@ -21,7 +21,7 @@ def rate_splitting_test_no_norm(
         power_constraint_watt: float,
         rsma_factor: float,
 ) -> np.ndarray:
-    
+
     # inversion_constant_lambda = finfo('float32').tiny
     inversion_constant_lambda = 0
 
@@ -29,7 +29,7 @@ def rate_splitting_test_no_norm(
     sat_tot_ant_nr = channel_matrix.shape[1]
 
     w_common = np.ones()
-    
+
     w_private = mmse_precoder_normalized(
         channel_matrix=satellite_manager.erroneous_channel_state_information,
         **config.mmse_args
