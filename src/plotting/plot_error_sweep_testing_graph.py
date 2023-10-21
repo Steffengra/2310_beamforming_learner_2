@@ -60,8 +60,8 @@ def plot_error_sweep_testing_graph(
             linestyle = None
 
         ax.errorbar(data_entry[0],
-                    data_entry[1]['sum_rate'][first_entry]['mean'],
-                    yerr=data_entry[1]['sum_rate'][first_entry]['std'],
+                    data_entry[1]['sum_rate']['mean'],
+                    yerr=data_entry[1]['sum_rate']['std'],
                     marker=marker,
                     color=color,
                     linestyle=linestyle,
@@ -86,18 +86,23 @@ if __name__ == '__main__':
 
     data_paths = [
         Path(cfg.output_metrics_path,
-             'sat_2_ant_4_usr_3_satdist_10000_usrdist_1000', 'err_satpos_and_userpos', 'error_sweep',
-             'testing_mmse_sweep_0.0_0.07_userwiggle_30.gzip'),
-
+             'sat_1_ant_16_usr_3_satdist_10000_usrdist_100000', 'error_sweep',
+             'testing_mmse_sweep_0.0_0.1_userwiggle_50000.gzip'),
         Path(cfg.output_metrics_path,
-             'sat_2_ant_4_usr_3_satdist_10000_usrdist_1000', 'err_satpos_and_userpos', 'error_sweep',
-             'testing_sac_error_st_0.1_ph_0.01_userwiggle_30_snap_2.785_sweep_0.0_0.07_userwiggle_30.gzip'),
+             'sat_1_ant_16_usr_3_satdist_10000_usrdist_100000', 'error_sweep',
+             'testing_robust_slnr_sweep_0.0_0.1_userwiggle_50000.gzip'),
+        Path(cfg.output_metrics_path,
+             'sat_1_ant_16_usr_3_satdist_10000_usrdist_100000', 'error_sweep',
+             'testing_learned1_sweep_0.0_0.1_userwiggle_50000.gzip'),
+        Path(cfg.output_metrics_path,
+             'sat_1_ant_16_usr_3_satdist_10000_usrdist_100000', 'error_sweep',
+             'testing_learned2_sweep_0.0_0.1_userwiggle_50000.gzip'),
     ]
 
     plot_width = 0.99 * plot_cfg.textwidth
     plot_height = plot_width * 9 / 20
 
-    plot_legend = ['MMSE', 'OMA', 'SAC1', 'SAC2']
+    plot_legend = ['MMSE', 'SLNR', 'SAC1', 'SAC2']
     plot_markerstyle = ['o', '^', 's', 'x']
     plot_colors = [plot_cfg.cp2['blue'], plot_cfg.cp2['black'], plot_cfg.cp2['magenta'], plot_cfg.cp2['green']]
     plot_linestyles = ['-', '--', '-', '-']
