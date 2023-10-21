@@ -271,7 +271,7 @@ class SoftActorCritic:
                     sample_importance_weights * -value_estimate_min
                     # pulls towards high variance - we want to minimize mean log probs -> more uncertainty:
                     + tf.exp(self.log_entropy_scale_alpha) * policy_action_log_prob_densities
-                    + l2_norm_loss
+                    + l2_norm_loss  # todo: we can probably move this out of the reduce_mean
                 )
             gradients = tape.gradient(target=policy_loss, sources=network.trainable_variables)
             network.optimizer.apply_gradients(zip(gradients, network.trainable_variables))
