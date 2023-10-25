@@ -6,10 +6,10 @@ __pycache__/
 venv/
 
 /data/
-/models/
 /outputs/
 /references/
-/reports/
+/reports/figures/eps
+/reports/figures/pgf
 /src/notebooks/
 
 /src/analysis/test_precoder_error_sweep.py
