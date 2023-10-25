@@ -2,6 +2,7 @@
 import gzip
 import pickle
 from pathlib import Path
+from datetime import datetime
 
 import numpy as np
 import tensorflow as tf
@@ -18,6 +19,7 @@ from src.data.precoder.calc_autocorrelation import calc_autocorrelation
 from src.data.precoder.robust_SLNR_precoder import robust_SLNR_precoder_no_norm
 from src.models.helpers.learned_precoder import get_learned_precoder_normalized
 from src.utils.update_sim import update_sim
+from src.utils.progress_printer import progress_printer
 
 
 def generate_beampatterns(
@@ -67,6 +69,8 @@ def generate_beampatterns(
         learned_models[model_name] = {}
         learned_models[model_name]['model'] = load_model(model_path)
         learned_models[model_name]['norm_dict'] = norm_factors
+
+    real_time_start = datetime.now()
 
     data = []
     for iter_id in range(num_patterns):
@@ -168,6 +172,10 @@ def generate_beampatterns(
             }
 
         data.append(iter_data)
+
+        if iter_id % 10 == 0:
+            progress_printer(progress=(iter_id+1)/num_patterns, real_time_start=real_time_start)
+
     save_results()
 
 
@@ -194,12 +202,20 @@ if __name__ == '__main__':
 
     # todo: models currently must have the same get_state config
     model_paths = {
-        'something':
+        'learned_0.0_error':
             Path(
                 config.trained_models_path,
                 '1_sat_16_ant_3_usr_100000_dist_0.0_error_on_cos_0.1_fading',
                 'single_error',
                 'userwiggle_50000_snap_4.565',
+                'model',
+            ),
+        'learned_0.5_error':
+            Path(
+                config.trained_models_path,
+                '1_sat_16_ant_3_usr_100000_dist_0.05_error_on_cos_0.1_fading',
+                'single_error',
+                'userwiggle_50000_snap_2.710',
                 'model',
             ),
     }

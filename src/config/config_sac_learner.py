@@ -19,10 +19,10 @@ class ConfigSACLearner:
 
         self.training_name: str = (
             '1_sat'
-            '_16_ant'
+            '_10_ant'
             '_3_usr'
-            '_100000_dist'
-            '_0.05_error_on_cos'
+            '_10000_dist'
+            '_0.0_error_on_cos'
             '_0.1_fading'
         )
 
