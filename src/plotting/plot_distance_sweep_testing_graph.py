@@ -53,8 +53,8 @@ def plot_distance_sweep_testing_graph(
         else:
             linestyle = None
 
-        if len(data_entry[0][data_entry[1]['sum_rate'][first_entry]['mean'] > 0.999 * np.max(data_entry[1]['sum_rate'][first_entry]['mean'])]) < int(len(data_entry[0])/10):
-            markevery = np.searchsorted(data_entry[0], data_entry[0][data_entry[1]['sum_rate'][first_entry]['mean'] > 0.999 * np.max(data_entry[1]['sum_rate'][first_entry]['mean'])])
+        if len(data_entry[0][data_entry[1]['sum_rate']['mean'] > 0.999 * np.max(data_entry[1]['sum_rate']['mean'])]) < int(len(data_entry[0])/10):
+            markevery = np.searchsorted(data_entry[0], data_entry[0][data_entry[1]['sum_rate']['mean'] > 0.999 * np.max(data_entry[1]['sum_rate']['mean'])])
             for value_id in reversed(range(1, len(markevery))):
                 if markevery[value_id] / markevery[value_id-1] < 1.01:
                     markevery = np.delete(markevery, value_id)
@@ -62,7 +62,7 @@ def plot_distance_sweep_testing_graph(
             markevery = (int(len(data_entry[0])/10 / len(data)*data_id), int(len(data_entry[0])/10))
 
         ax.plot(data_entry[0],
-                data_entry[1]['sum_rate'][first_entry]['mean'],
+                data_entry[1]['sum_rate']['mean'],
                 color=color,
                 marker=marker,
                 markevery=markevery,
@@ -88,18 +88,18 @@ if __name__ == '__main__':
 
     data_paths = [
         Path(cfg.output_metrics_path,
-             'sat_2_ant_4_usr_3_satdist_10000_usrdist_1000', 'distance_sweep',
-             'testing_mmse_sweep_970.0_1029.9899999999454.gzip'),
+             'sat_1_ant_16_usr_3_satdist_10000_usrdist_100000', 'distance_sweep',
+             'testing_mmse_sweep_50000_149999.gzip'),
 
         Path(cfg.output_metrics_path,
-             'sat_2_ant_4_usr_3_satdist_10000_usrdist_1000', 'distance_sweep',
-             'testing_sac_error_0.0_userwiggle_30_snap_3.580_sweep_970.0_1029.9899999999454.gzip'),
+             'sat_1_ant_16_usr_3_satdist_10000_usrdist_100000', 'distance_sweep',
+             'testing_learned_0.0_error_sweep_50000_149999.gzip'),
         # Path(cfg.output_metrics_path,
         #      'sat_2_ant_4_usr_3_satdist_10000_usrdist_1000', 'distance_sweep',
         #      'testing_sac_error_0.1_userwiggle_30_snap_3.422_sweep_970.0_1029.9899999999454.gzip'),
-        Path(cfg.output_metrics_path,
-             'sat_2_ant_4_usr_3_satdist_10000_usrdist_1000', 'distance_sweep',
-             'testing_mrc_sweep_970.0_1029.9899999999454.gzip'),
+        # Path(cfg.output_metrics_path,
+        #      'sat_2_ant_4_usr_3_satdist_10000_usrdist_1000', 'distance_sweep',
+        #      'testing_mrc_sweep_970.0_1029.9899999999454.gzip'),
 
     ]
 
