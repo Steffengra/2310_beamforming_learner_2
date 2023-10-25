@@ -3,8 +3,8 @@ import gzip
 import pickle
 from pathlib import Path
 
+import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import colors as mpl_colors
 
 from src.config.config import (
     Config,
@@ -24,7 +24,10 @@ def plot_beam_patterns(
         color_dict: dict,
         line_style_dict: dict,
         label_dict: dict,
+        marker_style_dict: dict,
         xlim: list,
+        plots_parent_path,
+        name,
 ) -> None:
 
     rows = max([subdict['row'] for subdict in plots]) + 1
@@ -81,12 +84,14 @@ def plot_beam_patterns(
             )
 
         # Beam patterns
-        for precoder in precoders:
+        for precoder_id, precoder in enumerate(precoders):
             for user_id in range(data[realization][precoder]['power_gains'].shape[0]):
                 if user_id == 0:
                     label = label_dict[precoder]
                 else:
                     label = '_PrecoderHidden'
+
+                peak = np.argmax(data[realization][precoder]['power_gains'][user_id])
 
                 ax.plot(
                     angle_sweep_range,
@@ -94,13 +99,15 @@ def plot_beam_patterns(
                     label=label,
                     color=color_dict[precoder],
                     linestyle=line_style_dict[precoder],
+                    marker=marker_style_dict[precoder],
+                    markevery=[peak],
                 )
 
             print(f'{precoder} sum rate: {data[realization][precoder]["sum_rate"]}')
 
         ax.set_xlim(xlim)
 
-        # ax.legend()
+        ax.legend()
 
         if row == (rows-1):
             ax.set_xlabel('xlabel')
@@ -110,6 +117,8 @@ def plot_beam_patterns(
         generic_styling(ax=ax)
 
     fig.tight_layout(pad=0)
+
+    save_figures(plots_parent_path=plots_parent_path, plot_name=name, padding=0)
 
 
 def print_realizations(
@@ -137,27 +146,21 @@ if __name__ == '__main__':
     cfg = Config()
     plot_cfg = PlotConfig()
 
-    list_patterns = False
+    list_patterns = True
 
     which_plots = [
         {
             'row': 0,
             'column': 0,
-            'realization': 2,
-            'precoders': ['mmse',]
+            'realization': 1871,
+            'precoders': ['mmse', 'slnr']
         },
-        # {
-        #     'row': 0,
-        #     'column': 1,
-        #     'realization': 2,
-        #     'precoders': ['slnr',]
-        # },
-        # {
-        #     'row': 0,
-        #     'column': 2,
-        #     'realization': 2,
-        #     'precoders': ['something',]
-        # },
+        {
+            'row': 1,
+            'column': 0,
+            'realization': 1871,
+            'precoders': ['mmse', 'learned_0.0_error']
+        },
     ]
 
     data_path = Path(cfg.output_metrics_path,
@@ -167,25 +170,33 @@ if __name__ == '__main__':
     # plot_width = 0.99 * 3.5
     plot_height = plot_width * 1/2
 
-    x_limits = [1.35, 1.85]
-    # x_limits = None
+    # x_limits = [1.4, 1.7]
+    x_limits = None
 
     colors = {
-        'mmse': plot_cfg.cp2['blue'],
-        'slnr': plot_cfg.cp2['green'],
-        'something': plot_cfg.cp2['gold'],
+        'mmse': plot_cfg.cp2['gold'],
+        'slnr': plot_cfg.cp2['magenta'],
+        'learned_0.0_error': plot_cfg.cp2['blue'],
+        'learned_0.5_error': plot_cfg.cp2['green'],
     }
 
     line_styles = {
         'mmse': 'solid',
-        'slnr': 'dashed',
-        'something': 'dashed',
+        'slnr': 'solid',
+        'learned_0.0_error': 'solid',
+    }
+
+    marker_styles = {
+        'mmse': 'o',
+        'slnr': '^',
+        'learned_0.0_error': 's',
+        'learned_0.5_error': 'x',
     }
 
     labels = {
         'mmse': 'MMSE',
         'slnr': 'SLNR',
-        'something': 'abc',
+        'learned_0.0_error': 'abc',
     }
 
     if list_patterns:
@@ -199,7 +210,10 @@ if __name__ == '__main__':
         color_dict=colors,
         line_style_dict=line_styles,
         label_dict=labels,
+        marker_style_dict=marker_styles,
         xlim=x_limits,
+        plots_parent_path=plot_cfg.plots_parent_path,
+        name='test',
     )
 
     plt.show()
