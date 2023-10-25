@@ -42,7 +42,6 @@ def plot_error_sweep_testing_graph(
             data.append(pickle_load(file))
 
     for data_id, data_entry in enumerate(data):
-        first_entry = list(data_entry[1]['sum_rate'].keys())[0]
 
         if markerstyle is not None:
             marker = markerstyle[data_id]
@@ -59,19 +58,21 @@ def plot_error_sweep_testing_graph(
         else:
             linestyle = None
 
-        ax.errorbar(data_entry[0],
-                    data_entry[1]['sum_rate']['mean'],
-                    yerr=data_entry[1]['sum_rate']['std'],
-                    marker=marker,
-                    color=color,
-                    linestyle=linestyle,
-                    )
+        ax.errorbar(
+            data_entry[0],
+            data_entry[1]['sum_rate']['mean'],
+            yerr=data_entry[1]['sum_rate']['std'],
+            marker=marker,
+            color=color,
+            linestyle=linestyle,
+            label=legend[data_id],
+        )
 
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
 
     if legend:
-        ax.legend(legend, ncols=2)
+        ax.legend(ncols=2)
 
     generic_styling(ax=ax)
     fig.tight_layout(pad=0)
