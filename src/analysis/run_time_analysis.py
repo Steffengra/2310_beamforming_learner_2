@@ -24,16 +24,16 @@ def main():
 
     config = Config()
 
-    num_monte_carlo = 30
-    num_precodings_per = 30
+    num_monte_carlo = 300
+    num_precodings_per = 300
 
     which_precoder = 'slnr'  # mmse, slnr, sac
 
     model_path = Path(  # sac only
         config.trained_models_path,
-        '1_sat_16_ant_3_usr_100000_dist_0.05_error_on_cos_0.1_fading',
+        '1_sat_16_ant_3_usr_100000_dist_0.0_error_on_cos_0.1_fading',
         'single_error',
-        'userwiggle_50000_snap_2.710',
+        'userwiggle_50000_snap_4.565',
         'model',
     )
 

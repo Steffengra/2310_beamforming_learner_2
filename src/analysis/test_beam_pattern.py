@@ -38,9 +38,9 @@ config = Config()
 
 model_path = Path(  # SAC only
     config.trained_models_path,
-    '1_sat_10_ant_3_usr_100000_dist_0.05_error_on_cos_0.1_fading',
+    '1_sat_10_ant_3_usr_10000_dist_0.0_error_on_cos_0.1_fading',
     'single_error',
-    'userwiggle_50000_snap_3.662',
+    'userwiggle_5000_snap_3.748',
     'model',
 )
 
